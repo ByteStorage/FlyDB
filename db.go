@@ -78,7 +78,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 
 	//更新内存索引
 	if ok := db.index.Put(key, pos); !ok {
-		return ErrIndexUpdataFailed
+		return ErrIndexUpdateFailed
 	}
 
 	return nil
@@ -194,6 +194,37 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 	return logRecord.Value, nil
 }
 
+func (db *DB) Delete(key []byte) error {
+	// 判断 key 的有效性
+	if len(key) == 0 {
+		return ErrKeyIsEmpty
+	}
+
+	// 检查 key 是否存在，如果不存在直接返回
+	if pst := db.index.Get(key); pst == nil {
+		return nil
+	}
+
+	// 构造 logRecord，标识其是被删除的
+	logRecord := &data.LogRecord{
+		Key:  key,
+		Type: data.LogRecordDeleted,
+	}
+
+	// 写入到数据文件中
+	_, err := db.appendLogRecord(logRecord)
+	if err != nil {
+		return err
+	}
+
+	//从内存索引中将 key 删除
+	ok := db.index.Delete(key)
+	if !ok {
+		return ErrIndexUpdateFailed
+	}
+	return nil
+}
+
 func checkOptions(options Options) error {
 	if options.DirPath == "" {
 		return ErrOptionDirPathIsEmpty
@@ -219,7 +250,7 @@ func (db *DB) loadDataFiles() error {
 			fileID, err := strconv.Atoi(splitNames[0])
 			//数据目录可能损坏
 			if err != nil {
-				return ErrDataDirctoryCorrupted
+				return ErrDataDirectoryCorrupted
 			}
 
 			fileIds = append(fileIds, fileID)
