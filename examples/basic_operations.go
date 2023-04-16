@@ -18,7 +18,7 @@ func main() {
 		panic(err)
 	}
 
-	val, err := db.Get([]byte("namee"))
+	val, err := db.Get([]byte("name"))
 	if err != nil {
 		panic(err)
 	}

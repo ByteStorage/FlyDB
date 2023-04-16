@@ -67,7 +67,7 @@ func TestBTree_Iterator(t *testing.T) {
 
 	// 3. 多条数据
 	bt1.Put([]byte("bcd"), &data.LogRecordPst{Fid: 2, Offset: 12})
-	bt1.Put([]byte("cde"), &data.LogRecordPst{Fid: 3, Offset: 12})
+	bt1.Put([]byte("efg"), &data.LogRecordPst{Fid: 3, Offset: 12})
 	bt1.Put([]byte("def"), &data.LogRecordPst{Fid: 4, Offset: 12})
 	iter3 := bt1.Iterator(false)
 	for iter3.Rewind(); iter3.Valid(); iter3.Next() {

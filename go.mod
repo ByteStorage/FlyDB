@@ -1,4 +1,4 @@
-module flydb
+module github.com/qishenonly/flydb
 
 go 1.20
 

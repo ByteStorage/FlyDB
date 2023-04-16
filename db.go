@@ -169,6 +169,12 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 		return nil, ErrKeyNotFound
 	}
 
+	// 从数据文件中获取 value
+	return db.getValueByPosition(logRecordPst)
+}
+
+// getValueByPosition 根据位置索引信息获取对应的 value
+func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error) {
 	//根据文件 id 找到对应的数据文件
 	var dataFile *data.DataFile
 	if logRecordPst.Fid == db.activeFile.FileID {
