@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flydb"
 	"fmt"
+	"github.com/qishenonly/flydb"
 )
 
 func main() {

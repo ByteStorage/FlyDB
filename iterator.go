@@ -2,7 +2,7 @@ package flydb
 
 import (
 	"bytes"
-	"flydb/index"
+	"github.com/qishenonly/flydb/index"
 )
 
 // Iterator 迭代器

@@ -1,7 +1,7 @@
 package index
 
 import (
-	"flydb/data"
+	"github.com/qishenonly/flydb/data"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
