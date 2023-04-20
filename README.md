@@ -26,6 +26,12 @@
 go get github.com/qishenonly/flydb
 ```
 
+或者从github上clone本项目：
+
+```bash
+git clone https://github.com/qishenonly/flydb
+```
+
 ## 用法
 
 以下是一个简单的`Linux版`使用示例：
@@ -54,7 +60,11 @@ func main() {
 }
 ```
 
+## 联系
 
+如果您有任何问题想联系我们，可以联系我们的开发者团队,我们会及时回复您的邮件：
+
+团队邮箱：jiustudio@qq.com
 
 ## 贡献
 
@@ -64,4 +74,4 @@ func main() {
 
 ## 许可证
 
-FlyDB 在 MIT 许可下发布。有关更多信息，请参见 LICENSE 文件。
+FlyDB 在 Apache 许可下发布。有关更多信息，请参见 LICENSE 文件。
