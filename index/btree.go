@@ -2,8 +2,8 @@ package index
 
 import (
 	"bytes"
-	"flydb/data"
 	"github.com/google/btree"
+	"github.com/qishenonly/flydb/data"
 	"sort"
 	"sync"
 )
@@ -53,6 +53,10 @@ func (bt *BTree) Delete(key []byte) bool {
 		return false
 	}
 	return true
+}
+
+func (bt *BTree) Size() int {
+	return bt.tree.Len()
 }
 
 func (bt *BTree) Iterator(reverse bool) Iterator {

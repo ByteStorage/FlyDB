@@ -2,8 +2,8 @@ package index
 
 import (
 	"bytes"
-	"flydb/data"
 	"github.com/google/btree"
+	"github.com/qishenonly/flydb/data"
 )
 
 /*
@@ -18,6 +18,9 @@ type Indexer interface {
 
 	// Delete 根据 key 删除对应的索引位置信息
 	Delete(key []byte) bool
+
+	// Size 索引中的数据量
+	Size() int
 
 	// Iterator 索引迭代器
 	Iterator(reverse bool) Iterator

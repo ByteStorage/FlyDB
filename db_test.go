@@ -1,8 +1,8 @@
 package flydb
 
 import (
-	"flydb/utils"
 	"fmt"
+	"github.com/qishenonly/flydb/utils"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -11,7 +11,9 @@ import (
 // 测试完成之后销毁 DB 数据目录
 func destroyDB(db *DB) {
 	if db != nil {
-		_ = db.activeFile.Close()
+		if db.activeFile != nil {
+			_ = db.Close()
+		}
 		err := os.RemoveAll(db.options.DirPath)
 		if err != nil {
 			panic(err)
@@ -25,6 +27,7 @@ func TestOpen(t *testing.T) {
 	fmt.Println("dir=>>", dir)
 	opts.DirPath = dir
 	db, err := Open(opts)
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 }
@@ -72,7 +75,7 @@ func TestDB_Put(t *testing.T) {
 	assert.Equal(t, 2, len(db.olderFiles))
 
 	// 6.重启后再 Put 数据
-	err = db.activeFile.Close()
+	err = db.Close()
 	assert.Nil(t, err)
 
 	// 重启数据库
@@ -137,7 +140,7 @@ func TestDB_Get(t *testing.T) {
 	assert.NotNil(t, val5)
 
 	// 6.重启后，前面写入的数据都能拿到
-	err = db.activeFile.Close()
+	err = db.Close()
 	assert.Nil(t, err)
 
 	// 重启数据库
@@ -196,7 +199,7 @@ func TestDB_Delete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 5.重启之后，再进行校验
-	err = db.activeFile.Close()
+	err = db.Close()
 	assert.Nil(t, err)
 
 	// 重启数据库
@@ -207,4 +210,105 @@ func TestDB_Delete(t *testing.T) {
 	val2, err := db2.Get(utils.GetTestKey(22))
 	assert.Nil(t, err)
 	assert.Equal(t, val1, val2)
+}
+
+func TestDB_GetListKeys(t *testing.T) {
+	opts := DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-ListKey")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := Open(opts)
+	defer destroyDB(db)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	// 数据库为空
+	keys1 := db.GetListKeys()
+	assert.Equal(t, 0, len(keys1))
+
+	// 只有一条数据
+	err = db.Put(utils.GetTestKey(10), utils.GetTestKey(20))
+	assert.Nil(t, err)
+	keys2 := db.GetListKeys()
+	assert.Equal(t, 1, len(keys2))
+
+	err = db.Put(utils.GetTestKey(20), utils.GetTestKey(20))
+	assert.Nil(t, err)
+	err = db.Put(utils.GetTestKey(30), utils.GetTestKey(20))
+	assert.Nil(t, err)
+	err = db.Put(utils.GetTestKey(40), utils.GetTestKey(20))
+	assert.Nil(t, err)
+
+	keys3 := db.GetListKeys()
+	assert.Equal(t, 4, len(keys3))
+	for _, value := range keys3 {
+		//t.Log(string(value))
+		assert.NotNil(t, value)
+	}
+}
+
+func TestDB_Fold(t *testing.T) {
+	opts := DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-fold")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := Open(opts)
+	defer destroyDB(db)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	err = db.Put(utils.GetTestKey(10), utils.RandomValue(20))
+	assert.Nil(t, err)
+	err = db.Put(utils.GetTestKey(20), utils.RandomValue(20))
+	assert.Nil(t, err)
+	err = db.Put(utils.GetTestKey(30), utils.RandomValue(20))
+	assert.Nil(t, err)
+	err = db.Put(utils.GetTestKey(40), utils.RandomValue(20))
+	assert.Nil(t, err)
+
+	err = db.Fold(func(key []byte, value []byte) bool {
+		assert.NotNil(t, key)
+		assert.NotNil(t, value)
+		// eg ==>
+		//		t.Log(string(key))
+		//		t.Log(string(value))
+		//		if bytes.Compare(key, utils.GetTestKey(20)) == 0 {
+		//			return false
+		//		}
+		return true
+	})
+	assert.Nil(t, err)
+}
+
+func TestDB_Close(t *testing.T) {
+	opts := DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-close")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := Open(opts)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	err = db.Put(utils.GetTestKey(10), utils.GetTestKey(10))
+	assert.Nil(t, err)
+
+	err = db.Close()
+	assert.Nil(t, err)
+}
+
+func TestDB_Sync(t *testing.T) {
+	opts := DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-close")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := Open(opts)
+	defer destroyDB(db)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	err = db.Put(utils.GetTestKey(10), utils.GetTestKey(10))
+	assert.Nil(t, err)
+
+	err = db.Sync()
+	assert.Nil(t, err)
 }

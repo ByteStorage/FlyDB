@@ -1,8 +1,8 @@
 package flydb
 
 import (
-	"flydb/data"
-	"flydb/index"
+	"github.com/qishenonly/flydb/data"
+	"github.com/qishenonly/flydb/index"
 	"io"
 	"os"
 	"sort"
@@ -54,6 +54,37 @@ func Open(options Options) (*DB, error) {
 	}
 
 	return db, nil
+}
+
+// Close 关闭数据库
+func (db *DB) Close() error {
+	if db.activeFile == nil {
+		return nil
+	}
+	db.lock.Lock()
+	defer db.lock.Unlock()
+
+	// 关闭当前活跃文件
+	if err := db.activeFile.Close(); err != nil {
+		return err
+	}
+	// 关闭旧的数据文件
+	for _, file := range db.olderFiles {
+		if err := file.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Sync 持久化数据文件
+func (db *DB) Sync() error {
+	if db.activeFile == nil {
+		return nil
+	}
+	db.lock.Lock()
+	defer db.lock.Unlock()
+	return db.activeFile.Sync()
 }
 
 // Put 写入key/value， key不能为空
@@ -171,6 +202,36 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 
 	// 从数据文件中获取 value
 	return db.getValueByPosition(logRecordPst)
+}
+
+// GetListKeys 获取数据库中所有的 key
+func (db *DB) GetListKeys() [][]byte {
+	iterator := db.index.Iterator(false)
+	keys := make([][]byte, db.index.Size())
+	var idx int
+	for iterator.Rewind(); iterator.Valid(); iterator.Next() {
+		keys[idx] = iterator.Key()
+		idx++
+	}
+	return keys
+}
+
+// Fold 获取所有的数据，并执行用户指定的操作，函数返回 false 退出
+func (db *DB) Fold(f func(key []byte, value []byte) bool) error {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	iterator := db.index.Iterator(false)
+	for iterator.Rewind(); iterator.Valid(); iterator.Next() {
+		value, err := db.getValueByPosition(iterator.Value())
+		if err != nil {
+			return err
+		}
+		if !f(iterator.Key(), value) {
+			break
+		}
+	}
+	return nil
 }
 
 // getValueByPosition 根据位置索引信息获取对应的 value
