@@ -19,6 +19,7 @@ type DB struct {
 	activeFile *data.DataFile            //当前的活跃数据文件，可以用于写入
 	olderFiles map[uint32]*data.DataFile //旧的数据文件，只能用于读
 	index      index.Indexer             //内存索引
+	transSeqNo uint64                    //事务序列号，全局递增
 }
 
 // Open 打开 bitcask 存储引擎实例
@@ -102,7 +103,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 	}
 
 	//追加写入到当前活跃文件当中
-	pos, err := db.appendLogRecord(logRecord)
+	pos, err := db.appendLogRecordWithLock(logRecord)
 	if err != nil {
 		return err
 	}
@@ -115,11 +116,15 @@ func (db *DB) Put(key []byte, value []byte) error {
 	return nil
 }
 
-// appendLogRecord 追加数据写入到文件当中
-func (db *DB) appendLogRecord(logRecord *data.LogRecord) (*data.LogRecordPst, error) {
+// appendLogRecord方法加锁逻辑拆分，避免批量写入时导致死锁问题
+func (db *DB) appendLogRecordWithLock(logRecord *data.LogRecord) (*data.LogRecordPst, error) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
+	return db.appendLogRecord(logRecord)
+}
 
+// appendLogRecord 追加数据写入到文件当中
+func (db *DB) appendLogRecord(logRecord *data.LogRecord) (*data.LogRecordPst, error) {
 	//判断当前活跃数据文件是否存在
 	//如果为空则初始化数据文件
 	if db.activeFile == nil {
@@ -279,7 +284,7 @@ func (db *DB) Delete(key []byte) error {
 	}
 
 	// 写入到数据文件中
-	_, err := db.appendLogRecord(logRecord)
+	_, err := db.appendLogRecordWithLock(logRecord)
 	if err != nil {
 		return err
 	}

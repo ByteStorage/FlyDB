@@ -8,6 +8,7 @@ var (
 	ErrKeyNotFound            = errors.New("KeyNotFoundError : key not found in database")
 	ErrDataFailNotFound       = errors.New("DataFailNotFoundError : data file is not found")
 	ErrDataDirectoryCorrupted = errors.New("DataDirectoryCorruptedError : the databases directory maybe corrupted")
+	ErrExceedMaxBatchNum      = errors.New("ExceedMaxBatchNumError : exceed the max batch num")
 
 	ErrOptionDirPathIsEmpty          = errors.New("OptionDirPathError : database dir path is empty")
 	ErrOptionDataFileSizeNotPositive = errors.New("OptionDataFileSizeError : database data file size must be greater than 0")

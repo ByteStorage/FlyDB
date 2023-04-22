@@ -10,6 +10,7 @@ type LogRecrdType = byte
 const (
 	LogRecordNormal LogRecrdType = iota
 	LogRecordDeleted
+	LogRecordTransFinished
 )
 
 // crc type KeySize ValueSize
