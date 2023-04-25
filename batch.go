@@ -7,6 +7,9 @@ import (
 	"sync/atomic"
 )
 
+// 默认非事务id
+var nonTransactionSeqNo uint64 = 0
+
 // 标识事务完成
 var lgrTransFinaKey = []byte("lgr-fina")
 
@@ -145,4 +148,11 @@ func encodeLogRecordKeyWithSeq(key []byte, seqNo uint64) []byte {
 	copy(encodeKey[n:], key)
 
 	return encodeKey
+}
+
+// 解析 LogRecord 的 key，获取实际的 key 和事务序列号 seq
+func parseLogRecordKeyAndSeq(key []byte) ([]byte, uint64) {
+	seqNo, n := binary.Uvarint(key)
+	realKey := key[n:]
+	return realKey, seqNo
 }

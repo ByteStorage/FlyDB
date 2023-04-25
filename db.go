@@ -97,7 +97,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 
 	//构造 LogRecord 结构体
 	logRecord := &data.LogRecord{
-		Key:   key,
+		Key:   encodeLogRecordKeyWithSeq(key, nonTransactionSeqNo),
 		Value: value,
 		Type:  data.LogRecordNormal,
 	}
@@ -279,7 +279,7 @@ func (db *DB) Delete(key []byte) error {
 
 	// 构造 logRecord，标识其是被删除的
 	logRecord := &data.LogRecord{
-		Key:  key,
+		Key:  encodeLogRecordKeyWithSeq(key, nonTransactionSeqNo),
 		Type: data.LogRecordDeleted,
 	}
 
@@ -358,6 +358,22 @@ func (db *DB) loadIndexFromDataFiles() error {
 		return nil
 	}
 
+	updataIndex := func(key []byte, typ data.LogRecrdType, pst *data.LogRecordPst) {
+		var ok bool
+		if typ == data.LogRecordDeleted {
+			ok = db.index.Delete(key)
+		} else {
+			ok = db.index.Put(key, pst)
+		}
+		if !ok {
+			panic(ErrIndexUpdateFailed)
+		}
+	}
+
+	// 暂存事务数据
+	transactionRecords := make(map[uint64][]*data.TransactionRecord)
+	var currentSeqNo = nonTransactionSeqNo
+
 	// 遍历所有文件id，处理文件中的记录
 	for i, fid := range db.fileIds {
 		var fileID = uint32(fid)
@@ -384,10 +400,32 @@ func (db *DB) loadIndexFromDataFiles() error {
 				Fid:    fileID,
 				Offset: offset,
 			}
-			if logRecord.Type == data.LogRecordDeleted {
-				db.index.Delete(logRecord.Key)
+
+			// 解析 key，拿到事务序列号
+			realKey, seqNo := parseLogRecordKeyAndSeq(logRecord.Key)
+			if seqNo == nonTransactionSeqNo {
+				// 非事务操作
+				updataIndex(realKey, logRecord.Type, logRecordPst)
 			} else {
-				db.index.Put(logRecord.Key, logRecordPst)
+				// 事务完成， 对应的 seqNo 数据可以更新到内存索引中
+				if logRecord.Type == data.LogRecordTransFinished {
+					for _, transRecord := range transactionRecords[seqNo] {
+						updataIndex(transRecord.Record.Key, transRecord.Record.Type, transRecord.Pos)
+					}
+					delete(transactionRecords, seqNo)
+				} else {
+					// batch 中提交，不知道事务是否已完成，先暂存
+					logRecord.Key = realKey
+					transactionRecords[seqNo] = append(transactionRecords[seqNo], &data.TransactionRecord{
+						Record: logRecord,
+						Pos:    logRecordPst,
+					})
+				}
+			}
+
+			// 更新事务序列号
+			if seqNo > currentSeqNo {
+				currentSeqNo = seqNo
 			}
 
 			// 递增offset，下一次从新的位置读取
@@ -399,5 +437,9 @@ func (db *DB) loadIndexFromDataFiles() error {
 			db.activeFile.WriteOff = offset
 		}
 	}
+
+	// 更新事务序列号到数据库字段
+	db.transSeqNo = currentSeqNo
+
 	return nil
 }

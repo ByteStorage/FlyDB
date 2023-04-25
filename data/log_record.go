@@ -38,6 +38,12 @@ type LogRecordPst struct {
 	Offset int64  // 偏移，表示将数据存储到了数据文件的哪个位置
 }
 
+// TransactionRecord 暂存事务相关的数据
+type TransactionRecord struct {
+	Record *LogRecord
+	Pos    *LogRecordPst
+}
+
 // EncodeLogRecord 对 LogRecord 进行编码，返回字节数组和长度
 // +-------------+------------+------------+--------------+-------+---------+
 // |  crc 校验值  |  type 类型  |  key size  |  value size  |  key  |  value  |
