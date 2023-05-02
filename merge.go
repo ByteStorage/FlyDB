@@ -2,6 +2,7 @@ package flydb
 
 import (
 	"github.com/qishenonly/flydb/data"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -64,6 +65,43 @@ func (db *DB) Merge() error {
 	// 新建 merge 目录
 	if err := os.MkdirAll(mergePath, os.ModePerm); err != nil {
 		return err
+	}
+
+	// 打开一个临时的新的实例，并修改配置项
+	mergeOptions := db.options
+	mergeOptions.DirPath = mergePath
+	mergeOptions.SyncWrite = false
+	mergeDB, err := Open(mergeOptions)
+	if err != nil {
+		return err
+	}
+
+	// 遍历每个数据文件
+	for _, files := range mergeFiles {
+		var offset int64 = 0
+		for {
+			logRecord, _, err := files.ReadLogRecord(offset)
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				return err
+			}
+			// 解析拿到的 key
+			realKey, _ := parseLogRecordKeyAndSeq(logRecord.Key)
+			logRecordPst := db.index.Get(realKey)
+			// 和内存中的索引位置进行比较，有效则重写
+			if logRecordPst != nil && logRecordPst.Fid == files.FileID && logRecordPst.Offset == offset {
+				// 清除事务标记
+				logRecord.Key = encodeLogRecordKeyWithSeq(realKey, nonTransactionSeqNo)
+				_, err := mergeDB.appendLogRecord(logRecord)
+				if err != nil {
+					return err
+				}
+
+			}
+
+		}
 	}
 
 	return nil
