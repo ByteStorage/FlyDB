@@ -1,42 +1,43 @@
 # FlyDB
 
-**FlyDB** 是一款简单轻量的 `Go` 语言`kv`型数据库。它提供了一组易于使用的 API，允许用户在应用程序中存储和检索数据。
+English|[简体中文](https://github.com/qishenonly/flydb/blob/master/README_CN.md)
 
-## 项目正在迭代开发中，请不要用于生产环境！
+FlyDB is a simple and lightweight kv-type database written in Go. It provides an easy-to-use API that allows users to store and retrieve data in their applications.
 
-## 简介
+## **Note**: This project is currently under iterative development and should not be used in production environments!
 
-**FlyDB** 是一个快速且易于使用的基于`bitcask`的`kv`型数据库，旨在轻量和简单。使用 **FlyDB**，您可以轻松地在 `Go` 应用程序中存储和检索数据。**FlyDB** 优化了速度，这使得它非常适合需要快速数据访问的应用程序。
+## Introduction
 
-## 特点
+FlyDB is a fast and easy-to-use kv-type database based on bitcask, designed to be lightweight and simple. With FlyDB, you can easily store and retrieve data in your Go applications. FlyDB is optimized for speed, making it ideal for applications that require fast data access.
 
-**FlyDB** 的一些特点包括：
+## Features
 
-- `易于使用`：`FlyDB` 提供了一个简单直观的 API，使得存储和检索数据非常容易。
-- `轻量`：`FlyDB` 设计为轻量级和高效，这使得它非常适合在资源受限的环境中使用。
-- `可靠`：`FlyDB` 支持事务操作，确保在存储过程中不会丢失或损坏数据。
-- `快速`：`FlyDB` 使用内存数据结构，这使得它快速响应，特别适合需要快速读写速度的应用程序。
-- `可扩展`：`FlyDB` 提供了许多可配置选项，允许用户调整其性能和功能以适应不同的使用情况。
+Some features of FlyDB include:
 
-## 安装
+- Easy to use: FlyDB provides a simple and intuitive API that makes storing and retrieving data very easy.
 
-您可以使用 Go 命令行工具安装 FlyDB：
+- Lightweight: FlyDB is designed to be lightweight and efficient, making it ideal for use in resource-constrained environments.
+- Reliable: FlyDB supports transactional operations, ensuring that data is not lost or corrupted during the storage process.
+- Fast: FlyDB uses in-memory data structures, making it fast and responsive, especially for applications that require fast read/write speeds.
+- Scalable: FlyDB provides many configurable options that allow users to adjust its performance and features to suit different usage scenarios.
+
+## Installation
+
+You can install FlyDB using the Go command line tool:
 
 ```go
 go get github.com/qishenonly/flydb
 ```
 
-或者从github上clone本项目：
+Or clone this project from GitHub:
 
 ```bash
 git clone https://github.com/qishenonly/flydb
 ```
 
-## 用法
+## Usage
 
-以下是一个简单的`Linux版`使用示例：
-
-> 详细使用请看flydb/examples.
+Here is a simple Linux usage example:
 
 ```go
 package main
@@ -47,7 +48,7 @@ import (
 )
 
 func main() {
-    options := flydb.DefaultOptions
+	options := flydb.DefaultOptions
 	options.DirPath = "/tmp/flydb"
 	db, _ := flydb.Open(options)
 
@@ -57,21 +58,24 @@ func main() {
 	if err != nil {
 		fmt.Println("name value => ", string(val))
 	}
+
 }
 ```
 
-## 联系
+For more detailed usage, please refer to the flydb/examples directory.
 
-如果您有任何问题想联系我们，可以联系我们的开发者团队,我们会及时回复您的邮件：
+## Contact
 
-团队邮箱：jiustudio@qq.com
+If you have any questions or want to contact us, you can reach out to our development team and we will respond to your email promptly:
 
-## 贡献
+Team email: jiustudio@qq.com
 
-如果您有任何想法或建议 FlyDB，请随时在 GitHub 上提交`issues`或`pr`。我们欢迎您的贡献！
+## Contributions
 
-> 完整的规范步骤请参考：[CONTRIBUTEING](https://github.com/qishenonly/flydb/blob/master/CONTRIBUTING.md)
+If you have any ideas or suggestions for FlyDB, please feel free to submit issues or pull requests on GitHub. We welcome your contributions!
 
-## 许可证
+For full contributing guidelines, please refer to .[CONTRIBUTING](https://github.com/qishenonly/flydb/blob/master/CONTRIBUTING.md)
 
-FlyDB 在 Apache 许可下发布。有关更多信息，请参见 LICENSE 文件。
+## License
+
+FlyDB is released under the Apache license. For more information, please see the LICENSE file.
