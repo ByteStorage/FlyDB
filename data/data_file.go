@@ -8,7 +8,11 @@ import (
 	"path/filepath"
 )
 
-const DataFileSuffix = ".data"
+const (
+	DataFileSuffix      = ".data"
+	HintFileSuffix      = "hintIndex"
+	MergeFinaFileSuffix = "mergeFina"
+)
 
 // DataFile 数据文件
 type DataFile struct {
@@ -20,8 +24,24 @@ type DataFile struct {
 // OpenDataFile 打开新的数据文件
 func OpenDataFile(dirPath string, fildID uint32) (*DataFile, error) {
 	fileName := filepath.Join(dirPath, fmt.Sprintf("%09d", fildID)+DataFileSuffix)
+	return newDataFile(fileName, fildID)
+}
+
+// OpenHintFile 打开 Hint 索引文件
+func OpenHintFile(dirPath string) (*DataFile, error) {
+	fileName := filepath.Join(dirPath, HintFileSuffix)
+	return newDataFile(fileName, 0)
+}
+
+// OpenMergeFinaFile 打开标识 merge 完成的文件
+func OpenMergeFinaFile(dirPath string) (*DataFile, error) {
+	fileName := filepath.Join(dirPath, MergeFinaFileSuffix)
+	return newDataFile(fileName, 0)
+}
+
+func newDataFile(dirPath string, fildID uint32) (*DataFile, error) {
 	//初始化 IOManager 管理器接口
-	ioManager, err := fio.NewIOManager(fileName)
+	ioManager, err := fio.NewIOManager(dirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +110,10 @@ func (df *DataFile) Write(buf []byte) error {
 		return err
 	}
 	df.WriteOff += int64(size)
+	return nil
+}
+
+func (df *DataFile) WriteHintRecord(key []byte, pst *LogRecordPst) error {
 	return nil
 }
 

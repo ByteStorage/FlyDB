@@ -7,10 +7,14 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
 )
 
 // merge 文件夹名称
-var mergeDirName = "dbmerge"
+var (
+	mergeDirName = "dbmerge"
+	mergeFinaKey = "mergeFina.finished"
+)
 
 // Merge 清理无效数据，生成 hint 索引文件
 func (db *DB) Merge() error {
@@ -42,6 +46,9 @@ func (db *DB) Merge() error {
 		db.lock.Unlock()
 		return nil
 	}
+
+	// 记录最近没有参与 merge 的文件
+	noMergeFileId := db.activeFile.FileID
 
 	// 取出所有需要 merge 的文件
 	var mergeFiles []*data.DataFile
@@ -76,11 +83,16 @@ func (db *DB) Merge() error {
 		return err
 	}
 
+	// 打开 hint 文件存储索引
+	hintFile, err := data.OpenHintFile(mergePath)
+	if err != nil {
+		return err
+	}
 	// 遍历每个数据文件
 	for _, files := range mergeFiles {
 		var offset int64 = 0
 		for {
-			logRecord, _, err := files.ReadLogRecord(offset)
+			logRecord, size, err := files.ReadLogRecord(offset)
 			if err != nil {
 				if err == io.EOF {
 					break
@@ -94,17 +106,52 @@ func (db *DB) Merge() error {
 			if logRecordPst != nil && logRecordPst.Fid == files.FileID && logRecordPst.Offset == offset {
 				// 清除事务标记
 				logRecord.Key = encodeLogRecordKeyWithSeq(realKey, nonTransactionSeqNo)
-				_, err := mergeDB.appendLogRecord(logRecord)
+				recordPst, err := mergeDB.appendLogRecord(logRecord)
 				if err != nil {
 					return err
 				}
 
+				// 将当前位置索引写到 hint 文件中
+				if err := hintFile.WriteHintRecord(realKey, recordPst); err != nil {
+					return err
+				}
 			}
-
+			// 递增 offest
+			offset += size
 		}
 	}
 
+	// 持久化
+	if err := hintFile.Sync(); err != nil {
+		return err
+	}
+	if err := mergeDB.Sync(); err != nil {
+		return err
+	}
+
+	// 写标识 merge 完成的文件
+	mergeFinaFile, err := data.OpenMergeFinaFile(mergePath)
+	if err != nil {
+		return err
+	}
+
+	mergeFinaRecord := &data.LogRecord{
+		Key:   []byte(mergeFinaKey),
+		Value: []byte(strconv.Itoa(int(noMergeFileId))),
+	}
+
+	encRecord, _ := data.EncodeLogRecord(mergeFinaRecord)
+	if err := mergeFinaFile.Write(encRecord); err != nil {
+		return err
+	}
+
+	// 持久化
+	if err := mergeFinaFile.Sync(); err != nil {
+		return err
+	}
+
 	return nil
+
 }
 
 func (db *DB) getMergePath() string {
@@ -113,4 +160,3 @@ func (db *DB) getMergePath() string {
 	// 返回 merge 文件路径
 	return filepath.Join(parentDir + mergeDirName)
 }
-
