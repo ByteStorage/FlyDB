@@ -1,6 +1,6 @@
 # FlyDB
 
-English|[简体中文](https://github.com/qishenonly/flydb/blob/master/README_CN.md)
+English | [简体中文](https://github.com/qishenonly/flydb/blob/master/README_CN.md)
 
 FlyDB is a simple and lightweight kv-type database written in Go. It provides an easy-to-use API that allows users to store and retrieve data in their applications.
 
@@ -69,6 +69,12 @@ For more detailed usage, please refer to the flydb/examples directory.
 If you have any questions or want to contact us, you can reach out to our development team and we will respond to your email promptly:
 
 Team email: jiustudio@qq.com
+
+Or add my wechat account and invite you to join the project community to exchange and learn with Daniu.
+
+> Note when adding wechat : Github
+
+<img src="./assets/vx-1683193364673-1.png" alt="vx" style="zoom:33%;"  />
 
 ## Contributions
 

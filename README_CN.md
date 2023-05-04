@@ -66,6 +66,12 @@ func main() {
 
 团队邮箱：jiustudio@qq.com
 
+或者添加我的微信，邀你进入项目社群，和大牛一起交流学习。
+
+> 添加微信请备注 GIthub
+
+<img src="./assets/vx.png" alt="vx" style="zoom: 25%;"  />
+
 ## 贡献
 
 如果您有任何想法或建议 FlyDB，请随时在 GitHub 上提交`issues`或`pr`。我们欢迎您的贡献！
