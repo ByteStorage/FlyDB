@@ -70,7 +70,7 @@ func main() {
 
 > 添加微信请备注 GIthub
 
-<img src="./assets/vx.png" alt="vx" style="zoom: 25%;"  />
+<img src="./assets/vx.png" alt="vx" style="width: 33%;"  />
 
 ## 贡献
 

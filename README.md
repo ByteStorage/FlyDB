@@ -74,7 +74,7 @@ Or add my wechat account and invite you to join the project community to exchang
 
 > Note when adding wechat : Github
 
-<img src="./assets/vx-1683193364673-1.png" alt="vx" style="zoom:33%;"  />
+<img src="./assets/vx-1683193364673-1.png" alt="vx" style="width:33%;"  />
 
 ## Contributions
 
