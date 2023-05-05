@@ -113,8 +113,14 @@ func (df *DataFile) Write(buf []byte) error {
 	return nil
 }
 
+// WriteHintRecord 写入索引信息到 hint 文件中
 func (df *DataFile) WriteHintRecord(key []byte, pst *LogRecordPst) error {
-	return nil
+	record := &LogRecord{
+		Key:   key,
+		Value: EncodeLogRecordPst(pst),
+	}
+	encRecord, _ := EncodeLogRecord(record)
+	return df.Write(encRecord)
 }
 
 func (df *DataFile) Sync() error {
