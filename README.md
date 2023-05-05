@@ -80,7 +80,7 @@ Or add my wechat account and invite you to join the project community to exchang
 
 If you have any ideas or suggestions for FlyDB, please feel free to submit issues or pull requests on GitHub. We welcome your contributions!
 
-For full contributing guidelines, please refer to .[CONTRIBUTING](https://github.com/qishenonly/flydb/blob/master/CONTRIBUTING.md)
+For full contributing guidelines, please refer to [CONTRIBUTING](https://github.com/qishenonly/flydb/blob/master/CONTRIBUTING.md)
 
 ## License
 
