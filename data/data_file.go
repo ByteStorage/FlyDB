@@ -23,8 +23,12 @@ type DataFile struct {
 
 // OpenDataFile 打开新的数据文件
 func OpenDataFile(dirPath string, fildID uint32) (*DataFile, error) {
-	fileName := filepath.Join(dirPath, fmt.Sprintf("%09d", fildID)+DataFileSuffix)
+	fileName := GetDataFileName(dirPath, fildID)
 	return newDataFile(fileName, fildID)
+}
+
+func GetDataFileName(dirPath string, fildID uint32) string {
+	return filepath.Join(dirPath, fmt.Sprintf("%09d", fildID)+DataFileSuffix)
 }
 
 // OpenHintFile 打开 Hint 索引文件
