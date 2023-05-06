@@ -45,12 +45,17 @@ func Open(options Options) (*DB, error) {
 		index:      index.NewIndexer(options.IndexType),
 	}
 
-	//加载数据文件
+	// 加载 merge 数据目录
+	if err := db.loadMergeFiles(); err != nil {
+		return nil, err
+	}
+
+	// 加载数据文件
 	if err := db.loadDataFiles(); err != nil {
 		return nil, err
 	}
 
-	//从数据文件中加载索引
+	// 从数据文件中加载索引
 	if err := db.loadIndexFromDataFiles(); err != nil {
 		return nil, err
 	}
