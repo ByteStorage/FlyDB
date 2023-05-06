@@ -160,3 +160,65 @@ func (db *DB) getMergePath() string {
 	// 返回 merge 文件路径
 	return filepath.Join(parentDir + mergeDirName)
 }
+
+// 加载 merge 数据目录
+func (db *DB) loadMergeFiles() error {
+	mergePath := db.getMergePath()
+	// merge 目录不存在的话直接返回
+	if _, err := os.Stat(mergePath); os.IsNotExist(err) {
+		return nil
+	}
+	defer func() {
+		_ = os.RemoveAll(mergePath)
+	}()
+
+	dirs, err := os.ReadDir(mergePath)
+	if err != nil {
+		return err
+	}
+
+	// 查找标识 merge 的文件，判断 merge 是否完成
+	var mergeFinished bool
+	var mergeFileNames []string
+	for _, dir := range dirs {
+		if dir.Name() == data.MergeFinaFileSuffix {
+			mergeFinished = true
+		}
+		mergeFileNames = append(mergeFileNames, dir.Name())
+	}
+	// 没有则直接返回
+	if !mergeFinished {
+		return nil
+	}
+
+	nonMergeFileID, err := db.getRecentlyNonMergeFileId(mergePath)
+	if err != nil {
+		return err
+	}
+
+	// 删除旧的数据文件
+	var fileID uint32 = 0
+	for ; fileID < nonMergeFileID; fileID++ {
+		fileName := data.GetDataFileName(db.options.DirPath, fileID)
+		if _, err := os.Stat(fileName); err == nil {
+			if err := os.Remove(fileName); err != nil {
+				return err
+			}
+		}
+	}
+
+	// 移动新的数据文件到数据目录中
+	for _, fileName := range mergeFileNames {
+		mergeSrcPath := filepath.Join(mergePath, fileName)
+		dataSrcPath := filepath.Join(db.options.DirPath, fileName)
+		if err := os.Rename(mergeSrcPath, dataSrcPath); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// 获取最近没有参与 merge 的文件 id
+func (db *DB) getRecentlyNonMergeFileId(dirPath string) (uint32, error) {
+	return 0, nil
+}
