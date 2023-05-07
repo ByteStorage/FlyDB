@@ -220,5 +220,17 @@ func (db *DB) loadMergeFiles() error {
 
 // 获取最近没有参与 merge 的文件 id
 func (db *DB) getRecentlyNonMergeFileId(dirPath string) (uint32, error) {
-	return 0, nil
+	mergeFinaFile, err := data.OpenMergeFinaFile(dirPath)
+	if err != nil {
+		return 0, err
+	}
+	record, _, err := mergeFinaFile.ReadLogRecord(0)
+	if err != nil {
+		return 0, err
+	}
+	nonMergeFileID, err := strconv.Atoi(string(record.Value))
+	if err != nil {
+		return 0, err
+	}
+	return uint32(nonMergeFileID), nil
 }
