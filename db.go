@@ -55,6 +55,11 @@ func Open(options Options) (*DB, error) {
 		return nil, err
 	}
 
+	// 从 hint 文件中加载索引
+	if err := db.loadIndexFromHintFile(); err != nil {
+		return nil, err
+	}
+
 	// 从数据文件中加载索引
 	if err := db.loadIndexFromDataFiles(); err != nil {
 		return nil, err
