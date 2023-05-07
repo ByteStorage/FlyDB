@@ -5,6 +5,7 @@ import (
 	"github.com/qishenonly/flydb/index"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -369,6 +370,20 @@ func (db *DB) loadIndexFromDataFiles() error {
 		return nil
 	}
 
+	// 查看是否发生过 merge
+	var hasMerge bool = false
+	var nonMergeFileId uint32 = 0
+	mergeFileName := filepath.Join(db.options.DirPath, data.MergeFinaFileSuffix)
+	// 存在文件，则取出没有参与过 merge 的文件 id
+	if _, err := os.Stat(mergeFileName); err == nil {
+		fileId, err := db.getRecentlyNonMergeFileId(db.options.DirPath)
+		if err != nil {
+			return err
+		}
+		nonMergeFileId = fileId
+		hasMerge = true
+	}
+
 	updataIndex := func(key []byte, typ data.LogRecrdType, pst *data.LogRecordPst) {
 		var ok bool
 		if typ == data.LogRecordDeleted {
@@ -388,6 +403,11 @@ func (db *DB) loadIndexFromDataFiles() error {
 	// 遍历所有文件id，处理文件中的记录
 	for i, fid := range db.fileIds {
 		var fileID = uint32(fid)
+		// 如果比最近未参与 merge 的文件 id 更小，则说明已经从 hint 文件中加载过了
+		if hasMerge && fileID < nonMergeFileId {
+			continue
+		}
+
 		var dataFile *data.DataFile
 		if fileID == db.activeFile.FileID {
 			dataFile = db.activeFile
