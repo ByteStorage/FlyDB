@@ -234,3 +234,36 @@ func (db *DB) getRecentlyNonMergeFileId(dirPath string) (uint32, error) {
 	}
 	return uint32(nonMergeFileID), nil
 }
+
+// 从 hint 文件中加载索引
+func (db *DB) loadIndexFromHintFile() error {
+	// 判断 hint 文件是否存在
+	hintFileName := filepath.Join(db.options.DirPath, data.HintFileSuffix)
+	if _, err := os.Stat(hintFileName); os.IsNotExist(err) {
+		return err
+	}
+
+	// 打开 hint 文件
+	hintFile, err := data.OpenHintFile(db.options.DirPath)
+	if err != nil {
+		return err
+	}
+
+	// 读取文件中的索引
+	var offset int64 = 0
+	for {
+		logRecord, size, err := hintFile.ReadLogRecord(offset)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		// 解码拿到实际的索引位置
+		pst := data.DecodeLogRecordPst(logRecord.Value)
+		db.index.Put(logRecord.Key, pst)
+		offset += size
+	}
+	return nil
+}
