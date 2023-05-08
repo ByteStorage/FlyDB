@@ -13,14 +13,13 @@ func TestDB_Merge(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-merge-1")
 	opts.DirPath = dir
 	db, err := NewFlyDB(opts)
-	//defer destroyDB(db)
-	//assert.Nil(t, err)
-	t.Log(err)
-	//assert.NotNil(t, db)
+	defer destroyDB(db)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
 
 	err = db.Merge()
 	t.Log(err)
-	//assert.Nil(t, err)
+	assert.Nil(t, err)
 }
 
 // 全部都是有效的数据
