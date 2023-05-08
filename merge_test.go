@@ -12,7 +12,7 @@ func TestDB_Merge(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-merge-1")
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	//defer destroyDB(db)
 	//assert.Nil(t, err)
 	t.Log(err)
@@ -29,7 +29,7 @@ func TestDB_Merge2(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-merge-2")
 	opts.DataFileSize = 32 * 1024 * 1024
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -47,7 +47,7 @@ func TestDB_Merge2(t *testing.T) {
 	err = db.Close()
 	assert.Nil(t, err)
 
-	db2, err := Open(opts)
+	db2, err := NewFlyDB(opts)
 	defer func() {
 		_ = db2.Close()
 	}()
@@ -69,7 +69,7 @@ func TestDB_Merge3(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-merge-3")
 	opts.DataFileSize = 32 * 1024 * 1024
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -90,7 +90,7 @@ func TestDB_Merge3(t *testing.T) {
 	err = db.Close()
 	assert.Nil(t, err)
 
-	db2, err := Open(opts)
+	db2, err := NewFlyDB(opts)
 	defer func() {
 		_ = db2.Close()
 	}()
