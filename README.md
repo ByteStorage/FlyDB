@@ -50,7 +50,7 @@ import (
 func main() {
 	options := flydb.DefaultOptions
 	options.DirPath = "/tmp/flydb"
-	db, _ := flydb.Open(options)
+	db, _ := flydb.NewFlyDB(options)
 
 	db.Put([]byte("name"), []byte("flydb-example"))
 
