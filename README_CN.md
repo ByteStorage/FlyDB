@@ -80,4 +80,4 @@ func main() {
 
 ## 许可证
 
-FlyDB 在 Apache 许可下发布。有关更多信息，请参见 LICENSE 文件。
+FlyDB 在 Apache 许可下发布。请参见 LICENSE 文件。
