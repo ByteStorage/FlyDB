@@ -240,7 +240,7 @@ func (db *DB) loadIndexFromHintFile() error {
 	// 判断 hint 文件是否存在
 	hintFileName := filepath.Join(db.options.DirPath, data.HintFileSuffix)
 	if _, err := os.Stat(hintFileName); os.IsNotExist(err) {
-		return err
+		return nil
 	}
 
 	// 打开 hint 文件
