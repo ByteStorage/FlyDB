@@ -21,12 +21,12 @@ func destroyDB(db *DB) {
 	}
 }
 
-func TestOpen(t *testing.T) {
+func TestNewFlyDB(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb")
 	fmt.Println("dir=>>", dir)
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -37,7 +37,7 @@ func TestDB_Put(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-put")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -79,7 +79,7 @@ func TestDB_Put(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := Open(opts)
+	db2, err := NewFlyDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db2)
 	val4 := utils.RandomValue(128)
@@ -95,7 +95,7 @@ func TestDB_Get(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-get")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -144,7 +144,7 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := Open(opts)
+	db2, err := NewFlyDB(opts)
 	val6, err := db2.Get(utils.GetTestKey(11))
 	assert.Nil(t, err)
 	assert.NotNil(t, val6)
@@ -165,7 +165,7 @@ func TestDB_Delete(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-delete")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -203,7 +203,7 @@ func TestDB_Delete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := Open(opts)
+	db2, err := NewFlyDB(opts)
 	_, err = db2.Get(utils.GetTestKey(11))
 	assert.Equal(t, ErrKeyNotFound, err)
 
@@ -217,7 +217,7 @@ func TestDB_GetListKeys(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-ListKey")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -252,7 +252,7 @@ func TestDB_Fold(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-fold")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -285,7 +285,7 @@ func TestDB_Close(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-close")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -301,7 +301,7 @@ func TestDB_Sync(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-close")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)

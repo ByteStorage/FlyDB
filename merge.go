@@ -78,7 +78,7 @@ func (db *DB) Merge() error {
 	mergeOptions := db.options
 	mergeOptions.DirPath = mergePath
 	mergeOptions.SyncWrite = false
-	mergeDB, err := Open(mergeOptions)
+	mergeDB, err := NewFlyDB(mergeOptions)
 	if err != nil {
 		return err
 	}

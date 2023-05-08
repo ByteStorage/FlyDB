@@ -11,7 +11,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-batch-1")
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -48,7 +48,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-batch-2")
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -74,7 +74,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	err = db.Close()
 	assert.Nil(t, err)
 
-	db2, err := Open(opts)
+	db2, err := NewFlyDB(opts)
 	assert.Nil(t, err)
 
 	_, err = db2.Get(utils.GetTestKey(1))
@@ -88,7 +88,7 @@ func TestDB_WriteBatch1(t *testing.T) {
 	opts := DefaultOptions
 	dir := "/tmp/batch-3"
 	opts.DirPath = dir
-	db, err := Open(opts)
+	db, err := NewFlyDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 

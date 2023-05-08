@@ -8,7 +8,7 @@ import (
 func main() {
 	options := flydb.DefaultOptions
 	options.DirPath = "/tmp/flydb"
-	db, err := flydb.Open(options)
+	db, err := flydb.NewFlyDB(options)
 	if err != nil {
 		panic(err)
 	}

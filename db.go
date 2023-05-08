@@ -24,8 +24,8 @@ type DB struct {
 	isMerging  bool                      //是否正在 merge
 }
 
-// Open 打开 bitcask 存储引擎实例
-func Open(options Options) (*DB, error) {
+// NewFlyDB 打开 bitcask 存储引擎实例
+func NewFlyDB(options Options) (*DB, error) {
 	// 对用户传入的配置项进行校验
 	if err := checkOptions(options); err != nil {
 		return nil, err

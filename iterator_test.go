@@ -11,7 +11,7 @@ func TestDB_NewIterator(t *testing.T) {
 	opt := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-1")
 	opt.DirPath = dir
-	db, err := Open(opt)
+	db, err := NewFlyDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -24,7 +24,7 @@ func TestDB_Iterator_One_Value(t *testing.T) {
 	opt := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-2")
 	opt.DirPath = dir
-	db, err := Open(opt)
+	db, err := NewFlyDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -43,7 +43,7 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	opt := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-3")
 	opt.DirPath = dir
-	db, err := Open(opt)
+	db, err := NewFlyDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
