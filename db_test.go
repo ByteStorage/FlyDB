@@ -1,7 +1,6 @@
 package flydb
 
 import (
-	"fmt"
 	"github.com/qishenonly/flydb/utils"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -24,7 +23,6 @@ func destroyDB(db *DB) {
 func TestNewFlyDB(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb")
-	fmt.Println("dir=>>", dir)
 	opts.DirPath = dir
 	db, err := NewFlyDB(opts)
 	defer destroyDB(db)
@@ -242,7 +240,6 @@ func TestDB_GetListKeys(t *testing.T) {
 	keys3 := db.GetListKeys()
 	assert.Equal(t, 4, len(keys3))
 	for _, value := range keys3 {
-		//t.Log(string(value))
 		assert.NotNil(t, value)
 	}
 }
@@ -269,12 +266,6 @@ func TestDB_Fold(t *testing.T) {
 	err = db.Fold(func(key []byte, value []byte) bool {
 		assert.NotNil(t, key)
 		assert.NotNil(t, value)
-		// eg ==>
-		//		t.Log(string(key))
-		//		t.Log(string(value))
-		//		if bytes.Compare(key, utils.GetTestKey(20)) == 0 {
-		//			return false
-		//		}
 		return true
 	})
 	assert.Nil(t, err)

@@ -18,7 +18,6 @@ func TestDB_Merge(t *testing.T) {
 	assert.NotNil(t, db)
 
 	err = db.Merge()
-	t.Log(err)
 	assert.Nil(t, err)
 }
 
@@ -39,7 +38,6 @@ func TestDB_Merge2(t *testing.T) {
 	}
 
 	err = db.Merge()
-	t.Log(err)
 	assert.Nil(t, err)
 
 	// 重启校验

@@ -61,13 +61,11 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	// 正向迭代
 	itertor1 := db.NewIterator(DefaultIteratorOptions)
 	for itertor1.Rewind(); itertor1.Valid(); itertor1.Next() {
-		//t.Log("key => ", string(itertor1.Key()))
 		assert.NotNil(t, itertor1.Key())
 	}
 
 	itertor1.Rewind()
 	for itertor1.Seek([]byte("c")); itertor1.Valid(); itertor1.Next() {
-		t.Log("key => ", string(itertor1.Key()))
 		assert.NotNil(t, itertor1.Key())
 	}
 
@@ -76,13 +74,11 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	iterOpt2.Reverse = true
 	itertor2 := db.NewIterator(iterOpt2)
 	for itertor2.Rewind(); itertor2.Valid(); itertor2.Next() {
-		//t.Log("key => ", string(itertor2.Key()))
 		assert.NotNil(t, itertor2.Key())
 	}
 
 	itertor2.Rewind()
 	for itertor2.Seek([]byte("c")); itertor2.Valid(); itertor2.Next() {
-		//t.Log("key => ", string(itertor2.Key()))
 		assert.NotNil(t, itertor2.Key())
 	}
 
@@ -91,7 +87,6 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	iterOpt3.Prefix = []byte("ae")
 	itertor3 := db.NewIterator(iterOpt3)
 	for itertor3.Rewind(); itertor3.Valid(); itertor3.Next() {
-		//t.Log("key => ", string(itertor3.Key()))
 		assert.NotNil(t, itertor3.Key())
 	}
 

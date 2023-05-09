@@ -92,9 +92,6 @@ func TestDB_WriteBatch1(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	//keys := db.GetListKeys()
-	//t.Log(len(keys))
-
 	// 批量提交中间手动停止
 	wbopt := DefaultWriteBatchOptions
 	wbopt.MaxBatchNum = 1000000
