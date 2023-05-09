@@ -157,8 +157,10 @@ func (db *DB) Merge() error {
 func (db *DB) getMergePath() string {
 	// 获取数据库父级目录
 	parentDir := path.Dir(path.Clean(db.options.DirPath))
+	// DB base path
+	basePath := path.Base(db.options.DirPath)
 	// 返回 merge 文件路径
-	return filepath.Join(parentDir + mergeDirName)
+	return filepath.Join(parentDir, basePath+mergeDirName)
 }
 
 // 加载 merge 数据目录
