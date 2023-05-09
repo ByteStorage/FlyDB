@@ -76,6 +76,16 @@ Or add my wechat account and invite you to join the project community to exchang
 
 <img src="./assets/vx-1683193364673-1.png" alt="vx" style="width:33%;"  />
 
+## TODO List
+
+- [ ] Performance optimization: including but not limited to index replacement, merge optimization, etc.
+- [ ] Data backup functionality
+- [ ] Support for HTTP service
+- [ ] Expand support for data structures: including but not limited to string, list, hash, set, etc.
+- [ ] Compatibility with Redis protocol and commands
+- [ ] Distributed cluster mode
+- [ ] Other pending tasks...
+
 ## Contributions
 
 If you have any ideas or suggestions for FlyDB, please feel free to submit issues or pull requests on GitHub. We welcome your contributions!
