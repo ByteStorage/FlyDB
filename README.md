@@ -84,4 +84,4 @@ For full contributing guidelines, please refer to [CONTRIBUTING](https://github.
 
 ## License
 
-FlyDB is released under the Apache license. For more information, please see the LICENSE file.
+FlyDB is released under the Apache license.  please see the LICENSE file.
