@@ -72,6 +72,16 @@ func main() {
 
 <img src="./assets/vx.png" alt="vx" style="width: 33%;"  />
 
+## TODO List
+
+- [ ] 性能优化：包括但不限于索引更换、merge优化等
+- [ ] 数据备份功能
+- [ ] 支持HTTP服务
+- [ ] 拓展数据结构的支持：包括但不限于string、list、hash、set等
+- [ ] 兼容Redis协议及命令
+- [ ] 分布式集群模式
+- [ ] 其他待办事项...
+
 ## 贡献
 
 如果您有任何想法或建议 FlyDB，请随时在 GitHub 上提交`issues`或`pr`。我们欢迎您的贡献！
