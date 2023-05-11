@@ -29,6 +29,10 @@ func (b *Bufio) Sync() error {
 }
 
 func (b *Bufio) Close() error {
+	err := b.wr.Flush()
+	if err != nil {
+		return err
+	}
 	return b.fd.Close()
 }
 
@@ -38,10 +42,6 @@ func (b *Bufio) Size() (int64, error) {
 		return 0, err
 	}
 	return stat.Size(), nil
-}
-
-func (b *Bufio) Flush() error {
-	return b.wr.Flush()
 }
 
 func NewBufIOManager(path string) (*Bufio, error) {
