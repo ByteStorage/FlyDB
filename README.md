@@ -80,6 +80,7 @@ Or add my wechat account and invite you to join the project community to exchang
 
 - [ ] Performance optimization: including but not limited to index replacement, merge optimization, etc.
 - [ ] Data backup functionality
+- [ ] Log functionality, including operation logs and system logs.
 - [ ] Support for HTTP service
 - [ ] Expand support for data structures: including but not limited to string, list, hash, set, etc.
 - [ ] Compatibility with Redis protocol and commands
