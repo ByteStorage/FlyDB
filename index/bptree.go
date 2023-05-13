@@ -29,6 +29,12 @@ func NewBPlusTree(dirPath string) *BPlusTree {
 	}
 
 	// Create the corresponding bucket
+	// The update method can be thought of as a single transaction,
+	// and all operations within the method are committed as a single transaction.
+	// There is a bucket parameter in the transaction,
+	// which can be interpreted as partitioning the data.
+	// After creating a bucket, a bucket is returned.
+	// The returned bucket can be used to Put, Get and other methods.
 	if err := bptree.Update(func(tx *bbolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(indexBucketName)
 		return err
