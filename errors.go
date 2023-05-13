@@ -16,4 +16,6 @@ var (
 
 	ErrOpenBPTreeFailed   = errors.New("OpenBPTreeFailedError : failed to open bptree")
 	ErrCreateBucketFailed = errors.New("CreateBucketFailedError : failed to create bucket in bptree")
+	ErrPutValueFailed     = errors.New("PutValueFailedError : failed to put value in bptree")
+	ErrGetValueFailed     = errors.New("GetValueFailedError : failed to get value in bptree")
 )

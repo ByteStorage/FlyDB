@@ -48,13 +48,30 @@ func NewBPlusTree(dirPath string) *BPlusTree {
 }
 
 func (bptree *BPlusTree) Put(key []byte, pst *data.LogRecordPst) bool {
-	//TODO implement me
-	panic("implement me")
+	if err := bptree.tree.Update(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket(indexBucketName)
+		// The two arguments to the Put method are required to be byte arrays
+		return bucket.Put(key, data.EncodeLogRecordPst(pst))
+	}); err != nil {
+		panic(flydb.ErrPutValueFailed)
+	}
+	return true
 }
 
 func (bptree *BPlusTree) Get(key []byte) *data.LogRecordPst {
-	//TODO implement me
-	panic("implement me")
+	var pst *data.LogRecordPst
+	// The view method allows only reads, not inserts and deletes.
+	if err := bptree.tree.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket(indexBucketName)
+		value := bucket.Get(key)
+		if len(value) != 0 {
+			pst = data.DecodeLogRecordPst(value)
+		}
+		return nil
+	}); err != nil {
+		panic(flydb.ErrGetValueFailed)
+	}
+	return pst
 }
 
 func (bptree *BPlusTree) Delete(key []byte) bool {
