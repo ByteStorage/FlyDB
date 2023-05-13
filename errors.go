@@ -13,4 +13,7 @@ var (
 
 	ErrOptionDirPathIsEmpty          = errors.New("OptionDirPathError : database dir path is empty")
 	ErrOptionDataFileSizeNotPositive = errors.New("OptionDataFileSizeError : database data file size must be greater than 0")
+
+	ErrOpenBPTreeFailed   = errors.New("OpenBPTreeFailedError : failed to open bptree")
+	ErrCreateBucketFailed = errors.New("CreateBucketFailedError : failed to create bucket in bptree")
 )
