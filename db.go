@@ -3,6 +3,7 @@ package flydb
 import (
 	"github.com/qishenonly/flydb/data"
 	"github.com/qishenonly/flydb/index"
+	"go.uber.org/zap"
 	"io"
 	"os"
 	"path/filepath"
@@ -24,21 +25,22 @@ type DB struct {
 	isMerging  bool                      //是否正在 merge
 }
 
-// NewFlyDB 打开 bitcask 存储引擎实例
+// NewFlyDB open a new db instance
 func NewFlyDB(options Options) (*DB, error) {
-	// 对用户传入的配置项进行校验
+	zap.L().Info("open db", zap.Any("options", options))
+	// check options first
 	if err := checkOptions(options); err != nil {
 		return nil, err
 	}
 
-	// 判断数据目录是否存在，如果不存在的话，则创建这个目录
+	// check data dir, if not exist, create it
 	if _, err := os.Stat(options.DirPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(options.DirPath, os.ModePerm); err != nil {
 			return nil, err
 		}
 	}
 
-	// 初始化 DB 实例
+	// init db instance
 	db := &DB{
 		options:    options,
 		lock:       new(sync.RWMutex),
@@ -46,22 +48,22 @@ func NewFlyDB(options Options) (*DB, error) {
 		index:      index.NewIndexer(options.IndexType),
 	}
 
-	// 加载 merge 数据目录
+	// load merge files
 	if err := db.loadMergeFiles(); err != nil {
 		return nil, err
 	}
 
-	// 加载数据文件
+	// load data files
 	if err := db.loadDataFiles(); err != nil {
 		return nil, err
 	}
 
-	// 从 hint 文件中加载索引
+	// load index from hint file
 	if err := db.loadIndexFromHintFile(); err != nil {
 		return nil, err
 	}
 
-	// 从数据文件中加载索引
+	// load index from data files
 	if err := db.loadIndexFromDataFiles(); err != nil {
 		return nil, err
 	}
@@ -69,19 +71,20 @@ func NewFlyDB(options Options) (*DB, error) {
 	return db, nil
 }
 
-// Close 关闭数据库
+// Close the db instance
 func (db *DB) Close() error {
+	zap.L().Info("close db", zap.Any("options", db.options))
 	if db.activeFile == nil {
 		return nil
 	}
 	db.lock.Lock()
 	defer db.lock.Unlock()
 
-	// 关闭当前活跃文件
+	// close active file
 	if err := db.activeFile.Close(); err != nil {
 		return err
 	}
-	// 关闭旧的数据文件
+	// close older files
 	for _, file := range db.olderFiles {
 		if err := file.Close(); err != nil {
 			return err
@@ -90,8 +93,9 @@ func (db *DB) Close() error {
 	return nil
 }
 
-// Sync 持久化数据文件
+// Sync the db instance
 func (db *DB) Sync() error {
+	zap.L().Info("sync db", zap.Any("options", db.options))
 	if db.activeFile == nil {
 		return nil
 	}
@@ -100,27 +104,28 @@ func (db *DB) Sync() error {
 	return db.activeFile.Sync()
 }
 
-// Put 写入key/value， key不能为空
+// Put write a key-value pair to db, and the key must be not empty
 func (db *DB) Put(key []byte, value []byte) error {
-	//判断key是否有效
+	zap.L().Info("put", zap.ByteString("key", key), zap.ByteString("value", value))
+	// check key
 	if len(key) == 0 {
 		return ErrKeyIsEmpty
 	}
 
-	//构造 LogRecord 结构体
+	// check LogRecord
 	logRecord := &data.LogRecord{
 		Key:   encodeLogRecordKeyWithSeq(key, nonTransactionSeqNo),
 		Value: value,
 		Type:  data.LogRecordNormal,
 	}
 
-	//追加写入到当前活跃文件当中
+	// append log record
 	pos, err := db.appendLogRecordWithLock(logRecord)
 	if err != nil {
 		return err
 	}
 
-	//更新内存索引
+	// update index
 	if ok := db.index.Put(key, pos); !ok {
 		return ErrIndexUpdateFailed
 	}
@@ -202,6 +207,7 @@ func (db *DB) setActiveDataFile() error {
 
 // Get 根据 key 读取数据
 func (db *DB) Get(key []byte) ([]byte, error) {
+	zap.L().Info("get", zap.ByteString("key", key))
 	db.lock.Lock()
 	defer db.lock.Unlock()
 
@@ -279,6 +285,7 @@ func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error
 }
 
 func (db *DB) Delete(key []byte) error {
+	zap.L().Info("delete", zap.ByteString("key", key))
 	// 判断 key 的有效性
 	if len(key) == 0 {
 		return ErrKeyIsEmpty
