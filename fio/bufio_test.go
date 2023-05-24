@@ -81,6 +81,7 @@ func TestBufio_Write2(t *testing.T) {
 func TestBufio_Write_Speed(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewBufIOManager(path)
+	defer fio.Close()
 	assert.Nil(t, err)
 	assert.NotNil(t, fio)
 
@@ -90,7 +91,6 @@ func TestBufio_Write_Speed(t *testing.T) {
 		assert.Nil(t, err)
 	}
 
-	err = fio.Flush()
 	assert.Nil(t, err)
 }
 
