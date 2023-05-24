@@ -69,6 +69,11 @@ func NewFlyDB(options Options) (*DB, error) {
 	return db, nil
 }
 
+// NewFlyDbCluster create a new db cluster
+func NewFlyDbCluster(options Options) (*DB, error) {
+	panic("implement me")
+}
+
 // Close 关闭数据库
 func (db *DB) Close() error {
 	if db.activeFile == nil {
