@@ -71,6 +71,12 @@ func NewFlyDB(options Options) (*DB, error) {
 	return db, nil
 }
 
+
+// NewFlyDbCluster create a new db cluster
+func NewFlyDbCluster(options Options) (*DB, error) {
+	panic("implement me")
+}
+
 // Close the db instance
 func (db *DB) Close() error {
 	zap.L().Info("close db", zap.Any("options", db.options))
