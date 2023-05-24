@@ -1,9 +1,11 @@
 package flydb
 
 import (
+	"fmt"
 	"github.com/qishenonly/flydb/utils"
 	"github.com/stretchr/testify/assert"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -86,6 +88,122 @@ func TestDB_Put(t *testing.T) {
 	val5, err := db2.Get(utils.GetTestKey(55))
 	assert.Nil(t, err)
 	assert.Equal(t, val4, val5)
+}
+
+func TestDB_ConcurrentPut(t *testing.T) {
+	opts := DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-ConcurrentPut")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := NewFlyDB(opts)
+	defer destroyDB(db)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	var wg sync.WaitGroup
+
+	putTestWorker := func(id int, db *DB) {
+		defer func() {
+			// fmt.Printf("put Worker %d done\n", id)
+			wg.Done()
+		}()
+		// fmt.Printf("Worker %d processing\n", id)
+		err = db.Put(utils.GetTestKey(id), utils.GetTestKey(id))
+		assert.Nil(t, err)
+		// fmt.Printf("Worker %d resumed\n", id)
+	}
+
+	getTestWorker := func(id int, db *DB) {
+		defer func() {
+			wg.Done()
+		}()
+		val, err := db.Get(utils.GetTestKey(id))
+		assert.Nil(t, err)
+		assert.NotNil(t, val)
+		assert.Equal(t, utils.GetTestKey(id), val)
+	}
+
+	var workerNum = 100
+
+	// 1. 并行Put  workerNum条数据
+	wg.Add(workerNum)
+	go func() {
+		for i := 0; i < workerNum; i++ {
+			go putTestWorker(i, db)
+		}
+	}()
+
+	// 2. 并行Put  workerNum条和上一并行过程相同的数据
+	wg.Add(workerNum)
+	go func() {
+		for i := 0; i < workerNum; i++ {
+			go putTestWorker(i, db)
+		}
+	}()
+
+	// 等待所有Put结束后，进行后续测试
+	wg.Wait()
+
+	// 3. 并行Get 之前插入的所有数据
+	wg.Add(workerNum)
+	go func() {
+		for i := 0; i < workerNum; i++ {
+			go getTestWorker(i, db)
+		}
+	}()
+
+	// 等待并行Get结束后，进行后续测试
+	wg.Wait()
+
+	// 4. 转换为了旧的数据文件，从旧的数据文件上获取 value
+	for i := workerNum; i < 1000000; i++ {
+		err := db.Put(utils.GetTestKey(i), utils.RandomValue(128))
+		assert.Nil(t, err)
+	}
+
+	wg.Add(workerNum)
+	go func() {
+		for i := 0; i < workerNum; i++ {
+			go getTestWorker(i, db)
+		}
+	}()
+	wg.Wait()
+
+	// 6.重启后，前面写入的数据都能拿到
+	err = db.Close()
+	assert.Nil(t, err)
+
+	// 重启数据库
+	db2, err := NewFlyDB(opts)
+
+	val1, err := db2.Get(utils.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.NotNil(t, val1)
+	assert.Equal(t, utils.GetTestKey(1), val1)
+
+	val2, err := db2.Get(utils.GetTestKey(3))
+	assert.Nil(t, err)
+	assert.NotNil(t, val2)
+	assert.Equal(t, utils.GetTestKey(3), val2)
+
+	val3, err := db2.Get(utils.GetTestKey(5))
+	assert.Nil(t, err)
+	assert.NotNil(t, val3)
+	assert.Equal(t, utils.GetTestKey(5), val3)
+
+	val4, err := db2.Get(utils.GetTestKey(99999))
+	assert.Nil(t, err)
+	assert.NotNil(t, val4)
+
+	// 重启数据库后再并行测试Get
+	wg.Add(workerNum)
+	go func() {
+		for i := 0; i < workerNum; i++ {
+			go getTestWorker(i, db2)
+		}
+	}()
+	wg.Wait()
+	fmt.Printf("All workers done\n")
 }
 
 func TestDB_Get(t *testing.T) {
