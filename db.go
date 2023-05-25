@@ -71,7 +71,6 @@ func NewFlyDB(options Options) (*DB, error) {
 	return db, nil
 }
 
-
 // NewFlyDbCluster create a new db cluster
 func NewFlyDbCluster(options Options) (*DB, error) {
 	panic("implement me")
@@ -294,8 +293,9 @@ func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error
 
 func (db *DB) Delete(key []byte) error {
 	zap.L().Info("delete", zap.ByteString("key", key))
+
 	// Determine the validity of the key
-	if len(key) == 0 {
+  if len(key) == 0 {
 		return ErrKeyIsEmpty
 	}
 
