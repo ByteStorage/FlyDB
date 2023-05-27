@@ -1,3 +1,6 @@
+// CopyRight: qishen
+// Created by qishen on 2023/4/1
+
 package flydb
 
 import (
@@ -244,8 +247,8 @@ func (db *DB) GetListKeys() [][]byte {
 	return keys
 }
 
-// Fold 
-// Get all the data and perform the operation specified by the user. 
+// Fold
+// Get all the data and perform the operation specified by the user.
 // The function returns false to exit
 func (db *DB) Fold(f func(key []byte, value []byte) bool) error {
 	db.lock.RLock()
@@ -295,11 +298,11 @@ func (db *DB) Delete(key []byte) error {
 	zap.L().Info("delete", zap.ByteString("key", key))
 
 	// Determine the validity of the key
-  if len(key) == 0 {
+	if len(key) == 0 {
 		return ErrKeyIsEmpty
 	}
 
-	// Check whether the key exists. If it does not exist, return it 
+	// Check whether the key exists. If it does not exist, return it
 	if pst := db.index.Get(key); pst == nil {
 		return nil
 	}
@@ -418,7 +421,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 	// Iterate through all file ids, processing records in the file
 	for i, fid := range db.fileIds {
 		var fileID = uint32(fid)
-		// If the id is smaller than that of the file that did not participate in the merge recently, 
+		// If the id is smaller than that of the file that did not participate in the merge recently,
 		// the hint file has been loaded
 		if hasMerge && fileID < nonMergeFileId {
 			continue
