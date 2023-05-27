@@ -22,6 +22,7 @@ type BPlusTree struct {
 	tree *bbolt.DB
 }
 
+// NewBPlusTree Initializes the B+ tree index
 func NewBPlusTree(dirPath string) *BPlusTree {
 	bptree, err := bbolt.Open(filepath.Join(dirPath, bPlusTreeIndexFileName), 0644, nil)
 	if err != nil {
@@ -47,10 +48,14 @@ func NewBPlusTree(dirPath string) *BPlusTree {
 	}
 }
 
+// Put Inserts a key-value pair into the B+ tree index
+// The two arguments to the Put method are required to be byte arrays
+// The first argument is the key, and the second argument is the value
+// The key is the primary key of the data,
+// and the value is the offset of the data in the data file
 func (bptree *BPlusTree) Put(key []byte, pst *data.LogRecordPst) bool {
 	if err := bptree.tree.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket(indexBucketName)
-		// The two arguments to the Put method are required to be byte arrays
 		return bucket.Put(key, data.EncodeLogRecordPst(pst))
 	}); err != nil {
 		panic(flydb.ErrPutValueFailed)
@@ -58,6 +63,10 @@ func (bptree *BPlusTree) Put(key []byte, pst *data.LogRecordPst) bool {
 	return true
 }
 
+// Get Gets the value corresponding to the key from the B+ tree index
+// The argument to the Get method is required to be a byte array
+// The argument is the key, and the return value is the value corresponding to the key
+// If the key does not exist, nil is returned
 func (bptree *BPlusTree) Get(key []byte) *data.LogRecordPst {
 	var pst *data.LogRecordPst
 	// The view method allows only reads, not inserts and deletes.
@@ -74,14 +83,38 @@ func (bptree *BPlusTree) Get(key []byte) *data.LogRecordPst {
 	return pst
 }
 
+// Delete Deletes the key-value pair corresponding to the key from the B+ tree index
+// The argument to the Delete method is required to be a byte array
+// The argument is the key, and the return value is a bool value
+// If the key does not exist, false is returned
 func (bptree *BPlusTree) Delete(key []byte) bool {
-	//TODO implement me
-	panic("implement me")
+	var ok bool
+	if err := bptree.tree.Update(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket(indexBucketName)
+		if value := bucket.Get(key); len(value) != 0 {
+			ok = true
+			return bucket.Delete(key)
+		}
+		return nil
+	}); err != nil {
+		panic(flydb.ErrDeleteValueFailed)
+	}
+	return ok
 }
 
+// Size Gets the number of key-value pairs in the B+ tree index
+// The return value is an int value
+// If the index is empty, 0 is returned
 func (bptree *BPlusTree) Size() int {
-	//TODO implement me
-	panic("implement me")
+	var size int
+	if err := bptree.tree.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket(indexBucketName)
+		size = bucket.Stats().KeyN
+		return nil
+	}); err != nil {
+		panic(flydb.ErrGetIndexSizeFailed)
+	}
+	return size
 }
 
 func (bptree *BPlusTree) Iterator(reverse bool) Iterator {
