@@ -10,4 +10,5 @@ var (
 	ErrDeleteValueFailed  = errors.New("DeleteValueFailedError : failed to delete value in bptree")
 	ErrGetIndexSizeFailed = errors.New("GetIndexSizeFailedError : failed to get index size in bptree")
 	ErrBeginTxFailed      = errors.New("BeginTxFailedError : failed to begin tx in bptree")
+	ErrRollbackTxFailed   = errors.New("RollbackTxFailedError : failed to rollback tx in bptree")
 )

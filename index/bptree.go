@@ -48,7 +48,7 @@ func NewBPlusTree(dirPath string) *BPlusTree {
 }
 
 // Put Inserts a key-value pair into the B+ tree index
-// The two arguments to the Put method are required to be byte arrays
+// The two arguments to the Put method
 // The first argument is the key, and the second argument is the value
 // The key is the primary key of the data,
 // and the value is the offset of the data in the data file
@@ -125,12 +125,14 @@ type bptreeIterator struct {
 	tx      *bbolt.Tx
 	cursor  *bbolt.Cursor
 	reverse bool
+	currKey []byte
+	currVal []byte
 }
 
 var _ Iterator = (*bptreeIterator)(nil)
 
 // newBptreeIterator Initializes the B+ tree index iterator
-// The two arguments to the newBptreeIterator method are required to be byte arrays
+// The two arguments to the newBptreeIterator method
 // The first argument is the B+ tree index,
 // and the second argument is the traversal direction of the iterator
 // The return value is an iterator
@@ -139,44 +141,75 @@ func newBptreeIterator(tree *bbolt.DB, reverse bool) *bptreeIterator {
 	if err != nil {
 		panic(ErrBeginTxFailed)
 	}
-	return &bptreeIterator{
+	b := &bptreeIterator{
 		tx:      tx,
 		cursor:  tx.Bucket(indexBucketName).Cursor(),
 		reverse: reverse,
 	}
+	b.Rewind()
+	return b
 }
 
-func (b bptreeIterator) Rewind() {
-	//TODO implement me
-	panic("implement me")
+// Rewind Resets the iterator to the beginning of the B+ tree index
+func (b *bptreeIterator) Rewind() {
+	if b.reverse {
+		b.currKey, b.currVal = b.cursor.Last()
+	} else {
+		b.currKey, b.currVal = b.cursor.First()
+	}
 }
 
-func (b bptreeIterator) Seek(key []byte) {
-	//TODO implement me
-	panic("implement me")
+// Seek Positions the iterator to the first key
+// that is greater or equal to the specified key
+// The argument to the Seek method is required to be a byte array
+// The argument is the key
+// If the key does not exist, the iterator is positioned
+// to the first key that is greater than the specified key
+func (b *bptreeIterator) Seek(key []byte) {
+	b.currKey, b.currVal = b.cursor.Seek(key)
 }
 
-func (b bptreeIterator) Next() {
-	//TODO implement me
-	panic("implement me")
+// Next Positions the iterator to the next key
+// If the iterator is positioned at the last key,
+// the iterator is positioned to the end of the B+ tree index
+// The Next method does not return a value
+func (b *bptreeIterator) Next() {
+	if b.reverse {
+		b.currKey, b.currVal = b.cursor.Prev()
+	} else {
+		b.currKey, b.currVal = b.cursor.Next()
+	}
 }
 
-func (b bptreeIterator) Valid() bool {
-	//TODO implement me
-	panic("implement me")
+// Valid Determines whether the iterator is positioned at a valid key
+// The return value is a bool value
+// If the iterator is positioned at a valid key, true is returned
+// Otherwise, false is returned
+func (b *bptreeIterator) Valid() bool {
+	return b.currKey != nil
 }
 
-func (b bptreeIterator) Key() []byte {
-	//TODO implement me
-	panic("implement me")
+// Key Gets the key at the current iterator position
+// The return value is a byte array
+// If the iterator is not positioned at a valid key, nil is returned
+// The Key method does not return an error
+func (b *bptreeIterator) Key() []byte {
+	return b.currKey
 }
 
-func (b bptreeIterator) Value() *data.LogRecordPst {
-	//TODO implement me
-	panic("implement me")
+// Value Gets the value at the current iterator position
+// The return value is LogRecordPst struct
+// If the iterator is not positioned at a valid key, nil is returned
+// The Value method does not return an error
+func (b *bptreeIterator) Value() *data.LogRecordPst {
+	return data.DecodeLogRecordPst(b.currVal)
 }
 
+// Close Closes the iterator
+// The Close method does not return a value or an error
+// The Close method rolls back the transaction
 func (b bptreeIterator) Close() {
-	//TODO implement me
-	panic("implement me")
+	if err := b.tx.Rollback(); err != nil {
+		panic(ErrRollbackTxFailed)
+	}
 }
