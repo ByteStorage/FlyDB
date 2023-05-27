@@ -48,7 +48,7 @@ func NewFlyDB(options Options) (*DB, error) {
 		options:    options,
 		lock:       new(sync.RWMutex),
 		olderFiles: make(map[uint32]*data.DataFile),
-		index:      index.NewIndexer(options.IndexType),
+		index:      index.NewIndexer(options.IndexType, options.DirPath),
 	}
 
 	// load merge files
