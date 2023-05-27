@@ -116,9 +116,14 @@ func (bptree *BPlusTree) Size() int {
 	return size
 }
 
+// Iterator Gets the iterator of the B+ tree index
+// The argument to the Iterator method is required to be a bool value
+// The argument is the traversal direction of the iterator,
+// and the return value is an iterator
+// If the argument is true, the iterator is traversed in reverse order,
+// otherwise it is traversed in order
 func (bptree *BPlusTree) Iterator(reverse bool) Iterator {
-	//TODO implement me
-	panic("implement me")
+	return newBptreeIterator(bptree.tree, reverse)
 }
 
 type bptreeIterator struct {
