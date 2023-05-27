@@ -36,13 +36,12 @@ const (
 	ART
 )
 
-func NewIndexer(typeIndex IndexType) Indexer {
+func NewIndexer(typeIndex IndexType, dirPath string) Indexer {
 	switch typeIndex {
 	case Btree:
 		return NewBTree()
 	case ART:
-		//todo
-		return nil
+		return NewART()
 	default:
 		panic("unsupported index type")
 	}
