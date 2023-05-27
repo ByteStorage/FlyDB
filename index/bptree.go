@@ -1,7 +1,6 @@
 package index
 
 import (
-	"github.com/qishenonly/flydb"
 	"github.com/qishenonly/flydb/data"
 	"go.etcd.io/bbolt"
 	"path/filepath"
@@ -26,7 +25,7 @@ type BPlusTree struct {
 func NewBPlusTree(dirPath string) *BPlusTree {
 	bptree, err := bbolt.Open(filepath.Join(dirPath, bPlusTreeIndexFileName), 0644, nil)
 	if err != nil {
-		panic(flydb.ErrOpenBPTreeFailed)
+		panic(ErrOpenBPTreeFailed)
 	}
 
 	// Create the corresponding bucket
@@ -40,7 +39,7 @@ func NewBPlusTree(dirPath string) *BPlusTree {
 		_, err := tx.CreateBucketIfNotExists(indexBucketName)
 		return err
 	}); err != nil {
-		panic(flydb.ErrCreateBucketFailed)
+		panic(ErrCreateBucketFailed)
 	}
 
 	return &BPlusTree{
@@ -58,7 +57,7 @@ func (bptree *BPlusTree) Put(key []byte, pst *data.LogRecordPst) bool {
 		bucket := tx.Bucket(indexBucketName)
 		return bucket.Put(key, data.EncodeLogRecordPst(pst))
 	}); err != nil {
-		panic(flydb.ErrPutValueFailed)
+		panic(ErrPutValueFailed)
 	}
 	return true
 }
@@ -78,7 +77,7 @@ func (bptree *BPlusTree) Get(key []byte) *data.LogRecordPst {
 		}
 		return nil
 	}); err != nil {
-		panic(flydb.ErrGetValueFailed)
+		panic(ErrGetValueFailed)
 	}
 	return pst
 }
@@ -97,7 +96,7 @@ func (bptree *BPlusTree) Delete(key []byte) bool {
 		}
 		return nil
 	}); err != nil {
-		panic(flydb.ErrDeleteValueFailed)
+		panic(ErrDeleteValueFailed)
 	}
 	return ok
 }
@@ -112,7 +111,7 @@ func (bptree *BPlusTree) Size() int {
 		size = bucket.Stats().KeyN
 		return nil
 	}); err != nil {
-		panic(flydb.ErrGetIndexSizeFailed)
+		panic(ErrGetIndexSizeFailed)
 	}
 	return size
 }
