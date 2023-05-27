@@ -120,3 +120,63 @@ func (bptree *BPlusTree) Iterator(reverse bool) Iterator {
 	//TODO implement me
 	panic("implement me")
 }
+
+type bptreeIterator struct {
+	tx      *bbolt.Tx
+	cursor  *bbolt.Cursor
+	reverse bool
+}
+
+var _ Iterator = (*bptreeIterator)(nil)
+
+// newBptreeIterator Initializes the B+ tree index iterator
+// The two arguments to the newBptreeIterator method are required to be byte arrays
+// The first argument is the B+ tree index,
+// and the second argument is the traversal direction of the iterator
+// The return value is an iterator
+func newBptreeIterator(tree *bbolt.DB, reverse bool) *bptreeIterator {
+	tx, err := tree.Begin(false)
+	if err != nil {
+		panic(ErrBeginTxFailed)
+	}
+	return &bptreeIterator{
+		tx:      tx,
+		cursor:  tx.Bucket(indexBucketName).Cursor(),
+		reverse: reverse,
+	}
+}
+
+func (b bptreeIterator) Rewind() {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b bptreeIterator) Seek(key []byte) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b bptreeIterator) Next() {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b bptreeIterator) Valid() bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b bptreeIterator) Key() []byte {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b bptreeIterator) Value() *data.LogRecordPst {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b bptreeIterator) Close() {
+	//TODO implement me
+	panic("implement me")
+}
