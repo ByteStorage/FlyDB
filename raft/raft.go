@@ -24,6 +24,10 @@ type Cluster struct {
 	Leader string
 	//Filename to node,key is filename,value is node
 	FilenameToNode map[string]string
+	//Current Node
+	CurrentNode string
+	//ID
+	ID string
 }
 
 // FSMSnapshot use to store the snapshot of the FSM
