@@ -12,8 +12,7 @@ type Impl struct {
 }
 
 func (i *Impl) State() raft.RaftState {
-	//TODO implement me
-	panic("implement me")
+	return i.c.Raft.State()
 }
 
 func (i *Impl) Peers() ([]string, error) {
