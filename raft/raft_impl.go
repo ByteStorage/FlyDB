@@ -36,8 +36,7 @@ func (i *Impl) IsCandidate() bool {
 }
 
 func (i *Impl) Leader() string {
-	//TODO implement me
-	panic("implement me")
+	return i.c.Leader
 }
 
 func (i *Impl) Apply(b []byte) error {
