@@ -36,7 +36,9 @@ func (i *Impl) IsCandidate() bool {
 }
 
 func (i *Impl) Leader() string {
-	return i.c.Leader
+	address, _ := i.c.Raft.LeaderWithID()
+	i.c.Leader = string(address)
+	return string(address)
 }
 
 func (i *Impl) Apply(b []byte) error {
@@ -45,8 +47,11 @@ func (i *Impl) Apply(b []byte) error {
 }
 
 func (i *Impl) AddServer(addr string) error {
-	//TODO implement me
-	panic("implement me")
+	voter := i.c.Raft.AddVoter(raft.ServerID(addr), raft.ServerAddress(addr), 0, 0)
+	if voter.Error() != nil {
+		return voter.Error()
+	}
+	return nil
 }
 
 func (i *Impl) ShowDebugInfo(witch string) ([]byte, error) {
