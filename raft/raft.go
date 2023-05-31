@@ -1,4 +1,4 @@
-package raft
+package master
 
 import (
 	"github.com/hashicorp/raft"
@@ -51,6 +51,36 @@ type FSMSnapshot struct {
 }
 
 // NewRaftCluster create a new raft db cluster
-func NewRaftCluster() {
+func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
+	c := &Cluster{
+		Master: masterList,
+		Slave:  slaveList,
+	}
+	c.startMasters()
+	c.startSlaves()
 	panic("implement me")
+}
+
+func (c *Cluster) startMasters() {
+	//启动grpc服务
+
+	//启动raft服务
+
+	//等待leader选举
+
+	//监听leader变化
+
+	//对slave进行下线或者上线
+
+}
+
+func (c *Cluster) startSlaves() {
+	//启动grpc服务
+
+	//向master注册
+
+	//发起心跳
+
+	//监听leader变化
+
 }

@@ -1,4 +1,4 @@
-package raft
+package master
 
 import (
 	"github.com/hashicorp/raft"
