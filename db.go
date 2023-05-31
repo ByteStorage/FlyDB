@@ -6,6 +6,7 @@ package flydb
 import (
 	"github.com/qishenonly/flydb/data"
 	"github.com/qishenonly/flydb/index"
+	master "github.com/qishenonly/flydb/raft"
 	"go.uber.org/zap"
 	"io"
 	"os"
@@ -75,7 +76,8 @@ func NewFlyDB(options Options) (*DB, error) {
 }
 
 // NewFlyDbCluster create a new db cluster
-func NewFlyDbCluster(options Options) (*DB, error) {
+func NewFlyDbCluster(masterList []string, slaveList []string, options Options) (*DB, error) {
+	master.NewRaftCluster(masterList, slaveList)
 	panic("implement me")
 }
 

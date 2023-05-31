@@ -1,4 +1,4 @@
-package raft
+package master
 
 import (
 	"github.com/hashicorp/raft"
@@ -51,6 +51,16 @@ type FSMSnapshot struct {
 }
 
 // NewRaftCluster create a new raft db cluster
-func NewRaftCluster() {
+func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
+	startMasters(masterList)
+	startSlaves(slaveList)
 	panic("implement me")
+}
+
+func startMasters(addr []string) {
+
+}
+
+func startSlaves(addr []string) {
+
 }
