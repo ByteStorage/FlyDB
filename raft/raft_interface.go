@@ -14,4 +14,6 @@ type Interface interface {
 	AddServer(addr string) error
 	ShowDebugInfo(witch string) ([]byte, error)
 	UserSnapshot() error
+	Put(key, value []byte) error
+	Get(key []byte) ([]byte, error)
 }

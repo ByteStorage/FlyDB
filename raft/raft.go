@@ -3,7 +3,7 @@ package master
 import (
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
-	"github.com/qishenonly/flydb/utils"
+	"github.com/qishenonly/flydb/lib/dirtree"
 )
 
 // Cluster define the cluster of db
@@ -17,7 +17,7 @@ type Cluster struct {
 	//Raft Log
 	RaftLog *boltdb.BoltStore
 	//Dir Tree
-	DirTree *utils.DirTree
+	DirTree *dirtree.DirTree
 	//Heartbeat
 	Heartbeat map[string]string
 	//Leader
@@ -41,7 +41,7 @@ type FSMSnapshot struct {
 	//Raft Log
 	RaftLog *boltdb.BoltStore
 	//Dir Tree
-	DirTree *utils.DirTree
+	DirTree *dirtree.DirTree
 	//Heartbeat
 	Heartbeat map[string]string
 	//Leader
@@ -71,6 +71,8 @@ func (c *Cluster) startMasters() {
 	//监听leader变化
 
 	//对slave进行下线或者上线
+
+	//监听用户请求，通过wal日志处理
 
 }
 
