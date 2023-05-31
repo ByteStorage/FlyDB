@@ -1,4 +1,4 @@
-package utils
+package dirtree
 
 var _ DirTreeInterface = &DirTree{}
 

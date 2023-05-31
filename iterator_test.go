@@ -1,7 +1,7 @@
 package flydb
 
 import (
-	"github.com/qishenonly/flydb/utils"
+	"github.com/qishenonly/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -28,15 +28,15 @@ func TestDB_Iterator_One_Value(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	err = db.Put(utils.GetTestKey(10), utils.GetTestKey(10))
+	err = db.Put(randkv.GetTestKey(10), randkv.GetTestKey(10))
 	assert.Nil(t, err)
 
 	iterator := db.NewIterator(DefaultIteratorOptions)
 	assert.NotNil(t, iterator)
 	assert.True(t, iterator.Valid())
-	assert.Equal(t, utils.GetTestKey(10), iterator.Key())
+	assert.Equal(t, randkv.GetTestKey(10), iterator.Key())
 	value, err := iterator.Value()
-	assert.Equal(t, utils.GetTestKey(10), value)
+	assert.Equal(t, randkv.GetTestKey(10), value)
 }
 
 func TestDB_Iterator_Multi_Value(t *testing.T) {
@@ -47,15 +47,15 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	err = db.Put([]byte("abcd"), utils.RandomValue(10))
+	err = db.Put([]byte("abcd"), randkv.RandomValue(10))
 	assert.Nil(t, err)
-	err = db.Put([]byte("efjh"), utils.RandomValue(10))
+	err = db.Put([]byte("efjh"), randkv.RandomValue(10))
 	assert.Nil(t, err)
-	err = db.Put([]byte("aefg"), utils.RandomValue(10))
+	err = db.Put([]byte("aefg"), randkv.RandomValue(10))
 	assert.Nil(t, err)
-	err = db.Put([]byte("cdef"), utils.RandomValue(10))
+	err = db.Put([]byte("cdef"), randkv.RandomValue(10))
 	assert.Nil(t, err)
-	err = db.Put([]byte("bcdg"), utils.RandomValue(10))
+	err = db.Put([]byte("bcdg"), randkv.RandomValue(10))
 	assert.Nil(t, err)
 
 	// 正向迭代

@@ -1,7 +1,7 @@
 package flydb
 
 import (
-	"github.com/qishenonly/flydb/utils"
+	"github.com/qishenonly/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -33,7 +33,7 @@ func TestDB_Merge2(t *testing.T) {
 	assert.NotNil(t, db)
 
 	for i := 0; i < 50000; i++ {
-		err := db.Put(utils.GetTestKey(i), utils.RandomValue(1024))
+		err := db.Put(randkv.GetTestKey(i), randkv.RandomValue(1024))
 		assert.Nil(t, err)
 	}
 
@@ -53,7 +53,7 @@ func TestDB_Merge2(t *testing.T) {
 	assert.Equal(t, 50000, len(keys))
 
 	for i := 0; i < 50000; i++ {
-		val, err := db2.Get(utils.GetTestKey(i))
+		val, err := db2.Get(randkv.GetTestKey(i))
 		assert.Nil(t, err)
 		assert.NotNil(t, val)
 	}
@@ -72,11 +72,11 @@ func TestDB_Merge3(t *testing.T) {
 	assert.NotNil(t, db)
 
 	for i := 0; i < 50000; i++ {
-		err := db.Put(utils.GetTestKey(i), utils.RandomValue(1024))
+		err := db.Put(randkv.GetTestKey(i), randkv.RandomValue(1024))
 		assert.Nil(t, err)
 	}
 	for i := 0; i < 50000; i++ {
-		err := db.Delete(utils.GetTestKey(i))
+		err := db.Delete(randkv.GetTestKey(i))
 		assert.Nil(t, err)
 	}
 

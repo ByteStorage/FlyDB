@@ -63,3 +63,13 @@ func (i *Impl) UserSnapshot() error {
 	//TODO implement me
 	panic("implement me")
 }
+
+func (i *Impl) Put(key, value []byte) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i *Impl) Get(key []byte) ([]byte, error) {
+	//TODO implement me
+	panic("implement me")
+}
