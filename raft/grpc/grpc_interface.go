@@ -1,4 +1,4 @@
-package grpc
+package client
 
 type Message struct {
 }
