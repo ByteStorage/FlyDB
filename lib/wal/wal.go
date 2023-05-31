@@ -4,7 +4,7 @@ import (
 	"github.com/tidwall/wal"
 )
 
-const WalFile = "/tmp/flydb/wal"
+const FileName = "/tmp/flydb/wal"
 
 type Wal struct {
 	log *wal.Log
@@ -31,7 +31,7 @@ func (w *Wal) ReadLast() ([]byte, error) {
 }
 
 func New() (*Wal, error) {
-	log, err := wal.Open(WalFile, nil)
+	log, err := wal.Open(FileName, nil)
 	if err != nil {
 		return &Wal{}, err
 	}
