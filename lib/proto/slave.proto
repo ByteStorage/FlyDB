@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package slave;
+option go_package = 	"flydb/lib/proto";
+
+service SlaveGrpcService {
+  rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Set(SetRequest) returns (SetResponse) {}
+  rpc Del(DelRequest) returns (DelResponse) {}
+  rpc Keys(KeysRequest) returns (KeysResponse) {}
+  rpc Exists(ExistsRequest) returns (ExistsResponse) {}
+  rpc Expire(ExpireRequest) returns (ExpireResponse) {}
+  rpc TTL(TTLRequest) returns (TTLResponse) {}
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
+}
+
+message GetRequest {
+  string key = 1;
+}
+
+message GetResponse {
+  string value = 1;
+}
+
+message SetRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message SetResponse {
+  bool ok = 1;
+}
+
+message DelRequest {
+  string key = 1;
+}
+
+message DelResponse {
+  bool ok = 1;
+}
+
+message KeysRequest {
+  string pattern = 1;
+}
+
+message KeysResponse {
+  repeated string keys = 1;
+}
+
+message ExistsRequest {
+  string key = 1;
+}
+
+message ExistsResponse {
+  bool exists = 1;
+}
+
+message ExpireRequest {
+  string key = 1;
+  int64 ttl = 2;
+}
+
+message ExpireResponse {
+  bool ok = 1;
+}
+
+message TTLRequest {
+  string key = 1;
+}
+
+message TTLResponse {
+  int64 ttl = 1;
+}
+
+message HeartbeatRequest {
+  string id = 1;
+}
+
+message HeartbeatResponse {
+  bool ok = 1;
+}

@@ -12,6 +12,15 @@ var _ DirTreeInterface = &DirTree{}
 	而不需要维护节点与文件的映射关系，这里DirTree只是写了个简单的目录树，可以找找有没有优化的目录树
 */
 
+func NewDirTree() *DirTree {
+	return &DirTree{
+		Root: &DirTreeNode{
+			Name:     "/",
+			Children: nil,
+		},
+	}
+}
+
 // DirTree is a struct that represents a directory tree
 type DirTree struct {
 	// Root is the root node of the directory tree

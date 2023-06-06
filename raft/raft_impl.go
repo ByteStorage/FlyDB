@@ -8,11 +8,11 @@ var _ Interface = &Impl{}
 
 // Impl is the interface that must be implemented by a raft server.
 type Impl struct {
-	c Cluster
+	m Master
 }
 
 func (i *Impl) State() raft.RaftState {
-	return i.c.Raft.State()
+	return i.m.Raft.State()
 }
 
 func (i *Impl) Peers() ([]string, error) {
@@ -36,8 +36,7 @@ func (i *Impl) IsCandidate() bool {
 }
 
 func (i *Impl) Leader() string {
-	address, _ := i.c.Raft.LeaderWithID()
-	i.c.Leader = string(address)
+	address, _ := i.m.Raft.LeaderWithID()
 	return string(address)
 }
 
@@ -47,7 +46,7 @@ func (i *Impl) Apply(b []byte) error {
 }
 
 func (i *Impl) AddServer(addr string) error {
-	voter := i.c.Raft.AddVoter(raft.ServerID(addr), raft.ServerAddress(addr), 0, 0)
+	voter := i.m.Raft.AddVoter(raft.ServerID(addr), raft.ServerAddress(addr), 0, 0)
 	if voter.Error() != nil {
 		return voter.Error()
 	}
