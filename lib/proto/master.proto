@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package master;
+option go_package = 	"flydb/lib/proto";
+
+service MasterGrpcService {
+  rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Set(SetRequest) returns (SetResponse) {}
+  rpc Del(DelRequest) returns (DelResponse) {}
+  rpc Keys(KeysRequest) returns (KeysResponse) {}
+  rpc Scan(ScanRequest) returns (ScanResponse) {}
+  rpc Expire(ExpireRequest) returns (ExpireResponse) {}
+  rpc TTL(TTLRequest) returns (TTLResponse) {}
+  rpc Ping(PingRequest) returns (PingResponse) {}
+  rpc Shutdown(ShutdownRequest) returns (ShutdownResponse) {}
+  rpc RegisterSlave(RegisterSlaveRequest) returns (RegisterSlaveResponse) {}
+}
+
+message RegisterSlaveRequest {
+  string addr = 1;
+}
+
+message RegisterSlaveResponse {
+  bool ok = 1;
+}
+
+message GetRequest {
+  string key = 1;
+}
+
+message GetResponse {
+  string value = 1;
+}
+
+message SetRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message SetResponse {
+  bool ok = 1;
+}
+
+message DelRequest {
+  string key = 1;
+}
+
+message DelResponse {
+  bool ok = 1;
+}
+
+message KeysRequest {
+  string pattern = 1;
+}
+
+message KeysResponse {
+  repeated string keys = 1;
+}
+
+message ScanRequest {
+  string pattern = 1;
+}
+
+message ScanResponse {
+  repeated string keys = 1;
+}
+
+message ExpireRequest {
+  string key = 1;
+  int64 ttl = 2;
+}
+
+message ExpireResponse {
+  bool ok = 1;
+}
+
+message TTLRequest {
+  string key = 1;
+}
+
+message TTLResponse {
+  int64 ttl = 1;
+}
+
+message PingRequest {
+  string message = 1;
+}
+
+message PingResponse {
+  string message = 1;
+}
+
+message ShutdownRequest {
+  string message = 1;
+}
+
+message ShutdownResponse {
+  string message = 1;
+}

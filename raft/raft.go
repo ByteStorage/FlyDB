@@ -124,12 +124,15 @@ func (c *Cluster) startMasters() {
 }
 
 func (c *Cluster) startSlaves() {
-	//启动grpc服务
-
-	//向master注册
-
-	//发起心跳
-
-	//监听leader变化
+	for _, s := range c.Slave {
+		//启动grpc服务
+		s.StartGrpcServer()
+		//向master注册
+		s.RegisterToMaster()
+		//发起心跳
+		go s.Heartbeat()
+		//监听leader变化
+		go s.ListenLeader()
+	}
 
 }
