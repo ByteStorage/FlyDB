@@ -3,58 +3,103 @@ package master
 import (
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
+	"github.com/qishenonly/flydb"
 	"github.com/qishenonly/flydb/lib/dirtree"
+	"strconv"
 )
 
 // Cluster define the cluster of db
 type Cluster struct {
 	//Master List
-	Master []string
+	Master []Master
 	//Slave List
-	Slave []string
+	Slave []Slave
 	//Raft
 	Raft raft.Raft
 	//Raft Log
 	RaftLog *boltdb.BoltStore
-	//Dir Tree
-	DirTree *dirtree.DirTree
-	//Heartbeat
-	Heartbeat map[string]string
-	//Leader
-	Leader string
-	//Filename to node,key is filename,value is node
-	FilenameToNode map[string]string
-	//Current Node
-	CurrentNode string
+}
+
+type Master struct {
 	//ID
 	ID string
+	//Addr
+	Addr string
+	//Master List Leader
+	Leader string
+	//Master List
+	Peers []string
+	//Slave List
+	Slave []Slave
+	//Heartbeat
+	Heartbeat map[string]string
+	//Filename to node,key is filename,value is node
+	FilenameToNode map[string]string
+	//Dir Tree
+	DirTree *dirtree.DirTree
+}
+
+type Slave struct {
+	//ID
+	ID string
+	//Addr
+	Addr string
+	//Master List Leader
+	Leader string
+	//Slave List
+	Peers []string
+	//DB
+	DB *flydb.DB
 }
 
 // FSMSnapshot use to store the snapshot of the FSM
 type FSMSnapshot struct {
-	//Master List
-	Master []string
-	//Slave List
-	Slave []string
-	//Raft
-	Raft raft.Raft
-	//Raft Log
-	RaftLog *boltdb.BoltStore
-	//Dir Tree
-	DirTree *dirtree.DirTree
-	//Heartbeat
-	Heartbeat map[string]string
-	//Leader
-	Leader string
-	//Filename to node,key is filename,value is node
-	FilenameToNode map[string]string
+}
+
+type IndexerType = int8
+
+const (
+	DefaultDbDir             = "/tmp/flydb"
+	Btree        IndexerType = iota + 1
+)
+
+var DefaultOptions = flydb.Options{
+	DirPath:      DefaultDbDir,
+	DataFileSize: 256 * 1024 * 1024, // 256MB
+	SyncWrite:    false,
+	IndexType:    Btree,
 }
 
 // NewRaftCluster create a new raft db cluster
 func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
+	masters := make([]Master, len(masterList))
+	slaves := make([]Slave, len(slaveList))
+	for i, slave := range slaveList {
+		db, err := flydb.NewFlyDB(DefaultOptions)
+		if err != nil {
+			panic(err)
+		}
+		slaves[i] = Slave{
+			ID:    strconv.Itoa(i),
+			Addr:  slave,
+			Peers: slaveList,
+			DB:    db,
+		}
+	}
+	for i, master := range masterList {
+		masters[i] = Master{
+			ID:             strconv.Itoa(i),
+			Addr:           master,
+			Peers:          masterList,
+			Slave:          slaves,
+			Heartbeat:      make(map[string]string),
+			FilenameToNode: make(map[string]string),
+			DirTree:        dirtree.NewDirTree(),
+		}
+	}
 	c := &Cluster{
-		Master: masterList,
-		Slave:  slaveList,
+		Master: masters,
+		Slave:  slaves,
 	}
 	c.startMasters()
 	c.startSlaves()
