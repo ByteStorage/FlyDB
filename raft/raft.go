@@ -14,10 +14,8 @@ type Cluster struct {
 	Master []Master
 	//Slave List
 	Slave []Slave
-	//Raft
-	Raft raft.Raft
-	//Raft Log
-	RaftLog *boltdb.BoltStore
+	//Master List Leader
+	Leader string
 }
 
 type Master struct {
@@ -25,8 +23,6 @@ type Master struct {
 	ID string
 	//Addr
 	Addr string
-	//Master List Leader
-	Leader string
 	//Master List
 	Peers []string
 	//Slave List
@@ -37,6 +33,11 @@ type Master struct {
 	FilenameToNode map[string]string
 	//Dir Tree
 	DirTree *dirtree.DirTree
+	//Raft
+	Raft raft.Raft
+	//Raft Log
+	RaftLog *boltdb.BoltStore
+	c       *Cluster
 }
 
 type Slave struct {
@@ -107,18 +108,19 @@ func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
 }
 
 func (c *Cluster) startMasters() {
-	//启动grpc服务
-
-	//启动raft服务
-
-	//等待leader选举
-
-	//监听leader变化
-
-	//对slave进行下线或者上线
-
-	//监听用户请求，通过wal日志处理
-
+	for _, m := range c.Master {
+		m.c = c
+		//启动grpc服务
+		m.StartGrpcServer()
+		//启动raft服务
+		m.NewRaft()
+		//等待leader选举
+		m.WaitForLeader()
+		//对slave进行下线或者上线
+		go m.ListenSlave(c.Slave)
+		//监听用户请求，通过wal日志处理
+		go m.ListenRequest()
+	}
 }
 
 func (c *Cluster) startSlaves() {
