@@ -8,6 +8,20 @@ import (
 	"strconv"
 )
 
+type IndexerType = int8
+
+const (
+	DefaultDbDir             = "/tmp/flydb"
+	Btree        IndexerType = iota + 1
+)
+
+var DefaultOptions = flydb.Options{
+	DirPath:      DefaultDbDir,
+	DataFileSize: 256 * 1024 * 1024, // 256MB
+	SyncWrite:    false,
+	IndexType:    Btree,
+}
+
 // Cluster define the cluster of db
 type Cluster struct {
 	//Master List
@@ -55,20 +69,6 @@ type Slave struct {
 
 // FSMSnapshot use to store the snapshot of the FSM
 type FSMSnapshot struct {
-}
-
-type IndexerType = int8
-
-const (
-	DefaultDbDir             = "/tmp/flydb"
-	Btree        IndexerType = iota + 1
-)
-
-var DefaultOptions = flydb.Options{
-	DirPath:      DefaultDbDir,
-	DataFileSize: 256 * 1024 * 1024, // 256MB
-	SyncWrite:    false,
-	IndexType:    Btree,
 }
 
 // NewRaftCluster create a new raft db cluster
