@@ -44,7 +44,7 @@ func NewMasterGrpcServiceClient(cc grpc.ClientConnInterface) MasterGrpcServiceCl
 
 func (c *masterGrpcServiceClient) Get(ctx context.Context, in *MasterGetRequest, opts ...grpc.CallOption) (*MasterGetResponse, error) {
 	out := new(MasterGetResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *masterGrpcServiceClient) Get(ctx context.Context, in *MasterGetRequest,
 
 func (c *masterGrpcServiceClient) Set(ctx context.Context, in *MasterSetRequest, opts ...grpc.CallOption) (*MasterSetResponse, error) {
 	out := new(MasterSetResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Set", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Set", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *masterGrpcServiceClient) Set(ctx context.Context, in *MasterSetRequest,
 
 func (c *masterGrpcServiceClient) Del(ctx context.Context, in *MasterDelRequest, opts ...grpc.CallOption) (*MasterDelResponse, error) {
 	out := new(MasterDelResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Del", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Del", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *masterGrpcServiceClient) Del(ctx context.Context, in *MasterDelRequest,
 
 func (c *masterGrpcServiceClient) Keys(ctx context.Context, in *MasterKeysRequest, opts ...grpc.CallOption) (*MasterKeysResponse, error) {
 	out := new(MasterKeysResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Keys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Keys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (c *masterGrpcServiceClient) Keys(ctx context.Context, in *MasterKeysReques
 
 func (c *masterGrpcServiceClient) Scan(ctx context.Context, in *MasterScanRequest, opts ...grpc.CallOption) (*MasterScanResponse, error) {
 	out := new(MasterScanResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Scan", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Scan", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (c *masterGrpcServiceClient) Scan(ctx context.Context, in *MasterScanReques
 
 func (c *masterGrpcServiceClient) Expire(ctx context.Context, in *MasterExpireRequest, opts ...grpc.CallOption) (*MasterExpireResponse, error) {
 	out := new(MasterExpireResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Expire", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Expire", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (c *masterGrpcServiceClient) Expire(ctx context.Context, in *MasterExpireRe
 
 func (c *masterGrpcServiceClient) TTL(ctx context.Context, in *MasterTTLRequest, opts ...grpc.CallOption) (*MasterTTLResponse, error) {
 	out := new(MasterTTLResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/TTL", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/TTL", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c *masterGrpcServiceClient) TTL(ctx context.Context, in *MasterTTLRequest,
 
 func (c *masterGrpcServiceClient) Ping(ctx context.Context, in *MasterPingRequest, opts ...grpc.CallOption) (*MasterPingResponse, error) {
 	out := new(MasterPingResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (c *masterGrpcServiceClient) Ping(ctx context.Context, in *MasterPingReques
 
 func (c *masterGrpcServiceClient) Shutdown(ctx context.Context, in *MasterShutdownRequest, opts ...grpc.CallOption) (*MasterShutdownResponse, error) {
 	out := new(MasterShutdownResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/Shutdown", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/Shutdown", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (c *masterGrpcServiceClient) Shutdown(ctx context.Context, in *MasterShutdo
 
 func (c *masterGrpcServiceClient) RegisterSlave(ctx context.Context, in *MasterRegisterSlaveRequest, opts ...grpc.CallOption) (*MasterRegisterSlaveResponse, error) {
 	out := new(MasterRegisterSlaveResponse)
-	err := c.cc.Invoke(ctx, "/master.MasterGrpcService/RegisterSlave", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.MasterGrpcService/RegisterSlave", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func _MasterGrpcService_Get_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Get",
+		FullMethod: "/cluster.MasterGrpcService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Get(ctx, req.(*MasterGetRequest))
@@ -224,7 +224,7 @@ func _MasterGrpcService_Set_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Set",
+		FullMethod: "/cluster.MasterGrpcService/Set",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Set(ctx, req.(*MasterSetRequest))
@@ -242,7 +242,7 @@ func _MasterGrpcService_Del_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Del",
+		FullMethod: "/cluster.MasterGrpcService/Del",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Del(ctx, req.(*MasterDelRequest))
@@ -260,7 +260,7 @@ func _MasterGrpcService_Keys_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Keys",
+		FullMethod: "/cluster.MasterGrpcService/Keys",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Keys(ctx, req.(*MasterKeysRequest))
@@ -278,7 +278,7 @@ func _MasterGrpcService_Scan_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Scan",
+		FullMethod: "/cluster.MasterGrpcService/Scan",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Scan(ctx, req.(*MasterScanRequest))
@@ -296,7 +296,7 @@ func _MasterGrpcService_Expire_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Expire",
+		FullMethod: "/cluster.MasterGrpcService/Expire",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Expire(ctx, req.(*MasterExpireRequest))
@@ -314,7 +314,7 @@ func _MasterGrpcService_TTL_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/TTL",
+		FullMethod: "/cluster.MasterGrpcService/TTL",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).TTL(ctx, req.(*MasterTTLRequest))
@@ -332,7 +332,7 @@ func _MasterGrpcService_Ping_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Ping",
+		FullMethod: "/cluster.MasterGrpcService/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Ping(ctx, req.(*MasterPingRequest))
@@ -350,7 +350,7 @@ func _MasterGrpcService_Shutdown_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/Shutdown",
+		FullMethod: "/cluster.MasterGrpcService/Shutdown",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).Shutdown(ctx, req.(*MasterShutdownRequest))
@@ -368,7 +368,7 @@ func _MasterGrpcService_RegisterSlave_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/master.MasterGrpcService/RegisterSlave",
+		FullMethod: "/cluster.MasterGrpcService/RegisterSlave",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MasterGrpcServiceServer).RegisterSlave(ctx, req.(*MasterRegisterSlaveRequest))
@@ -380,7 +380,7 @@ func _MasterGrpcService_RegisterSlave_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MasterGrpcService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "master.MasterGrpcService",
+	ServiceName: "cluster.MasterGrpcService",
 	HandlerType: (*MasterGrpcServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

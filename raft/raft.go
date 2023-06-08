@@ -1,10 +1,11 @@
-package master
+package cluster
 
 import (
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/qishenonly/flydb"
 	"github.com/qishenonly/flydb/lib/dirtree"
+	"github.com/qishenonly/flydb/lib/proto"
 	"strconv"
 )
 
@@ -33,6 +34,8 @@ type Cluster struct {
 }
 
 type Master struct {
+	//grpc server
+	proto.MasterGrpcServiceServer
 	//ID
 	ID string
 	//Addr
@@ -55,6 +58,8 @@ type Master struct {
 }
 
 type Slave struct {
+	//grpc server
+	proto.SlaveGrpcServiceServer
 	//ID
 	ID string
 	//Addr
@@ -130,7 +135,7 @@ func (c *Cluster) startSlaves() {
 		//向master注册
 		s.RegisterToMaster()
 		//发起心跳
-		go s.Heartbeat()
+		go s.SendHeartbeat()
 		//监听leader变化
 		go s.ListenLeader()
 	}

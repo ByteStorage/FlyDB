@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package master;
+package cluster;
 option go_package = 	"flydb/lib/proto";
 
 service MasterGrpcService {

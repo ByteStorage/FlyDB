@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package slave;
+package cluster;
 option go_package = 	"flydb/lib/proto";
 
 service SlaveGrpcService {

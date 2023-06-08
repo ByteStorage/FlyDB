@@ -42,7 +42,7 @@ func NewSlaveGrpcServiceClient(cc grpc.ClientConnInterface) SlaveGrpcServiceClie
 
 func (c *slaveGrpcServiceClient) Get(ctx context.Context, in *SlaveGetRequest, opts ...grpc.CallOption) (*SlaveGetResponse, error) {
 	out := new(SlaveGetResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *slaveGrpcServiceClient) Get(ctx context.Context, in *SlaveGetRequest, o
 
 func (c *slaveGrpcServiceClient) Set(ctx context.Context, in *SlaveSetRequest, opts ...grpc.CallOption) (*SlaveSetResponse, error) {
 	out := new(SlaveSetResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Set", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Set", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (c *slaveGrpcServiceClient) Set(ctx context.Context, in *SlaveSetRequest, o
 
 func (c *slaveGrpcServiceClient) Del(ctx context.Context, in *SlaveDelRequest, opts ...grpc.CallOption) (*SlaveDelResponse, error) {
 	out := new(SlaveDelResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Del", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Del", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (c *slaveGrpcServiceClient) Del(ctx context.Context, in *SlaveDelRequest, o
 
 func (c *slaveGrpcServiceClient) Keys(ctx context.Context, in *SlaveKeysRequest, opts ...grpc.CallOption) (*SlaveKeysResponse, error) {
 	out := new(SlaveKeysResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Keys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Keys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *slaveGrpcServiceClient) Keys(ctx context.Context, in *SlaveKeysRequest,
 
 func (c *slaveGrpcServiceClient) Exists(ctx context.Context, in *SlaveExistsRequest, opts ...grpc.CallOption) (*SlaveExistsResponse, error) {
 	out := new(SlaveExistsResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Exists", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Exists", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *slaveGrpcServiceClient) Exists(ctx context.Context, in *SlaveExistsRequ
 
 func (c *slaveGrpcServiceClient) Expire(ctx context.Context, in *SlaveExpireRequest, opts ...grpc.CallOption) (*SlaveExpireResponse, error) {
 	out := new(SlaveExpireResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Expire", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Expire", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (c *slaveGrpcServiceClient) Expire(ctx context.Context, in *SlaveExpireRequ
 
 func (c *slaveGrpcServiceClient) TTL(ctx context.Context, in *SlaveTTLRequest, opts ...grpc.CallOption) (*SlaveTTLResponse, error) {
 	out := new(SlaveTTLResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/TTL", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/TTL", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *slaveGrpcServiceClient) TTL(ctx context.Context, in *SlaveTTLRequest, o
 
 func (c *slaveGrpcServiceClient) Heartbeat(ctx context.Context, in *SlaveHeartbeatRequest, opts ...grpc.CallOption) (*SlaveHeartbeatResponse, error) {
 	out := new(SlaveHeartbeatResponse)
-	err := c.cc.Invoke(ctx, "/slave.SlaveGrpcService/Heartbeat", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cluster.SlaveGrpcService/Heartbeat", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func _SlaveGrpcService_Get_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Get",
+		FullMethod: "/cluster.SlaveGrpcService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Get(ctx, req.(*SlaveGetRequest))
@@ -196,7 +196,7 @@ func _SlaveGrpcService_Set_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Set",
+		FullMethod: "/cluster.SlaveGrpcService/Set",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Set(ctx, req.(*SlaveSetRequest))
@@ -214,7 +214,7 @@ func _SlaveGrpcService_Del_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Del",
+		FullMethod: "/cluster.SlaveGrpcService/Del",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Del(ctx, req.(*SlaveDelRequest))
@@ -232,7 +232,7 @@ func _SlaveGrpcService_Keys_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Keys",
+		FullMethod: "/cluster.SlaveGrpcService/Keys",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Keys(ctx, req.(*SlaveKeysRequest))
@@ -250,7 +250,7 @@ func _SlaveGrpcService_Exists_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Exists",
+		FullMethod: "/cluster.SlaveGrpcService/Exists",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Exists(ctx, req.(*SlaveExistsRequest))
@@ -268,7 +268,7 @@ func _SlaveGrpcService_Expire_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Expire",
+		FullMethod: "/cluster.SlaveGrpcService/Expire",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Expire(ctx, req.(*SlaveExpireRequest))
@@ -286,7 +286,7 @@ func _SlaveGrpcService_TTL_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/TTL",
+		FullMethod: "/cluster.SlaveGrpcService/TTL",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).TTL(ctx, req.(*SlaveTTLRequest))
@@ -304,7 +304,7 @@ func _SlaveGrpcService_Heartbeat_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/slave.SlaveGrpcService/Heartbeat",
+		FullMethod: "/cluster.SlaveGrpcService/Heartbeat",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SlaveGrpcServiceServer).Heartbeat(ctx, req.(*SlaveHeartbeatRequest))
@@ -316,7 +316,7 @@ func _SlaveGrpcService_Heartbeat_Handler(srv interface{}, ctx context.Context, d
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SlaveGrpcService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "slave.SlaveGrpcService",
+	ServiceName: "cluster.SlaveGrpcService",
 	HandlerType: (*SlaveGrpcServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
