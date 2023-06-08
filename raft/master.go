@@ -3,6 +3,13 @@ package cluster
 import (
 	"context"
 	"github.com/qishenonly/flydb/lib/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -34,7 +41,23 @@ func (m *Master) NewRaft() {
 }
 
 func (m *Master) StartGrpcServer() {
+	listener, err := net.Listen("tcp", m.Addr)
+	if err != nil {
+		panic(err)
+	}
+	server := grpc.NewServer()
+	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
+	go func() {
+		err := server.Serve(listener)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	// graceful shutdown
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
 
+	<-sig
 }
 
 func (m *Master) ListenRequest() {
