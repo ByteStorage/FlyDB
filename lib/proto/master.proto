@@ -1,99 +1,99 @@
 syntax = "proto3";
 
-package master;
+package cluster;
 option go_package = 	"flydb/lib/proto";
 
 service MasterGrpcService {
-  rpc Get(GetRequest) returns (GetResponse) {}
-  rpc Set(SetRequest) returns (SetResponse) {}
-  rpc Del(DelRequest) returns (DelResponse) {}
-  rpc Keys(KeysRequest) returns (KeysResponse) {}
-  rpc Scan(ScanRequest) returns (ScanResponse) {}
-  rpc Expire(ExpireRequest) returns (ExpireResponse) {}
-  rpc TTL(TTLRequest) returns (TTLResponse) {}
-  rpc Ping(PingRequest) returns (PingResponse) {}
-  rpc Shutdown(ShutdownRequest) returns (ShutdownResponse) {}
-  rpc RegisterSlave(RegisterSlaveRequest) returns (RegisterSlaveResponse) {}
+  rpc Get(MasterGetRequest) returns (MasterGetResponse) {}
+  rpc Set(MasterSetRequest) returns (MasterSetResponse) {}
+  rpc Del(MasterDelRequest) returns (MasterDelResponse) {}
+  rpc Keys(MasterKeysRequest) returns (MasterKeysResponse) {}
+  rpc Scan(MasterScanRequest) returns (MasterScanResponse) {}
+  rpc Expire(MasterExpireRequest) returns (MasterExpireResponse) {}
+  rpc TTL(MasterTTLRequest) returns (MasterTTLResponse) {}
+  rpc Ping(MasterPingRequest) returns (MasterPingResponse) {}
+  rpc Shutdown(MasterShutdownRequest) returns (MasterShutdownResponse) {}
+  rpc RegisterSlave(MasterRegisterSlaveRequest) returns (MasterRegisterSlaveResponse) {}
 }
 
-message RegisterSlaveRequest {
+message MasterRegisterSlaveRequest {
   string addr = 1;
 }
 
-message RegisterSlaveResponse {
+message MasterRegisterSlaveResponse {
   bool ok = 1;
 }
 
-message GetRequest {
+message MasterGetRequest {
   string key = 1;
 }
 
-message GetResponse {
+message MasterGetResponse {
   string value = 1;
 }
 
-message SetRequest {
+message MasterSetRequest {
   string key = 1;
   string value = 2;
 }
 
-message SetResponse {
+message MasterSetResponse {
   bool ok = 1;
 }
 
-message DelRequest {
+message MasterDelRequest {
   string key = 1;
 }
 
-message DelResponse {
+message MasterDelResponse {
   bool ok = 1;
 }
 
-message KeysRequest {
+message MasterKeysRequest {
   string pattern = 1;
 }
 
-message KeysResponse {
+message MasterKeysResponse {
   repeated string keys = 1;
 }
 
-message ScanRequest {
+message MasterScanRequest {
   string pattern = 1;
 }
 
-message ScanResponse {
+message MasterScanResponse {
   repeated string keys = 1;
 }
 
-message ExpireRequest {
+message MasterExpireRequest {
   string key = 1;
   int64 ttl = 2;
 }
 
-message ExpireResponse {
+message MasterExpireResponse {
   bool ok = 1;
 }
 
-message TTLRequest {
+message MasterTTLRequest {
   string key = 1;
 }
 
-message TTLResponse {
+message MasterTTLResponse {
   int64 ttl = 1;
 }
 
-message PingRequest {
+message MasterPingRequest {
   string message = 1;
 }
 
-message PingResponse {
+message MasterPingResponse {
   string message = 1;
 }
 
-message ShutdownRequest {
+message MasterShutdownRequest {
   string message = 1;
 }
 
-message ShutdownResponse {
+message MasterShutdownResponse {
   string message = 1;
 }

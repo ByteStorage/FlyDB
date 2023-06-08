@@ -1,81 +1,81 @@
 syntax = "proto3";
 
-package slave;
+package cluster;
 option go_package = 	"flydb/lib/proto";
 
 service SlaveGrpcService {
-  rpc Get(GetRequest) returns (GetResponse) {}
-  rpc Set(SetRequest) returns (SetResponse) {}
-  rpc Del(DelRequest) returns (DelResponse) {}
-  rpc Keys(KeysRequest) returns (KeysResponse) {}
-  rpc Exists(ExistsRequest) returns (ExistsResponse) {}
-  rpc Expire(ExpireRequest) returns (ExpireResponse) {}
-  rpc TTL(TTLRequest) returns (TTLResponse) {}
-  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
+  rpc Get(SlaveGetRequest) returns (SlaveGetResponse) {}
+  rpc Set(SlaveSetRequest) returns (SlaveSetResponse) {}
+  rpc Del(SlaveDelRequest) returns (SlaveDelResponse) {}
+  rpc Keys(SlaveKeysRequest) returns (SlaveKeysResponse) {}
+  rpc Exists(SlaveExistsRequest) returns (SlaveExistsResponse) {}
+  rpc Expire(SlaveExpireRequest) returns (SlaveExpireResponse) {}
+  rpc TTL(SlaveTTLRequest) returns (SlaveTTLResponse) {}
+  rpc Heartbeat(SlaveHeartbeatRequest) returns (SlaveHeartbeatResponse) {}
 }
 
-message GetRequest {
+message SlaveGetRequest {
   string key = 1;
 }
 
-message GetResponse {
+message SlaveGetResponse {
   string value = 1;
 }
 
-message SetRequest {
+message SlaveSetRequest {
   string key = 1;
   string value = 2;
 }
 
-message SetResponse {
+message SlaveSetResponse {
   bool ok = 1;
 }
 
-message DelRequest {
+message SlaveDelRequest {
   string key = 1;
 }
 
-message DelResponse {
+message SlaveDelResponse {
   bool ok = 1;
 }
 
-message KeysRequest {
+message SlaveKeysRequest {
   string pattern = 1;
 }
 
-message KeysResponse {
+message SlaveKeysResponse {
   repeated string keys = 1;
 }
 
-message ExistsRequest {
+message SlaveExistsRequest {
   string key = 1;
 }
 
-message ExistsResponse {
+message SlaveExistsResponse {
   bool exists = 1;
 }
 
-message ExpireRequest {
+message SlaveExpireRequest {
   string key = 1;
   int64 ttl = 2;
 }
 
-message ExpireResponse {
+message SlaveExpireResponse {
   bool ok = 1;
 }
 
-message TTLRequest {
+message SlaveTTLRequest {
   string key = 1;
 }
 
-message TTLResponse {
+message SlaveTTLResponse {
   int64 ttl = 1;
 }
 
-message HeartbeatRequest {
+message SlaveHeartbeatRequest {
   string id = 1;
 }
 
-message HeartbeatResponse {
+message SlaveHeartbeatResponse {
   bool ok = 1;
 }
