@@ -53,7 +53,11 @@ func (s *Slave) Set(ctx context.Context, in *proto.SlaveSetRequest) (*proto.Slav
 }
 
 func (s *Slave) Del(ctx context.Context, in *proto.SlaveDelRequest) (*proto.SlaveDelResponse, error) {
-	panic("implement me")
+	err := s.DB.Delete([]byte(in.Key))
+	if err != nil {
+		return &proto.SlaveDelResponse{}, err
+	}
+	return &proto.SlaveDelResponse{Ok: true}, nil
 }
 
 func (s *Slave) Keys(ctx context.Context, in *proto.SlaveKeysRequest) (*proto.SlaveKeysResponse, error) {
