@@ -1,11 +1,12 @@
 package cluster
 
 import (
+	"github.com/ByteStorage/flydb"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/lib/dirtree"
+	"github.com/ByteStorage/flydb/lib/proto"
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
-	"github.com/qishenonly/flydb"
-	"github.com/qishenonly/flydb/lib/dirtree"
-	"github.com/qishenonly/flydb/lib/proto"
 	"strconv"
 )
 
@@ -16,7 +17,7 @@ const (
 	Btree        IndexerType = iota + 1
 )
 
-var DefaultOptions = flydb.Options{
+var DefaultOptions = config.Options{
 	DirPath:      DefaultDbDir,
 	DataFileSize: 256 * 1024 * 1024, // 256MB
 	SyncWrite:    false,

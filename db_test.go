@@ -2,7 +2,8 @@ package flydb
 
 import (
 	"fmt"
-	"github.com/qishenonly/flydb/lib/randkv"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"sync"
@@ -23,7 +24,7 @@ func destroyDB(db *DB) {
 }
 
 func TestNewFlyDB(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb")
 	opts.DirPath = dir
 	db, err := NewFlyDB(opts)
@@ -33,7 +34,7 @@ func TestNewFlyDB(t *testing.T) {
 }
 
 func TestDB_Put(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-put")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -91,7 +92,7 @@ func TestDB_Put(t *testing.T) {
 }
 
 func TestDB_ConcurrentPut(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-ConcurrentPut")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -207,7 +208,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 }
 
 func TestDB_Get(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-get")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -277,7 +278,7 @@ func TestDB_Get(t *testing.T) {
 }
 
 func TestDB_Delete(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-delete")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -329,7 +330,7 @@ func TestDB_Delete(t *testing.T) {
 }
 
 func TestDB_GetListKeys(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-ListKey")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -363,7 +364,7 @@ func TestDB_GetListKeys(t *testing.T) {
 }
 
 func TestDB_Fold(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-fold")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -390,7 +391,7 @@ func TestDB_Fold(t *testing.T) {
 }
 
 func TestDB_Close(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-close")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
@@ -406,7 +407,7 @@ func TestDB_Close(t *testing.T) {
 }
 
 func TestDB_Sync(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-close")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024

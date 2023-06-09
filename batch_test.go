@@ -1,14 +1,15 @@
 package flydb
 
 import (
-	"github.com/qishenonly/flydb/lib/randkv"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
 
 func TestDB_WriteBatch(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-batch-1")
 	opts.DirPath = dir
 	db, err := NewFlyDB(opts)
@@ -17,7 +18,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.NotNil(t, db)
 
 	// 写数据之后不提交
-	wb := db.NewWriteBatch(DefaultWriteBatchOptions)
+	wb := db.NewWriteBatch(config.DefaultWriteBatchOptions)
 	err = wb.Put(randkv.GetTestKey(1), randkv.RandomValue(10))
 	assert.Nil(t, err)
 	err = wb.Delete(randkv.GetTestKey(2))
@@ -34,7 +35,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.NotNil(t, val)
 	assert.Nil(t, err)
 
-	wb2 := db.NewWriteBatch(DefaultWriteBatchOptions)
+	wb2 := db.NewWriteBatch(config.DefaultWriteBatchOptions)
 	err = wb2.Delete(randkv.GetTestKey(1))
 	assert.Nil(t, err)
 	err = wb2.Commit()
@@ -45,7 +46,7 @@ func TestDB_WriteBatch(t *testing.T) {
 }
 
 func TestDB_WriteBatchRestart(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-batch-2")
 	opts.DirPath = dir
 	db, err := NewFlyDB(opts)
@@ -56,7 +57,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	err = db.Put(randkv.GetTestKey(1), randkv.RandomValue(10))
 	assert.Nil(t, err)
 
-	wb := db.NewWriteBatch(DefaultWriteBatchOptions)
+	wb := db.NewWriteBatch(config.DefaultWriteBatchOptions)
 	err = wb.Put(randkv.GetTestKey(2), randkv.RandomValue(10))
 	assert.Nil(t, err)
 	err = wb.Delete(randkv.GetTestKey(1))
@@ -85,7 +86,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 }
 
 func TestDB_WriteBatch1(t *testing.T) {
-	opts := DefaultOptions
+	opts := config.DefaultOptions
 	dir := "/tmp/batch-3"
 	opts.DirPath = dir
 	db, err := NewFlyDB(opts)
@@ -93,7 +94,7 @@ func TestDB_WriteBatch1(t *testing.T) {
 	assert.NotNil(t, db)
 
 	// 批量提交中间手动停止
-	wbopt := DefaultWriteBatchOptions
+	wbopt := config.DefaultWriteBatchOptions
 	wbopt.MaxBatchNum = 1000000
 	wb := db.NewWriteBatch(wbopt)
 	for i := 0; i < 500000; i++ {

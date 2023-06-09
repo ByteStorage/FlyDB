@@ -1,27 +1,28 @@
 package flydb
 
 import (
-	"github.com/qishenonly/flydb/lib/randkv"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
 
 func TestDB_NewIterator(t *testing.T) {
-	opt := DefaultOptions
+	opt := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-1")
 	opt.DirPath = dir
 	db, err := NewFlyDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	iterator := db.NewIterator(DefaultIteratorOptions)
+	iterator := db.NewIterator(config.DefaultIteratorOptions)
 	assert.NotNil(t, iterator)
 	assert.Equal(t, false, iterator.Valid())
 }
 
 func TestDB_Iterator_One_Value(t *testing.T) {
-	opt := DefaultOptions
+	opt := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-2")
 	opt.DirPath = dir
 	db, err := NewFlyDB(opt)
@@ -31,7 +32,7 @@ func TestDB_Iterator_One_Value(t *testing.T) {
 	err = db.Put(randkv.GetTestKey(10), randkv.GetTestKey(10))
 	assert.Nil(t, err)
 
-	iterator := db.NewIterator(DefaultIteratorOptions)
+	iterator := db.NewIterator(config.DefaultIteratorOptions)
 	assert.NotNil(t, iterator)
 	assert.True(t, iterator.Valid())
 	assert.Equal(t, randkv.GetTestKey(10), iterator.Key())
@@ -40,7 +41,7 @@ func TestDB_Iterator_One_Value(t *testing.T) {
 }
 
 func TestDB_Iterator_Multi_Value(t *testing.T) {
-	opt := DefaultOptions
+	opt := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-3")
 	opt.DirPath = dir
 	db, err := NewFlyDB(opt)
@@ -59,7 +60,7 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 正向迭代
-	itertor1 := db.NewIterator(DefaultIteratorOptions)
+	itertor1 := db.NewIterator(config.DefaultIteratorOptions)
 	for itertor1.Rewind(); itertor1.Valid(); itertor1.Next() {
 		assert.NotNil(t, itertor1.Key())
 	}
@@ -70,7 +71,7 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	}
 
 	// 反向迭代
-	iterOpt2 := DefaultIteratorOptions
+	iterOpt2 := config.DefaultIteratorOptions
 	iterOpt2.Reverse = true
 	itertor2 := db.NewIterator(iterOpt2)
 	for itertor2.Rewind(); itertor2.Valid(); itertor2.Next() {
@@ -83,7 +84,7 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	}
 
 	// 指定 prefix
-	iterOpt3 := DefaultIteratorOptions
+	iterOpt3 := config.DefaultIteratorOptions
 	iterOpt3.Prefix = []byte("ae")
 	itertor3 := db.NewIterator(iterOpt3)
 	for itertor3.Rewind(); itertor3.Valid(); itertor3.Next() {

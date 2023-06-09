@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"github.com/qishenonly/flydb/fio"
+	"github.com/ByteStorage/flydb/fio"
 	"hash/crc32"
 	"io"
 	"path/filepath"

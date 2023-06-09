@@ -3,7 +3,7 @@ package tcp
 import (
 	"context"
 	"fmt"
-	"github.com/qishenonly/flydb/protocol/tcpIF"
+	"github.com/ByteStorage/flydb/protocol/tcpIF"
 	"net"
 )
 
