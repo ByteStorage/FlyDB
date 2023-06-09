@@ -26,13 +26,11 @@ func (i *Impl) Close() error {
 }
 
 func (i *Impl) IsLeader() bool {
-	//TODO implement me
-	panic("implement me")
+	return i.m.Raft.State() == raft.Leader
 }
 
 func (i *Impl) IsCandidate() bool {
-	//TODO implement me
-	panic("implement me")
+	return i.m.Raft.State() == raft.Candidate
 }
 
 func (i *Impl) Leader() string {
