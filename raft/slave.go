@@ -48,7 +48,7 @@ func (s *Slave) Get(ctx context.Context, in *proto.SlaveGetRequest) (*proto.Slav
 
 	val, err := s.DB.Get([]byte(in.Key))
 	if err != nil {
-		return nil, err
+		return &proto.SlaveGetResponse{}, err
 	}
 	return &proto.SlaveGetResponse{Value: string(val)}, nil
 }
@@ -56,7 +56,7 @@ func (s *Slave) Get(ctx context.Context, in *proto.SlaveGetRequest) (*proto.Slav
 func (s *Slave) Set(ctx context.Context, in *proto.SlaveSetRequest) (*proto.SlaveSetResponse, error) {
 	err := s.DB.Put([]byte(in.Key), []byte(in.Value))
 	if err != nil {
-		return nil, err
+		return &proto.SlaveSetResponse{}, err
 	}
 	return &proto.SlaveSetResponse{Ok: true}, nil
 }
@@ -64,7 +64,7 @@ func (s *Slave) Set(ctx context.Context, in *proto.SlaveSetRequest) (*proto.Slav
 func (s *Slave) Del(ctx context.Context, in *proto.SlaveDelRequest) (*proto.SlaveDelResponse, error) {
 	err := s.DB.Delete([]byte(in.Key))
 	if err != nil {
-		return nil, err
+		return &proto.SlaveDelResponse{}, err
 	}
 	return &proto.SlaveDelResponse{Ok: true}, nil
 }
@@ -89,6 +89,7 @@ func (s *Slave) Exists(ctx context.Context, in *proto.SlaveExistsRequest) (*prot
 
 func (s *Slave) Expire(ctx context.Context, in *proto.SlaveExpireRequest) (*proto.SlaveExpireResponse, error) {
 	panic("implement me")
+
 }
 
 func (s *Slave) TTL(ctx context.Context, in *proto.SlaveTTLRequest) (*proto.SlaveTTLResponse, error) {
