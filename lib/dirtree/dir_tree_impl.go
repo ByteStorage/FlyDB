@@ -18,15 +18,6 @@ var _ DirTreeInterface = &DirTree{}
 	而不需要维护节点与文件的映射关系，这里DirTree只是写了个简单的目录树，可以找找有没有优化的目录树
 */
 
-func NewDirTree() *DirTree {
-	return &DirTree{
-		Root: &DirTreeNode{
-			Name:     "/",
-			Children: nil,
-		},
-	}
-}
-
 // DirTree is a struct that represents a directory tree
 type DirTree struct {
 	// Root is the root node of the directory tree
@@ -59,13 +50,51 @@ func NewDirTree() *DirTree {
 }
 
 func (d *DirTree) InsertFile(path string) bool {
-	//TODO implement me
-	panic("implement me")
+	// the file maybe already exists
+	if _, ok := d.NodeMap[path]; ok {
+		return false
+	}
+
+	components := splitPath(path)
+
+	parentPath := filepath.Dir(path)
+
+	// get the parent node of the file
+	parentNode, ok := d.NodeMap[parentPath]
+	if !ok {
+		// the directory of this file maybe not exists, so create directories
+		d.MkDir(filepath.Join(components[:len(components)-1]...))
+		parentNode = d.NodeMap[parentPath]
+	}
+
+	fileName := "/" + components[len(components)-1]
+
+	fileNode := &DirTreeNode{
+		path:     path,
+		name:     fileName,
+		children: nil,
+		isDir:    false,
+	}
+
+	parentNode.children[fileName] = fileNode
+	d.NodeMap[path] = fileNode
+
+	return true
 }
 
-func (d *DirTree) DeleteFile(filename string) bool {
-	//TODO implement me
-	panic("implement me")
+func (d *DirTree) DeleteFile(path string) bool {
+	if _, ok := d.NodeMap[path]; !ok {
+		return false
+	}
+
+	components := splitPath(path)
+	fileName := "/" + components[len(components)-1]
+
+	parentNode := d.findParentNode(path)
+	delete(parentNode.children, fileName)
+	delete(d.NodeMap, path)
+
+	return true
 }
 
 func (d *DirTree) DeleteDir(path string) bool {
