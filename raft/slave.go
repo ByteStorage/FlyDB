@@ -45,11 +45,20 @@ func (s *Slave) ListenLeader() {
 }
 
 func (s *Slave) Get(ctx context.Context, in *proto.SlaveGetRequest) (*proto.SlaveGetResponse, error) {
-	panic("implement me")
+
+	val, err := s.DB.Get([]byte(in.Key))
+	if err != nil {
+		return &proto.SlaveGetResponse{}, err
+	}
+	return &proto.SlaveGetResponse{Value: string(val)}, nil
 }
 
 func (s *Slave) Set(ctx context.Context, in *proto.SlaveSetRequest) (*proto.SlaveSetResponse, error) {
-	panic("implement me")
+	err := s.DB.Put([]byte(in.Key), []byte(in.Value))
+	if err != nil {
+		return &proto.SlaveSetResponse{}, err
+	}
+	return &proto.SlaveSetResponse{Ok: true}, nil
 }
 
 func (s *Slave) Del(ctx context.Context, in *proto.SlaveDelRequest) (*proto.SlaveDelResponse, error) {
@@ -61,15 +70,26 @@ func (s *Slave) Del(ctx context.Context, in *proto.SlaveDelRequest) (*proto.Slav
 }
 
 func (s *Slave) Keys(ctx context.Context, in *proto.SlaveKeysRequest) (*proto.SlaveKeysResponse, error) {
-	panic("implement me")
+	list := s.DB.GetListKeys()
+	keys := make([]string, len(list))
+	for i, bytes := range list {
+		keys[i] = string(bytes)
+	}
+	return &proto.SlaveKeysResponse{Keys: keys}, nil
+
 }
 
 func (s *Slave) Exists(ctx context.Context, in *proto.SlaveExistsRequest) (*proto.SlaveExistsResponse, error) {
-	panic("implement me")
+	_, err := s.Get(ctx, &proto.SlaveGetRequest{Key: in.Key})
+	if err != nil {
+		return &proto.SlaveExistsResponse{Exists: false}, err
+	}
+	return &proto.SlaveExistsResponse{Exists: true}, nil
 }
 
 func (s *Slave) Expire(ctx context.Context, in *proto.SlaveExpireRequest) (*proto.SlaveExpireResponse, error) {
 	panic("implement me")
+
 }
 
 func (s *Slave) TTL(ctx context.Context, in *proto.SlaveTTLRequest) (*proto.SlaveTTLResponse, error) {
