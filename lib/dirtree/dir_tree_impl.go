@@ -2,6 +2,7 @@ package dirtree
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -20,22 +21,31 @@ var _ DirTreeInterface = &DirTree{}
 // DirTree is a struct that represents a directory tree
 type DirTree struct {
 	// Root is the root node of the directory tree
-	Root *DirTreeNode
+	Root    *DirTreeNode
+	NodeMap map[string]*DirTreeNode // quickly find node when deleting
 }
 
 // DirTreeNode is a struct that represents a directory tree node
 type DirTreeNode struct {
-	Name     string
-	Children []*DirTreeNode
+	path     string
+	name     string
+	children map[string]*DirTreeNode
+	isDir    bool
 }
 
 // NewDirTree Creates a new instance of DirTree
 func NewDirTree() *DirTree {
+	nodeMap := make(map[string]*DirTreeNode)
+	root := &DirTreeNode{
+		path:     "/",
+		name:     "/",
+		children: make(map[string]*DirTreeNode),
+		isDir:    true,
+	}
+	nodeMap[root.name] = root
 	return &DirTree{
-		Root: &DirTreeNode{
-			Name:     "/",
-			Children: nil,
-		},
+		Root:    root,
+		NodeMap: nodeMap,
 	}
 }
 
@@ -50,8 +60,27 @@ func (d *DirTree) DeleteFile(filename string) bool {
 }
 
 func (d *DirTree) DeleteDir(path string) bool {
-	//TODO implement me
-	panic("implement me")
+	node, ok := d.NodeMap[path] // find nodes directly from nodeMap, avoiding recursion overhead
+	if !ok {
+		return false // directory not found
+	}
+
+	if !node.isDir {
+		return false // this is not a path to a directory
+	}
+
+	// recursively delete child nodes
+	for name, child := range node.children {
+		d.deleteNode(child)
+		delete(node.children, name)
+	}
+
+	parentNode := d.findParentNode(path)
+
+	delete(parentNode.children, node.name)
+	delete(d.NodeMap, node.path)
+
+	return true
 }
 
 // MkDir Inserts a new DirTreeNode into the DirTree
@@ -61,16 +90,23 @@ func (d *DirTree) MkDir(path string) bool {
 
 	curNode := d.Root
 
-	for _, component := range components {
-		child := findChildByName(curNode.Children, component)
+	for i, component := range components {
+		component = "/" + component
+		child, ok := curNode.children[component]
 		// if the current component does not exist, create a new one
-		if child == nil {
+		if !ok {
+			nodePath := "/" + filepath.Join(components[:i+1]...)
+
 			newNode := &DirTreeNode{
-				Name:     component,
-				Children: nil,
+				path:     nodePath,
+				name:     component,
+				children: make(map[string]*DirTreeNode),
+				isDir:    true,
 			}
-			curNode.Children = append(curNode.Children, newNode)
+			curNode.children[component] = newNode
 			curNode = newNode
+
+			d.NodeMap[nodePath] = newNode
 		} else {
 			// otherwise go to the next level
 			curNode = child
@@ -80,13 +116,23 @@ func (d *DirTree) MkDir(path string) bool {
 	return true
 }
 
-func findChildByName(nodes []*DirTreeNode, name string) *DirTreeNode {
-	for _, node := range nodes {
-		if node.Name == name {
-			return node
+func (d *DirTree) deleteNode(node *DirTreeNode) {
+	if !node.isDir {
+		// Delete file node
+		delete(d.NodeMap, node.path)
+	} else {
+		// Delete directory node and its descendants
+		for name, child := range node.children {
+			d.deleteNode(child)
+			delete(node.children, name)
 		}
+		delete(d.NodeMap, node.path)
 	}
-	return nil
+}
+
+func (d *DirTree) findParentNode(path string) *DirTreeNode {
+	parentPath := filepath.Dir(path)
+	return d.NodeMap[parentPath]
 }
 
 func splitPath(path string) []string {
@@ -115,11 +161,13 @@ func debugDirTree(node *DirTreeNode, indent string, isLastChild bool) {
 		indent += "│  "
 	}
 
-	fmt.Println(node.Name)
+	fmt.Println(node.name)
 
-	childCount := len(node.Children)
-	for i, child := range node.Children {
+	childCount := len(node.children)
+	i := 0
+	for _, child := range node.children {
 		isLast := i == childCount-1
 		debugDirTree(child, indent, isLast)
+		i++
 	}
 }
