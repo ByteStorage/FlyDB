@@ -1,9 +1,10 @@
 // CopyRight: qishen
 // Created by qishen on 2023/4/1
 
-package flydb
+package engine
 
 import (
+	"github.com/ByteStorage/flydb"
 	"github.com/ByteStorage/flydb/config"
 	"github.com/ByteStorage/flydb/data"
 	"github.com/ByteStorage/flydb/index"
@@ -29,8 +30,8 @@ type DB struct {
 	isMerging  bool                      // Whether are merging
 }
 
-// NewFlyDB open a new db instance
-func NewFlyDB(options config.Options) (*DB, error) {
+// NewDB open a new db instance
+func NewDB(options config.Options) (*DB, error) {
 	zap.L().Info("open db", zap.Any("options", options))
 	// check options first
 	if err := checkOptions(options); err != nil {
@@ -73,6 +74,16 @@ func NewFlyDB(options config.Options) (*DB, error) {
 	}
 
 	return db, nil
+}
+
+func checkOptions(options config.Options) error {
+	if options.DirPath == "" {
+		return flydb.ErrOptionDirPathIsEmpty
+	}
+	if options.DataFileSize <= 0 {
+		return flydb.ErrOptionDataFileSizeNotPositive
+	}
+	return nil
 }
 
 // NewFlyDbCluster create a new db cluster
@@ -119,7 +130,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 	zap.L().Info("put", zap.ByteString("key", key), zap.ByteString("value", value))
 	// check key
 	if len(key) == 0 {
-		return ErrKeyIsEmpty
+		return flydb.ErrKeyIsEmpty
 	}
 
 	// check LogRecord
@@ -137,7 +148,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 
 	// update index
 	if ok := db.index.Put(key, pos); !ok {
-		return ErrIndexUpdateFailed
+		return flydb.ErrIndexUpdateFailed
 	}
 
 	return nil
@@ -223,14 +234,14 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 
 	// Determine the validity of the key
 	if len(key) == 0 {
-		return nil, ErrKeyIsEmpty
+		return nil, flydb.ErrKeyIsEmpty
 	}
 
 	// Retrieves the index of the key from the memory data structure
 	logRecordPst := db.index.Get(key)
 	// If key is not in the memory index, it does not exist
 	if logRecordPst == nil {
-		return nil, ErrKeyNotFound
+		return nil, flydb.ErrKeyNotFound
 	}
 
 	// Gets the value from the data file
@@ -281,7 +292,7 @@ func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error
 
 	// The data file is empty
 	if dataFile == nil {
-		return nil, ErrDataFailNotFound
+		return nil, flydb.ErrDataFailNotFound
 	}
 
 	// The corresponding data is read according to the offset
@@ -290,7 +301,7 @@ func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error
 		return nil, nil
 	}
 	if logRecord.Type == data.LogRecordDeleted {
-		return nil, ErrKeyNotFound
+		return nil, flydb.ErrKeyNotFound
 	}
 
 	return logRecord.Value, nil
@@ -301,7 +312,7 @@ func (db *DB) Delete(key []byte) error {
 
 	// Determine the validity of the key
 	if len(key) == 0 {
-		return ErrKeyIsEmpty
+		return flydb.ErrKeyIsEmpty
 	}
 
 	// Check whether the key exists. If it does not exist, return it
@@ -324,17 +335,7 @@ func (db *DB) Delete(key []byte) error {
 	// Removes key from memory index
 	ok := db.index.Delete(key)
 	if !ok {
-		return ErrIndexUpdateFailed
-	}
-	return nil
-}
-
-func checkOptions(options config.Options) error {
-	if options.DirPath == "" {
-		return ErrOptionDirPathIsEmpty
-	}
-	if options.DataFileSize <= 0 {
-		return ErrOptionDataFileSizeNotPositive
+		return flydb.ErrIndexUpdateFailed
 	}
 	return nil
 }
@@ -354,7 +355,7 @@ func (db *DB) loadDataFiles() error {
 			fileID, err := strconv.Atoi(splitNames[0])
 			// The data directory may be corrupted
 			if err != nil {
-				return ErrDataDirectoryCorrupted
+				return flydb.ErrDataDirectoryCorrupted
 			}
 
 			fileIds = append(fileIds, fileID)
@@ -412,7 +413,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 			ok = db.index.Put(key, pst)
 		}
 		if !ok {
-			panic(ErrIndexUpdateFailed)
+			panic(flydb.ErrIndexUpdateFailed)
 		}
 	}
 

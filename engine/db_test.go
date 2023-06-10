@@ -1,7 +1,8 @@
-package flydb
+package engine
 
 import (
 	"fmt"
+	"github.com/ByteStorage/flydb"
 	"github.com/ByteStorage/flydb/config"
 	"github.com/ByteStorage/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,7 @@ func TestNewFlyDB(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb")
 	opts.DirPath = dir
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -38,7 +39,7 @@ func TestDB_Put(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-put")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -59,7 +60,7 @@ func TestDB_Put(t *testing.T) {
 
 	// 3.key 为空
 	err = db.Put(nil, randkv.RandomValue(24))
-	assert.Equal(t, ErrKeyIsEmpty, err)
+	assert.Equal(t, flydb.ErrKeyIsEmpty, err)
 
 	// 4.value 为空
 	err = db.Put(randkv.GetTestKey(22), nil)
@@ -80,7 +81,7 @@ func TestDB_Put(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := NewFlyDB(opts)
+	db2, err := NewDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db2)
 	val4 := randkv.RandomValue(128)
@@ -96,7 +97,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-ConcurrentPut")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -175,7 +176,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := NewFlyDB(opts)
+	db2, err := NewDB(opts)
 
 	val1, err := db2.Get(randkv.GetTestKey(1))
 	assert.Nil(t, err)
@@ -212,7 +213,7 @@ func TestDB_Get(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-get")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -227,7 +228,7 @@ func TestDB_Get(t *testing.T) {
 	// 2.读取一个不存在的 key
 	val2, err := db.Get([]byte("some key unknown"))
 	assert.Nil(t, val2)
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 
 	// 3.值被重复 Put 后在读取
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(24))
@@ -244,7 +245,7 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 	val4, err := db.Get(randkv.GetTestKey(33))
 	assert.Equal(t, 0, len(val4))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 
 	// 5.转换为了旧的数据文件，从旧的数据文件上获取 value
 	for i := 100; i < 1000000; i++ {
@@ -261,7 +262,7 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := NewFlyDB(opts)
+	db2, err := NewDB(opts)
 	val6, err := db2.Get(randkv.GetTestKey(11))
 	assert.Nil(t, err)
 	assert.NotNil(t, val6)
@@ -274,7 +275,7 @@ func TestDB_Get(t *testing.T) {
 
 	val8, err := db2.Get(randkv.GetTestKey(33))
 	assert.Equal(t, 0, len(val8))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 }
 
 func TestDB_Delete(t *testing.T) {
@@ -282,7 +283,7 @@ func TestDB_Delete(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-delete")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -293,7 +294,7 @@ func TestDB_Delete(t *testing.T) {
 	err = db.Delete(randkv.GetTestKey(11))
 	assert.Nil(t, err)
 	_, err = db.Get(randkv.GetTestKey(11))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 
 	// 2.删除一个不存在的 key
 	err = db.Delete([]byte("unknown key"))
@@ -301,7 +302,7 @@ func TestDB_Delete(t *testing.T) {
 
 	// 3.删除一个空的 key
 	err = db.Delete(nil)
-	assert.Equal(t, ErrKeyIsEmpty, err)
+	assert.Equal(t, flydb.ErrKeyIsEmpty, err)
 
 	// 4.值被删除之后重新 Put
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(128))
@@ -320,9 +321,9 @@ func TestDB_Delete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// 重启数据库
-	db2, err := NewFlyDB(opts)
+	db2, err := NewDB(opts)
 	_, err = db2.Get(randkv.GetTestKey(11))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 
 	val2, err := db2.Get(randkv.GetTestKey(22))
 	assert.Nil(t, err)
@@ -334,7 +335,7 @@ func TestDB_GetListKeys(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-ListKey")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -368,7 +369,7 @@ func TestDB_Fold(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-fold")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -395,7 +396,7 @@ func TestDB_Close(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-close")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -411,7 +412,7 @@ func TestDB_Sync(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-close")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
