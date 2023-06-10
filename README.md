@@ -22,7 +22,7 @@ go get github.com/ByteStorage/flydb
 Or clone this project from github:
 
 ```bash
-git clone https://github.com/ByteStorage/flydb
+git clone https://github.com/ByteStorage/flydb.git
 ```
 
 ## 🚀 How to use FlyDB ?
