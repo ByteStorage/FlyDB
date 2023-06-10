@@ -44,6 +44,10 @@ func (s *Slave) ListenLeader() {
 
 }
 
+func (s *Slave) UpdateSlaveMessage() {
+
+}
+
 func (s *Slave) Get(ctx context.Context, in *proto.SlaveGetRequest) (*proto.SlaveGetResponse, error) {
 
 	val, err := s.DB.Get([]byte(in.Key))

@@ -149,6 +149,8 @@ func (c *Cluster) startSlaves() {
 		go s.SendHeartbeat()
 		//监听leader变化
 		go s.ListenLeader()
+		//更新slave信息
+		go s.UpdateSlaveMessage()
 	}
 
 }
