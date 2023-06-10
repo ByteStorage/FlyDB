@@ -1,9 +1,11 @@
 package tcp
 
 import (
+	"bufio"
 	"context"
-	"github.com/qishenonly/flydb/protocol/tcpIF"
-	"github.com/qishenonly/flydb/sync/boolAm"
+	"fmt"
+	"github.com/ByteStorage/flydb/protocol/tcpIF"
+	"github.com/ByteStorage/flydb/sync/boolAm"
 	"net"
 	"sync"
 )
@@ -15,12 +17,45 @@ type TcpReplyHandler struct {
 	isClosed   boolAm.Boolean
 }
 
-func (t *TcpReplyHandler) Handle(ct context.Context, conn net.Conn) {
-	//TODO implement me
-	panic("implement me")
+// Handle client connection
+func (t *TcpReplyHandler) Handle(ctx context.Context, conn net.Conn) {
+	if t.isClosed.GetBoolAtomic() {
+		_ = conn.Close()
+		return
+	}
+
+	client := &ReplyClient{
+		Conn: conn,
+	}
+	t.activeConn.Store(client, struct{}{})
+
+	reader := bufio.NewReader(conn)
+	for {
+		msg, err := reader.ReadString('\n')
+		if err != nil {
+			if err.Error() == "EOF" {
+				fmt.Println("client close connection")
+				t.activeConn.Delete(client)
+			} else {
+				fmt.Println("read message error: ", err)
+			}
+			return
+		}
+		client.Waiting.Add(1)
+		buf := []byte(msg)
+		_, _ = conn.Write(buf)
+		client.Waiting.Done()
+	}
 }
 
+// Close handler
 func (t *TcpReplyHandler) Close() error {
-	//TODO implement me
-	panic("implement me")
+	fmt.Println("tcp server close")
+	t.isClosed.SetBoolAtomic(true)
+	t.activeConn.Range(func(key, value interface{}) bool {
+		client := key.(*ReplyClient)
+		_ = client.Close()
+		return true
+	})
+	return nil
 }
