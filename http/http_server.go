@@ -2,15 +2,15 @@ package http_handler
 
 import (
 	"encoding/json"
-	"github.com/ByteStorage/flydb"
+	"github.com/ByteStorage/flydb/engine"
 	"net/http"
 )
 
 type HttpHandler struct {
-	*flydb.DB
+	*engine.DB
 }
 
-func NewHttpHandler(DB *flydb.DB) *HttpHandler {
+func NewHttpHandler(DB *engine.DB) *HttpHandler {
 	return &HttpHandler{DB: DB}
 }
 

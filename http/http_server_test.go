@@ -4,18 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/engine"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/ByteStorage/flydb"
 )
 
 func newHttpHandler() (*HttpHandler, error) {
 	options := config.DefaultOptions
 	options.DirPath = "/tmp/flydb"
-	db, err := flydb.NewFlyDB(options)
+	db, err := engine.NewFlyDB(options)
 	if err != nil {
 		return nil, err
 	}

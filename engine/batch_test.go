@@ -1,6 +1,7 @@
-package flydb
+package engine
 
 import (
+	"github.com/ByteStorage/flydb"
 	"github.com/ByteStorage/flydb/config"
 	"github.com/ByteStorage/flydb/lib/randkv"
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-batch-1")
 	opts.DirPath = dir
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -25,7 +26,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = db.Get(randkv.GetTestKey(1))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 
 	// 正常提交数据
 	err = wb.Commit()
@@ -42,14 +43,14 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = db.Get(randkv.GetTestKey(1))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 }
 
 func TestDB_WriteBatchRestart(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-batch-2")
 	opts.DirPath = dir
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
@@ -75,11 +76,11 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	err = db.Close()
 	assert.Nil(t, err)
 
-	db2, err := NewFlyDB(opts)
+	db2, err := NewDB(opts)
 	assert.Nil(t, err)
 
 	_, err = db2.Get(randkv.GetTestKey(1))
-	assert.Equal(t, ErrKeyNotFound, err)
+	assert.Equal(t, flydb.ErrKeyNotFound, err)
 
 	// 判断事务序列号
 	assert.Equal(t, uint64(2), db.transSeqNo)
@@ -89,7 +90,7 @@ func TestDB_WriteBatch1(t *testing.T) {
 	opts := config.DefaultOptions
 	dir := "/tmp/batch-3"
 	opts.DirPath = dir
-	db, err := NewFlyDB(opts)
+	db, err := NewDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 

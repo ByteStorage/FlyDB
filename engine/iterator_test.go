@@ -1,4 +1,4 @@
-package flydb
+package engine
 
 import (
 	"github.com/ByteStorage/flydb/config"
@@ -12,7 +12,7 @@ func TestDB_NewIterator(t *testing.T) {
 	opt := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-1")
 	opt.DirPath = dir
-	db, err := NewFlyDB(opt)
+	db, err := NewDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -25,7 +25,7 @@ func TestDB_Iterator_One_Value(t *testing.T) {
 	opt := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-2")
 	opt.DirPath = dir
-	db, err := NewFlyDB(opt)
+	db, err := NewDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -44,7 +44,7 @@ func TestDB_Iterator_Multi_Value(t *testing.T) {
 	opt := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-iterator-3")
 	opt.DirPath = dir
-	db, err := NewFlyDB(opt)
+	db, err := NewDB(opt)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 

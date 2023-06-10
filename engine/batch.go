@@ -1,7 +1,8 @@
-package flydb
+package engine
 
 import (
 	"encoding/binary"
+	"github.com/ByteStorage/flydb"
 	"github.com/ByteStorage/flydb/config"
 	"github.com/ByteStorage/flydb/data"
 	"sync"
@@ -35,7 +36,7 @@ func (db *DB) NewWriteBatch(opt config.WriteBatchOptions) *WriteBatch {
 // Put Data batch write
 func (wb *WriteBatch) Put(key []byte, value []byte) error {
 	if len(key) == 0 {
-		return ErrKeyIsEmpty
+		return flydb.ErrKeyIsEmpty
 	}
 	wb.lock.Lock()
 	defer wb.lock.Unlock()
@@ -52,7 +53,7 @@ func (wb *WriteBatch) Put(key []byte, value []byte) error {
 // Delete Batch deletion of data
 func (wb *WriteBatch) Delete(key []byte) error {
 	if len(key) == 0 {
-		return ErrKeyIsEmpty
+		return flydb.ErrKeyIsEmpty
 	}
 	wb.lock.Lock()
 	defer wb.lock.Unlock()
@@ -84,7 +85,7 @@ func (wb *WriteBatch) Commit() error {
 		return nil
 	}
 	if uint(len(wb.temporaryDataWrites)) > wb.options.MaxBatchNum {
-		return ErrExceedMaxBatchNum
+		return flydb.ErrExceedMaxBatchNum
 	}
 
 	// Gets the current, most recent transaction sequence number

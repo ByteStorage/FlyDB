@@ -1,8 +1,8 @@
 package cluster
 
 import (
-	"github.com/ByteStorage/flydb"
 	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/engine"
 	"github.com/ByteStorage/flydb/lib/dirtree"
 	"github.com/ByteStorage/flydb/lib/proto"
 	"github.com/hashicorp/raft"
@@ -70,7 +70,7 @@ type Slave struct {
 	//Slave List
 	Peers []string
 	//DB
-	DB *flydb.DB
+	DB *engine.DB
 }
 
 // FSMSnapshot use to store the snapshot of the FSM
@@ -82,7 +82,7 @@ func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
 	masters := make([]Master, len(masterList))
 	slaves := make([]Slave, len(slaveList))
 	for i, slave := range slaveList {
-		db, err := flydb.NewFlyDB(DefaultOptions)
+		db, err := engine.NewDB(DefaultOptions)
 		if err != nil {
 			panic(err)
 		}

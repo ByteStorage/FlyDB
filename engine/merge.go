@@ -1,6 +1,7 @@
-package flydb
+package engine
 
 import (
+	"github.com/ByteStorage/flydb"
 	"github.com/ByteStorage/flydb/data"
 	"io"
 	"os"
@@ -26,7 +27,7 @@ func (db *DB) Merge() error {
 	// 如果 merge 正在进行中，则直接返回
 	if db.isMerging {
 		db.lock.Unlock()
-		return ErrMergeIsProgress
+		return flydb.ErrMergeIsProgress
 	}
 	db.isMerging = true
 	defer func() {
@@ -78,7 +79,7 @@ func (db *DB) Merge() error {
 	mergeOptions := db.options
 	mergeOptions.DirPath = mergePath
 	mergeOptions.SyncWrite = false
-	mergeDB, err := NewFlyDB(mergeOptions)
+	mergeDB, err := NewDB(mergeOptions)
 	if err != nil {
 		return err
 	}
