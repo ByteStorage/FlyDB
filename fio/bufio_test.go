@@ -25,7 +25,6 @@ func TestBufio_Write(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-/*
 func TestBufio_Read(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewBufIOManager(path)
@@ -43,28 +42,27 @@ func TestBufio_Read(t *testing.T) {
 	n, err := fio.Read(b1, 0)
 	assert.Equal(t, 5, n)
 	assert.Equal(t, []byte("key-a"), b1)
-}*/
+}
 
-/*
-	func TestBufio_Read2(t *testing.T) {
-		path := filepath.Join("/tmp", "a.data")
-		fio, err := NewBufIOManager(path)
-		defer destoryFile(path)
+func TestBufio_Read2(t *testing.T) {
+	path := filepath.Join("/tmp", "a.data")
+	fio, err := NewBufIOManager(path)
+	defer destoryFile(path)
 
-		assert.Nil(t, err)
-		assert.NotNil(t, fio)
+	assert.Nil(t, err)
+	assert.NotNil(t, fio)
 
-		_, err = fio.Write([]byte("key-a"))
-		assert.Nil(t, err)
-		_, err = fio.Write([]byte("key-b"))
-		assert.Nil(t, err)
+	_, err = fio.Write([]byte("key-a"))
+	assert.Nil(t, err)
+	_, err = fio.Write([]byte("key-b"))
+	assert.Nil(t, err)
 
-		b1 := make([]byte, 5)
-		n, err := fio.Read(b1, 5)
-		assert.Equal(t, 5, n)
-		assert.Equal(t, []byte("key-b"), b1)
-	}
-*/
+	b1 := make([]byte, 5)
+	n, err := fio.Read(b1, 5)
+	assert.Equal(t, 5, n)
+	assert.Equal(t, []byte("key-b"), b1)
+}
+
 func TestBufio_Write2(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewBufIOManager(path)
