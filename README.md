@@ -40,25 +40,27 @@ import (
 )
 
 func main() {
-    options := flydb.DefaultOptions
+    	options := flydb.DefaultOptions
 	options.DirPath = "/tmp/flydb"
 	db, _ := flydb.NewFlyDB(options)
 
-    err := db.Put([]byte("name"), []byte("flydb-example"))
-    if err != nil {
-        fmt.Println("Put Error => ", err)
-    }
+    	err := db.Put([]byte("name"), []byte("flydb-example"))
+    	if err != nil {
+        	fmt.Println("Put Error => ", err)
+    	}
+
 
 	val, err := db.Get([]byte("name"))
 	if err != nil {
 		fmt.Println("Get Error => ", err)
 	}
-    fmt.Println("name value => ", string(val))
+    	fmt.Println("name value => ", string(val))
     
-    err := db.Delete([]byte("name"))
-    if err != nil {
-        fmt.Println("Delete Error => ", err)
-    }
+    
+    	err := db.Delete([]byte("name"))
+    	if err != nil {
+        	fmt.Println("Delete Error => ", err)
+    	}
 }
 ```
 
