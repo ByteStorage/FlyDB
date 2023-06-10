@@ -19,10 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.20
-
-      - name: Enable Go Modules
-        run: go env -w GO111MODULE=on
+          go-version: 1.18
 
       - name: Build
         run: go build -v ./...
