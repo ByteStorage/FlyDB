@@ -26,12 +26,12 @@ func TestDirTree_MkDir(t *testing.T) {
 	/*
 		Build a directory tree as follows
 		└─ /
-		   ├─ /a
-		   │  └─ /aa
-		   │     └─ /aaa
-		   ├─ /b
-		   │  └─ /bb
-		   └─ /c
+		   ├─ b
+		   │  └─ bb
+		   ├─ c
+		   └─ a
+			  └─ aa
+				 └─ aaa
 	*/
 	dirTree := NewDirTree()
 
@@ -59,13 +59,13 @@ func TestDirTree_MkDir_Batch(t *testing.T) {
 	start := time.Now()
 
 	for i := 0; i < dirCount; i++ {
-		filePath := generateRandomPath()
+		filePath := generateRandomPath(true)
 		dirTree.MkDir(filePath)
 	}
 
 	elapsed := time.Since(start)
 
-	fmt.Printf("Inserted %d dir in %s\n", dirCount, elapsed)
+	fmt.Printf("Inserted %d dirs in %s\n", dirCount, elapsed)
 }
 
 func TestDirTree_DeleteDir(t *testing.T) {
@@ -96,7 +96,7 @@ func TestDirTree_DeleteDir_Batch(t *testing.T) {
 	dirCount := 10000
 
 	for i := 0; i < dirCount; i++ {
-		filePath := generateRandomPath()
+		filePath := generateRandomPath(true)
 		dirTree.MkDir(filePath)
 	}
 
@@ -106,13 +106,101 @@ func TestDirTree_DeleteDir_Batch(t *testing.T) {
 
 	elapsed := time.Since(start)
 
-	fmt.Printf("deleted %d dir in %s\n", dirCount, elapsed)
+	fmt.Printf("deleted %d dirs in %s\n", dirCount, elapsed)
 
 	dirTree.DebugDirTree()
 }
 
+func TestDirTree_InsertFile(t *testing.T) {
+	dirTree := NewDirTree()
+
+	dirTree.MkDir("/a")
+	dirTree.MkDir("/b/bb")
+
+	// normally insert a file
+	assert.True(t, dirTree.InsertFile("/test.txt"))
+
+	// insert a duplicate file
+	assert.False(t, dirTree.InsertFile("/test.txt"))
+
+	// insert two files into children nodes
+	assert.True(t, dirTree.InsertFile("/a/test.txt"))
+	assert.True(t, dirTree.InsertFile("/b/bb/test.txt"))
+
+	// insert a file that it's parent node does not exist
+	assert.True(t, dirTree.InsertFile("/c/test.txt"))
+
+	dirTree.DebugDirTree()
+}
+
+func TestDirTree_InsertFile_Batch(t *testing.T) {
+	dirTree := NewDirTree()
+
+	fileCount := 100000
+
+	start := time.Now()
+
+	for i := 0; i < fileCount; i++ {
+		filePath := generateRandomPath(false)
+		dirTree.InsertFile(filePath)
+	}
+
+	elapsed := time.Since(start)
+
+	fmt.Printf("Inserted %d files in %s\n", fileCount, elapsed)
+}
+
+func TestDirTree_DeleteFile(t *testing.T) {
+	dirTree := NewDirTree()
+
+	dirTree.MkDir("/a")
+	dirTree.MkDir("/b/bb")
+
+	// create a directory tree
+	assert.True(t, dirTree.InsertFile("/test.txt"))
+	assert.True(t, dirTree.InsertFile("/a/test.txt"))
+	assert.True(t, dirTree.InsertFile("/b/bb/test.txt"))
+	assert.True(t, dirTree.InsertFile("/c/cc/ccc/test.txt"))
+
+	// normally delete a file
+	assert.True(t, dirTree.DeleteFile("/test.txt"))
+
+	// delete a file that does not exist
+	assert.False(t, dirTree.DeleteFile("/test.txt"))
+
+	// delete files in children nodes
+	assert.True(t, dirTree.DeleteFile("/b/bb/test.txt"))
+	assert.True(t, dirTree.DeleteFile("/c/cc/ccc/test.txt"))
+
+	dirTree.DebugDirTree()
+}
+
+func TestDirTree_DeleteFile_Batch(t *testing.T) {
+	dirTree := NewDirTree()
+
+	fileCount := 100000
+
+	filePaths := make([]string, fileCount)
+
+	for i := 0; i < fileCount; i++ {
+		filePath := generateRandomPath(false)
+		dirTree.InsertFile(filePath)
+		filePaths[i] = filePath
+	}
+
+	start := time.Now()
+
+	for i := 0; i < fileCount; i++ {
+		dirTree.DeleteFile(filePaths[i])
+	}
+
+	elapsed := time.Since(start)
+
+	fmt.Printf("deleted %d files in %s\n", fileCount, elapsed)
+}
+
 // generateRandomPath generate random paths from levels 1-20
-func generateRandomPath() string {
+func generateRandomPath(isDir bool) string {
 	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	pathLength := rand.Intn(20) + 1
 	components := make([]string, pathLength)
@@ -128,5 +216,10 @@ func generateRandomPath() string {
 		components[i] = component
 	}
 
-	return "/" + strings.Join(components, "/")
+	path := "/" + strings.Join(components, "/")
+	if !isDir {
+		path = path + ".txt"
+	}
+
+	return path
 }
