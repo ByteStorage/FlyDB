@@ -15,7 +15,11 @@ type Bufio struct {
 
 // Read bytes from offset
 func (b *Bufio) Read(bytes []byte, offset int64) (int, error) {
-	_, err := b.fd.Seek(offset, 0)
+	err := b.Flush()
+	if err != nil {
+		return 0, err
+	}
+	_, err = b.fd.Seek(offset, 0)
 	if err != nil {
 		return 0, err
 	}
