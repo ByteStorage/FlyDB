@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ByteStorage/flydb/protocol/tcpIF"
 	"github.com/ByteStorage/flydb/sync/boolAm"
+	"io"
 	"net"
 	"sync"
 )
@@ -15,6 +16,11 @@ var _ tcpIF.Handler = (*TcpReplyHandler)(nil)
 type TcpReplyHandler struct {
 	activeConn sync.Map
 	isClosed   boolAm.Boolean
+}
+
+// NewHandler create a new handler
+func NewHandler() *TcpReplyHandler {
+	return &TcpReplyHandler{}
 }
 
 // Handle client connection
@@ -33,7 +39,7 @@ func (t *TcpReplyHandler) Handle(ctx context.Context, conn net.Conn) {
 	for {
 		msg, err := reader.ReadString('\n')
 		if err != nil {
-			if err.Error() == "EOF" {
+			if err == io.EOF {
 				fmt.Println("client close connection")
 				t.activeConn.Delete(client)
 			} else {
@@ -41,11 +47,15 @@ func (t *TcpReplyHandler) Handle(ctx context.Context, conn net.Conn) {
 			}
 			return
 		}
-		client.Waiting.Add(1)
-		buf := []byte(msg)
-		_, _ = conn.Write(buf)
-		client.Waiting.Done()
+
+		if msg[:2] == "\\n" {
+			client.Waiting.Add(1)
+			buf := []byte(msg)
+			_, _ = conn.Write(buf)
+			client.Waiting.Done()
+		}
 	}
+
 }
 
 // Close handler
