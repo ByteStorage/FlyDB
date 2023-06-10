@@ -71,6 +71,16 @@ type Slave struct {
 	Peers []string
 	//DB
 	DB *engine.DB
+	//Slave Message
+	SlaveMessage SlaveMessage
+}
+
+type SlaveMessage struct {
+	UsedDisk   uint64
+	UsedMem    uint64
+	CpuPercent float32
+	TotalMem   uint64
+	TotalDisk  uint64
 }
 
 // FSMSnapshot use to store the snapshot of the FSM
@@ -139,6 +149,8 @@ func (c *Cluster) startSlaves() {
 		go s.SendHeartbeat()
 		//监听leader变化
 		go s.ListenLeader()
+		//更新slave信息
+		go s.UpdateSlaveMessage()
 	}
 
 }
