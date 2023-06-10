@@ -14,7 +14,7 @@ import (
 func newHttpHandler() (*HttpHandler, error) {
 	options := config.DefaultOptions
 	options.DirPath = "/tmp/flydb"
-	db, err := engine.NewFlyDB(options)
+	db, err := engine.NewDB(options)
 	if err != nil {
 		return nil, err
 	}
