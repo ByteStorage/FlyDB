@@ -3,16 +3,17 @@ package http_handler
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/ByteStorage/flydb/config"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/qishenonly/flydb"
+	"github.com/ByteStorage/flydb"
 )
 
 func newHttpHandler() (*HttpHandler, error) {
-	options := flydb.DefaultOptions
+	options := config.DefaultOptions
 	options.DirPath = "/tmp/flydb"
 	db, err := flydb.NewFlyDB(options)
 	if err != nil {

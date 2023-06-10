@@ -1,4 +1,4 @@
-package raft
+package cluster
 
 import "github.com/hashicorp/raft"
 

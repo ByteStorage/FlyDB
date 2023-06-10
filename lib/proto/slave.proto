@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package cluster;
+option go_package = 	"flydb/lib/proto";
+
+service SlaveGrpcService {
+  rpc Get(SlaveGetRequest) returns (SlaveGetResponse) {}
+  rpc Set(SlaveSetRequest) returns (SlaveSetResponse) {}
+  rpc Del(SlaveDelRequest) returns (SlaveDelResponse) {}
+  rpc Keys(SlaveKeysRequest) returns (SlaveKeysResponse) {}
+  rpc Exists(SlaveExistsRequest) returns (SlaveExistsResponse) {}
+  rpc Expire(SlaveExpireRequest) returns (SlaveExpireResponse) {}
+  rpc TTL(SlaveTTLRequest) returns (SlaveTTLResponse) {}
+  rpc Heartbeat(SlaveHeartbeatRequest) returns (SlaveHeartbeatResponse) {}
+}
+
+message SlaveGetRequest {
+  string key = 1;
+}
+
+message SlaveGetResponse {
+  string value = 1;
+}
+
+message SlaveSetRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message SlaveSetResponse {
+  bool ok = 1;
+}
+
+message SlaveDelRequest {
+  string key = 1;
+}
+
+message SlaveDelResponse {
+  bool ok = 1;
+}
+
+message SlaveKeysRequest {
+  string pattern = 1;
+}
+
+message SlaveKeysResponse {
+  repeated string keys = 1;
+}
+
+message SlaveExistsRequest {
+  string key = 1;
+}
+
+message SlaveExistsResponse {
+  bool exists = 1;
+}
+
+message SlaveExpireRequest {
+  string key = 1;
+  int64 ttl = 2;
+}
+
+message SlaveExpireResponse {
+  bool ok = 1;
+}
+
+message SlaveTTLRequest {
+  string key = 1;
+}
+
+message SlaveTTLResponse {
+  int64 ttl = 1;
+}
+
+message SlaveHeartbeatRequest {
+  string id = 1;
+}
+
+message SlaveHeartbeatResponse {
+  bool ok = 1;
+}

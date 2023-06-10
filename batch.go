@@ -2,7 +2,8 @@ package flydb
 
 import (
 	"encoding/binary"
-	"github.com/qishenonly/flydb/data"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/data"
 	"sync"
 	"sync/atomic"
 )
@@ -15,14 +16,14 @@ var lgrTransFinaKey = []byte("lgr-fina")
 
 // WriteBatch Writes data in atomic batches to ensure atomicity
 type WriteBatch struct {
-	options             WriteBatchOptions
+	options             config.WriteBatchOptions
 	lock                *sync.Mutex
 	db                  *DB
 	temporaryDataWrites map[string]*data.LogRecord // Stores the data written by the user
 }
 
 // NewWriteBatch Init WriteBatch
-func (db *DB) NewWriteBatch(opt WriteBatchOptions) *WriteBatch {
+func (db *DB) NewWriteBatch(opt config.WriteBatchOptions) *WriteBatch {
 	return &WriteBatch{
 		options:             opt,
 		lock:                new(sync.Mutex),
@@ -90,7 +91,7 @@ func (wb *WriteBatch) Commit() error {
 	transSeq := atomic.AddUint64(&wb.db.transSeqNo, 1)
 
 	// Start writing data to the data file
-	// The index is not updated immediately after a single piece of data is written. 
+	// The index is not updated immediately after a single piece of data is written.
 	// It needs to be stored temporarily
 	positions := make(map[string]*data.LogRecordPst)
 	for _, record := range wb.temporaryDataWrites {

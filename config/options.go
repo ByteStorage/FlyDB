@@ -1,4 +1,4 @@
-package flydb
+package config
 
 import "os"
 

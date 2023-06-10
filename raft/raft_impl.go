@@ -1,4 +1,4 @@
-package raft
+package cluster
 
 import (
 	"github.com/hashicorp/raft"
@@ -8,12 +8,11 @@ var _ Interface = &Impl{}
 
 // Impl is the interface that must be implemented by a raft server.
 type Impl struct {
-	c Cluster
+	m Master
 }
 
 func (i *Impl) State() raft.RaftState {
-	//TODO implement me
-	panic("implement me")
+	return i.m.Raft.State()
 }
 
 func (i *Impl) Peers() ([]string, error) {
@@ -27,18 +26,16 @@ func (i *Impl) Close() error {
 }
 
 func (i *Impl) IsLeader() bool {
-	//TODO implement me
-	panic("implement me")
+	return i.m.Raft.State() == raft.Leader
 }
 
 func (i *Impl) IsCandidate() bool {
-	//TODO implement me
-	panic("implement me")
+	return i.m.Raft.State() == raft.Candidate
 }
 
 func (i *Impl) Leader() string {
-	//TODO implement me
-	panic("implement me")
+	address, _ := i.m.Raft.LeaderWithID()
+	return string(address)
 }
 
 func (i *Impl) Apply(b []byte) error {
@@ -47,8 +44,11 @@ func (i *Impl) Apply(b []byte) error {
 }
 
 func (i *Impl) AddServer(addr string) error {
-	//TODO implement me
-	panic("implement me")
+	voter := i.m.Raft.AddVoter(raft.ServerID(addr), raft.ServerAddress(addr), 0, 0)
+	if voter.Error() != nil {
+		return voter.Error()
+	}
+	return nil
 }
 
 func (i *Impl) ShowDebugInfo(witch string) ([]byte, error) {
@@ -57,6 +57,16 @@ func (i *Impl) ShowDebugInfo(witch string) ([]byte, error) {
 }
 
 func (i *Impl) UserSnapshot() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i *Impl) Put(key, value []byte) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i *Impl) Get(key []byte) ([]byte, error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -1,7 +1,7 @@
 package flydb
 
 import (
-	"github.com/qishenonly/flydb/data"
+	"github.com/ByteStorage/flydb/data"
 	"io"
 	"os"
 	"path"

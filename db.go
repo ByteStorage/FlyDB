@@ -4,8 +4,9 @@
 package flydb
 
 import (
-	"github.com/qishenonly/flydb/data"
-	"github.com/qishenonly/flydb/index"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/data"
+	"github.com/ByteStorage/flydb/index"
 	"go.uber.org/zap"
 	"io"
 	"os"
@@ -18,7 +19,7 @@ import (
 
 // DB bitcask Storage engine instance
 type DB struct {
-	options    Options
+	options    config.Options
 	lock       *sync.RWMutex
 	fileIds    []int                     // File id, which can only be used when the index is loaded
 	activeFile *data.DataFile            // The current active data file that can be used for writing
@@ -29,7 +30,7 @@ type DB struct {
 }
 
 // NewFlyDB open a new db instance
-func NewFlyDB(options Options) (*DB, error) {
+func NewFlyDB(options config.Options) (*DB, error) {
 	zap.L().Info("open db", zap.Any("options", options))
 	// check options first
 	if err := checkOptions(options); err != nil {
@@ -75,9 +76,10 @@ func NewFlyDB(options Options) (*DB, error) {
 }
 
 // NewFlyDbCluster create a new db cluster
-func NewFlyDbCluster(options Options) (*DB, error) {
-	panic("implement me")
-}
+//func NewFlyDbCluster(masterList []string, slaveList []string, options config.Options) (*DB, error) {
+//	master.NewRaftCluster(masterList, slaveList)
+//	panic("implement me")
+//}
 
 // Close the db instance
 func (db *DB) Close() error {
@@ -327,7 +329,7 @@ func (db *DB) Delete(key []byte) error {
 	return nil
 }
 
-func checkOptions(options Options) error {
+func checkOptions(options config.Options) error {
 	if options.DirPath == "" {
 		return ErrOptionDirPathIsEmpty
 	}

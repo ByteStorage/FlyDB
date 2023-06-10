@@ -1,49 +1,43 @@
-# FlyDB
 
-**FlyDB** 是一款简单轻量的 `Go` 语言`kv`型数据库。它提供了一组易于使用的 API，允许用户在应用程序中存储和检索数据。
 
-## 项目正在迭代开发中，请不要用于生产环境！
+<img src="./assets/FlyDB-logo.png" alt="FlyDB-logo" style="width: 45%;" />
 
-## 简介
+![GitHub top language](https://img.shields.io/github/languages/top/ByteStorage/flydb)   [![Go Reference](https://pkg.go.dev/badge/github.com/ByteStorage/flydb)](https://pkg.go.dev/github.com/ByteStorage/flydb)   ![LICENSE](https://img.shields.io/github/license/ByteStorage/flydb)   ![GitHub stars](https://img.shields.io/github/stars/ByteStorage/flydb)   ![GitHub forks](https://img.shields.io/github/forks/ByteStorage/flydb)   [![Go Report Card](https://goreportcard.com/badge/github.com/qishenonly/flydb)](https://goreportcard.com/report/github.com/qishenonly/flydb)
 
-**FlyDB** 是一个快速且易于使用的基于`bitcask`的`kv`型数据库，旨在轻量和简单。使用 **FlyDB**，您可以轻松地在 `Go` 应用程序中存储和检索数据。**FlyDB** 优化了速度，这使得它非常适合需要快速数据访问的应用程序。
+## 该项目正在迭代开发中，请勿在生产环境中使用!
 
-## 特点
+**FlyDB**旨在在某些情况下作为内存键值存储(如**Redis**)的替代方案，旨在在性能和存储成本之间取得平衡。它通过优化资源分配和使用经济有效的存储介质来实现这一点。通过智能管理数据，**FlyDB**确保高效操作，同时最大限度地降低存储成本。它为需要在性能和存储成本之间取得平衡的场景提供了可靠的解决方案。
 
-**FlyDB** 的一些特点包括：
+## 👋 什么是 FlyDB ?
 
-- `易于使用`：`FlyDB` 提供了一个简单直观的 API，使得存储和检索数据非常容易。
-- `轻量`：`FlyDB` 设计为轻量级和高效，这使得它非常适合在资源受限的环境中使用。
-- `可靠`：`FlyDB` 支持事务操作，确保在存储过程中不会丢失或损坏数据。
-- `快速`：`FlyDB` 使用内存数据结构，这使得它快速响应，特别适合需要快速读写速度的应用程序。
-- `可扩展`：`FlyDB` 提供了许多可配置选项，允许用户调整其性能和功能以适应不同的使用情况。
+**FlyDB**是基于高效bitcask模型的高性能键值(KV)存储引擎。它提供了快速可靠的数据检索和存储功能。通过利用bitcask模型的简单性和有效性，**FlyDB**确保了高效的读写操作，从而提高了整体性能。它提供了一种简化的方法来存储和访问键值对，使其成为需要快速响应数据访问的场景的绝佳选择。**FlyDB**对速度和简单性的关注使其成为在平衡存储成本的同时优先考虑性能的应用程序的有价值的替代方案。
 
-## 安装
+## 🏁  快速入门 : FlyDB
 
-您可以使用 Go 命令行工具安装 FlyDB：
+您可以使用Go命令行工具安装FlyDB:
 
-```go
-go get github.com/qishenonly/flydb
+```GO
+go get github.com/ByteStorage/flydb
 ```
 
-或者从github上clone本项目：
+或者从github克隆这个项目:
 
 ```bash
-git clone https://github.com/qishenonly/flydb
+git clone https://github.com/ByteStorage/flydb
 ```
 
-## 用法
+## 🚀 如何使用 FlyDB ?
 
-以下是一个简单的`Linux版`使用示例：
+下面是一个如何使用Linux版本的简单示例:
 
-> 详细使用请看flydb/examples.
+> 详情请参阅 flydb/examples。
 
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/qishenonly/flydb"
+	"github.com/ByteStorage/flydb"
 )
 
 func main() {
@@ -51,44 +45,52 @@ func main() {
 	options.DirPath = "/tmp/flydb"
 	db, _ := flydb.NewFlyDB(options)
 
-	db.Put([]byte("name"), []byte("flydb-example"))
+    err := db.Put([]byte("name"), []byte("flydb-example"))
+    if err != nil {
+        fmt.Println("Put Error => ", err)
+    }
 
 	val, err := db.Get([]byte("name"))
 	if err != nil {
-		fmt.Println("name value => ", string(val))
+		fmt.Println("Get Error => ", err)
 	}
+    fmt.Println("name value => ", string(val))
+    
+    err := db.Delete([]byte("name"))
+    if err != nil {
+        fmt.Println("Delete Error => ", err)
+    }
 }
 ```
 
-## 联系
+## 🔮 如何联系我们?
 
-如果您有任何问题想联系我们，可以联系我们的开发者团队,我们会及时回复您的邮件：
+如果您有任何疑问并想与我们联系，您可以联系我们的开发团队，我们会回复您的邮件:
 
-团队邮箱：jiustudio@qq.com
+团队邮箱:bytestorage@163.com
 
-或者添加我的微信，邀你进入项目社群，和大牛一起交流学习。
+或者加我微信，邀请大家进入项目社区，和大牛一起交流学习。
 
-> 添加微信请备注 GIthub
+> 添加微信请备注Github
 
 <img src="./assets/vx.png" alt="vx" style="width: 33%;"  />
 
-## TODO List
+## 📜 TODO List
 
-- [ ] 性能优化：包括但不限于索引更换、merge优化等
-- [ ] 数据备份功能
-- [ ] 日志功能，包括操作日志和系统日志
-- [ ] 支持HTTP服务
-- [ ] 拓展数据结构的支持：包括但不限于string、list、hash、set等
-- [ ] 兼容Redis协议及命令
-- [ ] 分布式集群模式
-- [ ] 其他待办事项...
+- [ ] 扩展数据结构支持:包括但不限于字符串、列表、散列、集合等。
+- [ ] 兼容Redis协议和命令。
+- [ ] 支持http服务。
+- [ ] 支持tcp服务。
+- [x] 集成日志。
+- [ ] 数据备份
+- [ ] 分布式集群模型。
 
-## 贡献
+## 如何贡献 ?
 
-如果您有任何想法或建议 FlyDB，请随时在 GitHub 上提交`issues`或`pr`。我们欢迎您的贡献！
+如果您对FlyDB有任何想法或建议，请随时在GitHub上提交“问题”或“pr”。我们欢迎您的贡献!
 
-> 完整的规范步骤请参考：[CONTRIBUTEING](https://github.com/qishenonly/flydb/blob/master/CONTRIBUTING.md)
+> 完整的规范步骤请参考：[CONTRIBUTEING](https://github.com/ByteStorage/flydb/blob/master/CONTRIBUTING.md)
 
-## 许可证
+## Licence
 
-FlyDB 在 Apache 许可下发布。请参见 LICENSE 文件。
+FlyDB在Apache许可下发布。请参见LICENSE文件。

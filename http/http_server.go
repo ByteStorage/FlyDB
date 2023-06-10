@@ -2,7 +2,7 @@ package http_handler
 
 import (
 	"encoding/json"
-	"github.com/qishenonly/flydb"
+	"github.com/ByteStorage/flydb"
 	"net/http"
 )
 

@@ -1,4 +1,4 @@
-package utils
+package dirtree
 
 type DirTreeInterface interface {
 	// InsertFile inserts a file into the directory tree

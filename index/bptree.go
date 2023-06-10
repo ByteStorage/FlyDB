@@ -1,7 +1,7 @@
 package index
 
 import (
-	"github.com/qishenonly/flydb/data"
+	"github.com/ByteStorage/flydb/data"
 	"go.etcd.io/bbolt"
 	"path/filepath"
 )

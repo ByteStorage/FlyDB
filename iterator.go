@@ -2,18 +2,19 @@ package flydb
 
 import (
 	"bytes"
-	"github.com/qishenonly/flydb/index"
+	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/flydb/index"
 )
 
 // Iterator 迭代器
 type Iterator struct {
 	indexIter index.Iterator
 	db        *DB
-	options   IteratorOptions
+	options   config.IteratorOptions
 }
 
 // NewIterator 初始化迭代器
-func (db *DB) NewIterator(opt IteratorOptions) *Iterator {
+func (db *DB) NewIterator(opt config.IteratorOptions) *Iterator {
 	indexIter := db.index.Iterator(opt.Reverse)
 	return &Iterator{
 		indexIter: indexIter,

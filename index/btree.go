@@ -2,8 +2,8 @@ package index
 
 import (
 	"bytes"
+	"github.com/ByteStorage/flydb/data"
 	"github.com/google/btree"
-	"github.com/qishenonly/flydb/data"
 	"sort"
 	"sync"
 )

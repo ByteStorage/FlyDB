@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package cluster;
+option go_package = 	"flydb/lib/proto";
+
+service MasterGrpcService {
+  rpc Get(MasterGetRequest) returns (MasterGetResponse) {}
+  rpc Set(MasterSetRequest) returns (MasterSetResponse) {}
+  rpc Del(MasterDelRequest) returns (MasterDelResponse) {}
+  rpc Keys(MasterKeysRequest) returns (MasterKeysResponse) {}
+  rpc Scan(MasterScanRequest) returns (MasterScanResponse) {}
+  rpc Expire(MasterExpireRequest) returns (MasterExpireResponse) {}
+  rpc TTL(MasterTTLRequest) returns (MasterTTLResponse) {}
+  rpc Ping(MasterPingRequest) returns (MasterPingResponse) {}
+  rpc Shutdown(MasterShutdownRequest) returns (MasterShutdownResponse) {}
+  rpc RegisterSlave(MasterRegisterSlaveRequest) returns (MasterRegisterSlaveResponse) {}
+}
+
+message MasterRegisterSlaveRequest {
+  string addr = 1;
+}
+
+message MasterRegisterSlaveResponse {
+  bool ok = 1;
+}
+
+message MasterGetRequest {
+  string key = 1;
+}
+
+message MasterGetResponse {
+  string value = 1;
+}
+
+message MasterSetRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message MasterSetResponse {
+  bool ok = 1;
+}
+
+message MasterDelRequest {
+  string key = 1;
+}
+
+message MasterDelResponse {
+  bool ok = 1;
+}
+
+message MasterKeysRequest {
+  string pattern = 1;
+}
+
+message MasterKeysResponse {
+  repeated string keys = 1;
+}
+
+message MasterScanRequest {
+  string pattern = 1;
+}
+
+message MasterScanResponse {
+  repeated string keys = 1;
+}
+
+message MasterExpireRequest {
+  string key = 1;
+  int64 ttl = 2;
+}
+
+message MasterExpireResponse {
+  bool ok = 1;
+}
+
+message MasterTTLRequest {
+  string key = 1;
+}
+
+message MasterTTLResponse {
+  int64 ttl = 1;
+}
+
+message MasterPingRequest {
+  string message = 1;
+}
+
+message MasterPingResponse {
+  string message = 1;
+}
+
+message MasterShutdownRequest {
+  string message = 1;
+}
+
+message MasterShutdownResponse {
+  string message = 1;
+}
