@@ -103,3 +103,7 @@ func (m *Master) Shutdown(ctx context.Context, in *proto.MasterShutdownRequest) 
 func (m *Master) RegisterSlave(ctx context.Context, in *proto.MasterRegisterSlaveRequest) (*proto.MasterRegisterSlaveResponse, error) {
 	panic("implement me")
 }
+
+func (m *Master) InformLeader(ctx context.Context, in *proto.MasterCurrentLeaderRequest) (*proto.MasterCurrentLeaderResponse, error) {
+	panic("implement me")
+}
