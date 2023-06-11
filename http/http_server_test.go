@@ -97,6 +97,9 @@ func TestDel(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodDelete, server.URL+"?key=test_key", nil)
 	req.Header.Set("Content-Type", "multipart/form-data")
 
+	//提前插入test_key
+	handler.Put([]byte("test_key"), []byte("test_value"))
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("could not send request: %v", err)
@@ -132,6 +135,8 @@ func TestGet(t *testing.T) {
 	defer server.Close()
 	req, _ := http.NewRequest(http.MethodGet, server.URL+"?key=test_key", nil)
 	req.Header.Set("Content-Type", "application/json")
+	//提前插入test_key
+	handler.Put([]byte("test_key"), []byte("test_value"))
 
 	// 发送请求
 	resp, err := http.DefaultClient.Do(req)
@@ -148,7 +153,6 @@ func TestGet(t *testing.T) {
 	if err != nil {
 		t.Errorf("ReadAll error: %v", err)
 	}
-
 	// 验证是否Get成功
 	val, err := handler.Get([]byte("test_key"))
 	if err != nil {
@@ -157,5 +161,7 @@ func TestGet(t *testing.T) {
 
 	if string(body) != string(val) {
 		t.Errorf("Get error: expected ok, got %s", string(body))
+	} else {
+		t.Logf("value:%s", string(val))
 	}
 }

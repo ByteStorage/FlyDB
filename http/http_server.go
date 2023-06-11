@@ -73,9 +73,6 @@ func (hs *HttpHandler) GetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//test
-	//hs.Put([]byte("test_key"), []byte("aaa"))
-
 	val, err := hs.Get([]byte(key))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
