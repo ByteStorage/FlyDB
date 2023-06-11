@@ -88,3 +88,74 @@ func TestPut(t *testing.T) {
 		t.Logf("Put: test_value and Get: %s", value)
 	}
 }
+
+func TestDel(t *testing.T) {
+	handler, _ := newHttpHandler()
+	// 创建一个测试用的http server
+	server := httptest.NewServer(http.HandlerFunc(handler.DelHandler))
+	defer server.Close()
+	req, _ := http.NewRequest(http.MethodDelete, server.URL+"?key=test_key", nil)
+	req.Header.Set("Content-Type", "multipart/form-data")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("could not send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// 检查响应
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("ReadAll error: %v", err)
+	}
+	if string(body) != "ok" {
+		t.Errorf("Delete error: expected ok, got %s", string(body))
+	}
+
+	// 验证是否delete成功
+	_, err = handler.Get([]byte("test_key"))
+	if err == nil {
+		t.Errorf("Del error: %v", err)
+	} else {
+		t.Logf("delete data success")
+	}
+}
+
+func TestGet(t *testing.T) {
+	handler, _ := newHttpHandler()
+	// 创建一个测试用的http server
+	server := httptest.NewServer(http.HandlerFunc(handler.GetHandler))
+	defer server.Close()
+	req, _ := http.NewRequest(http.MethodGet, server.URL+"?key=test_key", nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	// 发送请求
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("could not send request: %v", err)
+	}
+	defer resp.Body.Close()
+	// 检查响应
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("ReadAll error: %v", err)
+	}
+
+	// 验证是否Get成功
+	val, err := handler.Get([]byte("test_key"))
+	if err != nil {
+		t.Errorf("Get error: %v", err)
+	}
+
+	if string(body) != string(val) {
+		t.Errorf("Get error: expected ok, got %s", string(body))
+	}
+}

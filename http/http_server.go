@@ -45,3 +45,45 @@ func (hs *HttpHandler) PutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// DelHandler 支持http进行Delete
+func (hs *HttpHandler) DelHandler(w http.ResponseWriter, r *http.Request) {
+	key := r.FormValue("key")
+
+	if key == "" {
+		http.Error(w, "key is empty", http.StatusBadRequest)
+		return
+	}
+	err := hs.Delete([]byte(key))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write([]byte("ok"))
+	if err != nil {
+		return
+	}
+}
+
+// GetHandler 支持http进行Get
+func (hs *HttpHandler) GetHandler(w http.ResponseWriter, r *http.Request) {
+	key := r.FormValue("key")
+	if key == "" {
+		http.Error(w, "key is empty", http.StatusBadRequest)
+		return
+	}
+
+	//test
+	//hs.Put([]byte("test_key"), []byte("aaa"))
+
+	val, err := hs.Get([]byte(key))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(val)
+	if err != nil {
+		return
+	}
+}
