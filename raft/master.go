@@ -104,6 +104,6 @@ func (m *Master) RegisterSlave(ctx context.Context, in *proto.MasterRegisterSlav
 	panic("implement me")
 }
 
-func (m *Master) InformLeader(ctx context.Context, in *proto.MasterCurrentLeaderRequest) (*proto.MasterCurrentLeaderResponse, error) {
+func (m *Master) CurrentLeader(ctx context.Context, in *proto.MasterCurrentLeaderRequest) (*proto.MasterCurrentLeaderResponse, error) {
 	panic("implement me")
 }
