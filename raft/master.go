@@ -105,5 +105,6 @@ func (m *Master) RegisterSlave(ctx context.Context, in *proto.MasterRegisterSlav
 }
 
 func (m *Master) CurrentLeader(ctx context.Context, in *proto.MasterCurrentLeaderRequest) (*proto.MasterCurrentLeaderResponse, error) {
-	panic("implement me")
+	addr, _ := m.Raft.LeaderWithID()
+	return &proto.MasterCurrentLeaderResponse{Leader: string(addr)}, nil
 }
