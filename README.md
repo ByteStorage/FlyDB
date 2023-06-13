@@ -81,7 +81,7 @@ Or add my wechat, invite you to enter the project community, and code masters to
 - [ ] Extended data structure support: including but not limited to string, list, hash, set, etc.
 - [ ] Compatible with Redis protocols and commands.
 - [ ] Support http services.
-- [ ] Support tcp services.
+- [x] Support tcp services.
 - [x] Log aggregation
 - [ ] Data backup
 - [ ] Distributed cluster model.
