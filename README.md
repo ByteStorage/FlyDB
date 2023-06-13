@@ -36,11 +36,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/ByteStorage/flydb"
+	"github.com/ByteStorage/flydb/flydb"
+	"github.com/ByteStorage/flydb/config"
 )
 
 func main() {
-    	options := flydb.DefaultOptions
+    	options := config.DefaultOptions
 	options.DirPath = "/tmp/flydb"
 	db, _ := flydb.NewFlyDB(options)
 
