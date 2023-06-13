@@ -2,7 +2,7 @@ package index
 
 import (
 	"bytes"
-	"github.com/ByteStorage/flydb/data"
+	"github.com/ByteStorage/FlyDB/data"
 	"github.com/google/btree"
 	"sort"
 	"sync"

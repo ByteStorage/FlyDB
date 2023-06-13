@@ -2,7 +2,7 @@ package cluster
 
 import (
 	"context"
-	"github.com/ByteStorage/flydb/lib/proto"
+	"github.com/ByteStorage/FlyDB/lib/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"

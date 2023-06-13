@@ -1,8 +1,8 @@
 package flydb
 
 import (
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/engine"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/engine"
 )
 
 // NewFlyDB open a new db instance

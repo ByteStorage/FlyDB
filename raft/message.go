@@ -3,7 +3,7 @@ package cluster
 import (
 	"context"
 	"fmt"
-	"github.com/ByteStorage/flydb/lib/proto"
+	"github.com/ByteStorage/FlyDB/lib/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"reflect"

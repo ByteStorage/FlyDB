@@ -1,7 +1,7 @@
 package index
 
 import (
-	"github.com/ByteStorage/flydb/data"
+	"github.com/ByteStorage/FlyDB/data"
 	"go.etcd.io/bbolt"
 	"path/filepath"
 )

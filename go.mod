@@ -1,8 +1,9 @@
-module github.com/ByteStorage/flydb
+module github.com/ByteStorage/FlyDB
 
 go 1.20
 
 require (
+	github.com/ByteStorage/flydb v1.0.2
 	github.com/google/btree v1.1.2
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702

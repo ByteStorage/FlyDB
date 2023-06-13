@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/lib/randkv"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"

@@ -2,9 +2,9 @@ package engine
 
 import (
 	"fmt"
-	"github.com/ByteStorage/flydb"
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/lib/randkv"
+	"github.com/ByteStorage/FlyDB"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"sync"
@@ -60,7 +60,7 @@ func TestDB_Put(t *testing.T) {
 
 	// 3.key 为空
 	err = db.Put(nil, randkv.RandomValue(24))
-	assert.Equal(t, flydb.ErrKeyIsEmpty, err)
+	assert.Equal(t, FlyDB.ErrKeyIsEmpty, err)
 
 	// 4.value 为空
 	err = db.Put(randkv.GetTestKey(22), nil)
@@ -228,7 +228,7 @@ func TestDB_Get(t *testing.T) {
 	// 2.读取一个不存在的 key
 	val2, err := db.Get([]byte("some key unknown"))
 	assert.Nil(t, val2)
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 
 	// 3.值被重复 Put 后在读取
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(24))
@@ -245,7 +245,7 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 	val4, err := db.Get(randkv.GetTestKey(33))
 	assert.Equal(t, 0, len(val4))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 
 	// 5.转换为了旧的数据文件，从旧的数据文件上获取 value
 	for i := 100; i < 1000000; i++ {
@@ -275,7 +275,7 @@ func TestDB_Get(t *testing.T) {
 
 	val8, err := db2.Get(randkv.GetTestKey(33))
 	assert.Equal(t, 0, len(val8))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 }
 
 func TestDB_Delete(t *testing.T) {
@@ -294,7 +294,7 @@ func TestDB_Delete(t *testing.T) {
 	err = db.Delete(randkv.GetTestKey(11))
 	assert.Nil(t, err)
 	_, err = db.Get(randkv.GetTestKey(11))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 
 	// 2.删除一个不存在的 key
 	err = db.Delete([]byte("unknown key"))
@@ -302,7 +302,7 @@ func TestDB_Delete(t *testing.T) {
 
 	// 3.删除一个空的 key
 	err = db.Delete(nil)
-	assert.Equal(t, flydb.ErrKeyIsEmpty, err)
+	assert.Equal(t, FlyDB.ErrKeyIsEmpty, err)
 
 	// 4.值被删除之后重新 Put
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(128))
@@ -323,7 +323,7 @@ func TestDB_Delete(t *testing.T) {
 	// 重启数据库
 	db2, err := NewDB(opts)
 	_, err = db2.Get(randkv.GetTestKey(11))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 
 	val2, err := db2.Get(randkv.GetTestKey(22))
 	assert.Nil(t, err)

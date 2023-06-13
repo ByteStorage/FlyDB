@@ -3,8 +3,8 @@ package http_handler
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/engine"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/engine"
 	"io"
 	"net/http"
 	"net/http/httptest"

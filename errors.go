@@ -1,4 +1,4 @@
-package flydb
+package FlyDB
 
 import "errors"
 

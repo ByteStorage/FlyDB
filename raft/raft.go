@@ -1,10 +1,10 @@
 package cluster
 
 import (
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/engine"
-	"github.com/ByteStorage/flydb/lib/dirtree"
-	"github.com/ByteStorage/flydb/lib/proto"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/lib/dirtree"
+	"github.com/ByteStorage/FlyDB/lib/proto"
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
 	"strconv"

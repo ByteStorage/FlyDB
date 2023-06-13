@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"github.com/ByteStorage/flydb"
-	"github.com/ByteStorage/flydb/data"
+	"github.com/ByteStorage/FlyDB"
+	"github.com/ByteStorage/FlyDB/data"
 	"io"
 	"os"
 	"path"
@@ -27,7 +27,7 @@ func (db *DB) Merge() error {
 	// 如果 merge 正在进行中，则直接返回
 	if db.isMerging {
 		db.lock.Unlock()
-		return flydb.ErrMergeIsProgress
+		return FlyDB.ErrMergeIsProgress
 	}
 	db.isMerging = true
 	defer func() {

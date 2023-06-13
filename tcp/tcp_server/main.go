@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/tcp"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/tcp"
 	"strconv"
 )
 

@@ -2,8 +2,8 @@ package engine
 
 import (
 	"bytes"
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/index"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/index"
 )
 
 // Iterator 迭代器

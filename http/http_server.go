@@ -2,7 +2,7 @@ package http_handler
 
 import (
 	"encoding/json"
-	"github.com/ByteStorage/flydb/engine"
+	"github.com/ByteStorage/FlyDB/engine"
 	"net/http"
 )
 

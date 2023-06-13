@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"github.com/ByteStorage/flydb"
-	"github.com/ByteStorage/flydb/config"
-	"github.com/ByteStorage/flydb/lib/randkv"
+	"github.com/ByteStorage/FlyDB"
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -26,7 +26,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = db.Get(randkv.GetTestKey(1))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 
 	// 正常提交数据
 	err = wb.Commit()
@@ -43,7 +43,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = db.Get(randkv.GetTestKey(1))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 }
 
 func TestDB_WriteBatchRestart(t *testing.T) {
@@ -80,7 +80,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = db2.Get(randkv.GetTestKey(1))
-	assert.Equal(t, flydb.ErrKeyNotFound, err)
+	assert.Equal(t, FlyDB.ErrKeyNotFound, err)
 
 	// 判断事务序列号
 	assert.Equal(t, uint64(2), db.transSeqNo)
