@@ -4,12 +4,14 @@ import (
 	"context"
 	"github.com/ByteStorage/flydb/lib/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func (s *Slave) StartGrpcServer() {
@@ -41,7 +43,20 @@ func (s *Slave) SendHeartbeat() {
 }
 
 func (s *Slave) ListenLeader() {
-
+	for range time.Tick(200 * time.Millisecond) {
+		// connect with the currently known "leader"
+		conn, err := grpc.Dial(s.Leader, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			continue
+		}
+		// The current known "leader" will tell the slave whether it is still the leader
+		response, err := proto.NewMasterGrpcServiceClient(conn).
+			CurrentLeader(context.Background(), &proto.MasterCurrentLeaderRequest{})
+		if err != nil {
+			continue
+		}
+		s.Leader = response.Leader
+	}
 }
 
 func (s *Slave) UpdateSlaveMessage() {

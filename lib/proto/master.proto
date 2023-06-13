@@ -14,6 +14,7 @@ service MasterGrpcService {
   rpc Ping(MasterPingRequest) returns (MasterPingResponse) {}
   rpc Shutdown(MasterShutdownRequest) returns (MasterShutdownResponse) {}
   rpc RegisterSlave(MasterRegisterSlaveRequest) returns (MasterRegisterSlaveResponse) {}
+  rpc CurrentLeader(MasterCurrentLeaderRequest) returns (MasterCurrentLeaderResponse) {}
 }
 
 message MasterRegisterSlaveRequest {
@@ -96,4 +97,10 @@ message MasterShutdownRequest {
 
 message MasterShutdownResponse {
   string message = 1;
+}
+
+message MasterCurrentLeaderRequest {}
+
+message MasterCurrentLeaderResponse {
+  string leader = 1;
 }

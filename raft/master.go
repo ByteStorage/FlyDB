@@ -103,3 +103,8 @@ func (m *Master) Shutdown(ctx context.Context, in *proto.MasterShutdownRequest) 
 func (m *Master) RegisterSlave(ctx context.Context, in *proto.MasterRegisterSlaveRequest) (*proto.MasterRegisterSlaveResponse, error) {
 	panic("implement me")
 }
+
+func (m *Master) CurrentLeader(ctx context.Context, in *proto.MasterCurrentLeaderRequest) (*proto.MasterCurrentLeaderResponse, error) {
+	addr, _ := m.Raft.LeaderWithID()
+	return &proto.MasterCurrentLeaderResponse{Leader: string(addr)}, nil
+}
