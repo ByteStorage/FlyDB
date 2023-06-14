@@ -3,6 +3,7 @@ package cluster
 import (
 	"context"
 	"github.com/ByteStorage/FlyDB/lib/proto"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
@@ -35,11 +36,38 @@ func (s *Slave) StartGrpcServer() {
 }
 
 func (s *Slave) RegisterToMaster() {
-
+	for range time.Tick(200 * time.Millisecond) {
+		// connect with the currently known "leader"
+		conn, err := grpc.Dial(s.Leader, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			continue
+		}
+		// The current known "leader" will tell the slave whether it is still the leader
+		response, err := proto.NewMasterGrpcServiceClient(conn).
+			RegisterSlave(context.Background(), &proto.MasterRegisterSlaveRequest{Addr: s.Addr})
+		if err != nil && response.Ok {
+			break
+		}
+		zap.L().Error("register slave failed", zap.Error(err))
+		continue
+	}
 }
 
 func (s *Slave) SendHeartbeat() {
-
+	for range time.Tick(3 * time.Second) {
+		// connect with the currently known "leader"
+		conn, err := grpc.Dial(s.Leader, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			continue
+		}
+		// The current known "leader" will tell the slave whether it is still the leader
+		response, err := proto.NewMasterGrpcServiceClient(conn).
+			ReceiveHeartbeat(context.Background(), &proto.MasterHeartbeatRequest{Addr: s.Addr})
+		if err != nil && response.Ok {
+			continue
+		}
+		zap.L().Error("heartbeat failed", zap.Error(err))
+	}
 }
 
 func (s *Slave) ListenLeader() {

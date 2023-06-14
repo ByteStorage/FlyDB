@@ -13,9 +13,18 @@ import (
 	"time"
 )
 
-func (m *Master) ListenSlave(slaves []Slave) {
-	//TODO implement me
-	panic("implement me")
+func (m *Master) ListenSlave() {
+	timeTick := time.NewTicker(200 * time.Millisecond)
+	for {
+		select {
+		case <-timeTick.C:
+			for k, t := range m.Heartbeat {
+				if t.Add(5*time.Second).Unix() < time.Now().Unix() {
+					delete(m.Heartbeat, k)
+				}
+			}
+		}
+	}
 }
 
 func (m *Master) WaitForLeader() {
@@ -107,4 +116,9 @@ func (m *Master) RegisterSlave(ctx context.Context, in *proto.MasterRegisterSlav
 func (m *Master) CurrentLeader(ctx context.Context, in *proto.MasterCurrentLeaderRequest) (*proto.MasterCurrentLeaderResponse, error) {
 	addr, _ := m.Raft.LeaderWithID()
 	return &proto.MasterCurrentLeaderResponse{Leader: string(addr)}, nil
+}
+
+func (m *Master) ReceiveHeartbeat(ctx context.Context, in *proto.MasterHeartbeatRequest) (*proto.MasterHeartbeatResponse, error) {
+	m.Heartbeat[in.Addr] = time.Now()
+	return &proto.MasterHeartbeatResponse{}, nil
 }

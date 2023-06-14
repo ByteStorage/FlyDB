@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
 	"strconv"
+	"time"
 )
 
 type IndexerType = int8
@@ -46,7 +47,7 @@ type Master struct {
 	//Slave List
 	Slave []Slave
 	//Heartbeat
-	Heartbeat map[string]string
+	Heartbeat map[string]time.Time
 	//Filename to node,key is filename,value is node
 	FilenameToNode map[string]string
 	//Dir Tree
@@ -73,6 +74,8 @@ type Slave struct {
 	DB *engine.DB
 	//Slave Message
 	SlaveMessage SlaveMessage
+	//work pool
+	WorkPool chan struct{}
 }
 
 type SlaveMessage struct {
@@ -109,7 +112,7 @@ func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
 			Addr:           master,
 			Peers:          masterList,
 			Slave:          slaves,
-			Heartbeat:      make(map[string]string),
+			Heartbeat:      make(map[string]time.Time),
 			FilenameToNode: make(map[string]string),
 			DirTree:        dirtree.NewDirTree(),
 		}
@@ -126,30 +129,30 @@ func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
 func (c *Cluster) startMasters() {
 	for _, m := range c.Master {
 		m.c = c
-		//启动grpc服务
+		//start grpc server
 		m.StartGrpcServer()
-		//启动raft服务
+		//start raft
 		m.NewRaft()
-		//等待leader选举
+		//wait for leader
 		m.WaitForLeader()
-		//对slave进行下线或者上线
-		go m.ListenSlave(c.Slave)
-		//监听用户请求，通过wal日志处理
+		//add slave or delete slave
+		go m.ListenSlave()
+		//listen user request, by wal
 		go m.ListenRequest()
 	}
 }
 
 func (c *Cluster) startSlaves() {
 	for _, s := range c.Slave {
-		//启动grpc服务
+		//start grpc server
 		s.StartGrpcServer()
-		//向master注册
+		//register to master
 		s.RegisterToMaster()
-		//发起心跳
+		//heartbeat
 		go s.SendHeartbeat()
-		//监听leader变化
+		//listen leader
 		go s.ListenLeader()
-		//更新slave信息
+		//update slave message
 		go s.UpdateSlaveMessage()
 	}
 

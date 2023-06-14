@@ -1,6 +1,9 @@
 package dh
 
-import "github.com/klauspost/reedsolomon"
+import (
+	cluster "github.com/ByteStorage/FlyDB/raft"
+	"github.com/klauspost/reedsolomon"
+)
 
 type EcEncoder struct {
 	reedsolomon.Encoder
@@ -14,6 +17,6 @@ func NewEcEncoder(dataNum int, parityNum int) (EcEncoder, error) {
 	return EcEncoder{encoder}, nil
 }
 
-func (ec *EcEncoder) AssignData(data []byte, slaveAddrList []string) (map[string][]byte, error) {
+func (ec *EcEncoder) AssignData(data []byte, slaveAddrList []cluster.Slave) (map[string][]byte, error) {
 	panic("implement me")
 }
