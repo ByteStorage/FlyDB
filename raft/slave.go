@@ -54,7 +54,7 @@ func (s *Slave) RegisterToMaster() {
 }
 
 func (s *Slave) SendHeartbeat() {
-	for range time.Tick(200 * time.Millisecond) {
+	for range time.Tick(3 * time.Second) {
 		// connect with the currently known "leader"
 		conn, err := grpc.Dial(s.Leader, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {

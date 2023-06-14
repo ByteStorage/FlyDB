@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/raft"
 	boltdb "github.com/hashicorp/raft-boltdb"
 	"strconv"
+	"time"
 )
 
 type IndexerType = int8
@@ -46,7 +47,7 @@ type Master struct {
 	//Slave List
 	Slave []Slave
 	//Heartbeat
-	Heartbeat map[string]string
+	Heartbeat map[string]time.Time
 	//Filename to node,key is filename,value is node
 	FilenameToNode map[string]string
 	//Dir Tree
@@ -111,7 +112,7 @@ func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
 			Addr:           master,
 			Peers:          masterList,
 			Slave:          slaves,
-			Heartbeat:      make(map[string]string),
+			Heartbeat:      make(map[string]time.Time),
 			FilenameToNode: make(map[string]string),
 			DirTree:        dirtree.NewDirTree(),
 		}
@@ -135,7 +136,7 @@ func (c *Cluster) startMasters() {
 		//wait for leader
 		m.WaitForLeader()
 		//add slave or delete slave
-		go m.ListenSlave(c.Slave)
+		go m.ListenSlave()
 		//listen user request, by wal
 		go m.ListenRequest()
 	}
