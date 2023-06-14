@@ -108,3 +108,7 @@ func (m *Master) CurrentLeader(ctx context.Context, in *proto.MasterCurrentLeade
 	addr, _ := m.Raft.LeaderWithID()
 	return &proto.MasterCurrentLeaderResponse{Leader: string(addr)}, nil
 }
+
+func (m *Master) ReceiveHeartbeat(ctx context.Context, in *proto.MasterHeartbeatRequest) (*proto.MasterHeartbeatResponse, error) {
+	panic("implement me")
+}

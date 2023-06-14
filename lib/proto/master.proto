@@ -15,6 +15,15 @@ service MasterGrpcService {
   rpc Shutdown(MasterShutdownRequest) returns (MasterShutdownResponse) {}
   rpc RegisterSlave(MasterRegisterSlaveRequest) returns (MasterRegisterSlaveResponse) {}
   rpc CurrentLeader(MasterCurrentLeaderRequest) returns (MasterCurrentLeaderResponse) {}
+  rpc ReceiveHeartbeat(MasterHeartbeatRequest) returns (MasterHeartbeatResponse) {}
+}
+
+message MasterHeartbeatRequest {
+  string addr = 1;
+}
+
+message MasterHeartbeatResponse {
+  bool ok = 1;
 }
 
 message MasterRegisterSlaveRequest {
