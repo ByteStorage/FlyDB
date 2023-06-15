@@ -67,7 +67,7 @@ func main() {
 
 如果您有任何疑问并想与我们联系，您可以联系我们的开发团队，我们会回复您的邮件:
 
-团队邮箱:bytestorage@163.com
+团队邮箱:bytestoragecommunity@gmail.com
 
 或者加我微信，邀请大家进入项目社区，和大牛一起交流学习。
 
