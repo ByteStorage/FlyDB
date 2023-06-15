@@ -69,7 +69,7 @@ func main() {
 
 If you have any questions and want to contact us, you can contact our developer team, we will reply to your email:
 
-Team Email: bytestorage@163.com
+Team Email: bytestoragecommunity@gmail.com
 
 Or add my wechat, invite you to enter the project community, and code masters together to exchange learning.
 
