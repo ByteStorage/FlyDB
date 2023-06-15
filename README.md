@@ -36,8 +36,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/ByteStorage/flydb/flydb"
-	"github.com/ByteStorage/flydb/config"
+	"github.com/ByteStorage/FlyDB/flydb"
+	"github.com/ByteStorage/FlyDB/config"
 )
 
 func main() {
