@@ -17,13 +17,13 @@
 您可以使用Go命令行工具安装FlyDB:
 
 ```GO
-go get github.com/ByteStorage/flydb
+go get github.com/ByteStorage/FlyDB@v1.0.3
 ```
 
 或者从github克隆这个项目:
 
 ```bash
-git clone https://github.com/ByteStorage/flydb
+git clone https://github.com/ByteStorage/FlyDB
 ```
 
 ## 🚀 如何使用 FlyDB ?
