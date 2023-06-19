@@ -65,6 +65,20 @@ func main() {
 }
 ```
 
+## 🚀 Performance test
+
+We did a simple performance test of the V1.0.3 version of FlyDB. This test mainly focused on reading and writing large-scale data, and we selected 500,000 random data for testing.
+
+Through testing, we found that in V1.0.3, with 500,000 data:
+
+PUT performance: 1.354297175s
+
+GET performance: 1.068179401s
+
+<img src="./assets/property.png" alt="vx" style="width: 33%;"  />
+
+If you have a better way to optimize read and write performance, please submit your 'pr'.
+
 ## 🔮 How to contact us ?
 
 If you have any questions and want to contact us, you can contact our developer team, we will reply to your email:
