@@ -1,9 +1,13 @@
 package meta
 
-import "github.com/ByteStorage/FlyDB/cluster/store"
+import (
+	"github.com/ByteStorage/FlyDB/cluster/store"
+	"time"
+)
 
 type Meta struct {
-	store map[string]*store.Store
+	store     map[string]*store.Store
+	heartbeat map[string]time.Time
 }
 
 type Manager interface {
