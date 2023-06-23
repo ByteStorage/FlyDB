@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/raft"
 )
 
-type Region struct {
+type region struct {
 	id       uint64
 	startKey []byte
 	endKey   []byte
@@ -13,7 +13,7 @@ type Region struct {
 	raft     *raft.Raft
 }
 
-type Manager interface {
+type Region interface {
 	// GetRegionByKey gets region and leader peer by region key from cluster.
 	GetRegionByKey(key []byte) (*Region, error)
 	// GetRegionByID gets region and leader peer by region id from cluster.

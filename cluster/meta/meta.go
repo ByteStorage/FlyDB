@@ -12,7 +12,10 @@ type Meta struct {
 	dirTree   *dirtree.DirTree
 }
 
-type Manager interface {
+type MetadataManager interface {
 	// GetStore gets store by addr
 	GetStore(addr string) (*store.Store, error)
+}
+
+type metadataManager struct {
 }
