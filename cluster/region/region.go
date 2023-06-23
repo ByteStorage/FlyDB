@@ -6,9 +6,9 @@ import (
 )
 
 type Region struct {
-	Id       uint64
-	StartKey []byte
-	EndKey   []byte
+	id       uint64
+	startKey []byte
+	endKey   []byte
 	db       *engine.DB
 	raft     *raft.Raft
 }
