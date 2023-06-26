@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
@@ -25,9 +26,42 @@ func startServer(c *grumble.Context) error {
 }
 
 func stopServer(c *grumble.Context) error {
-	panic("implement me")
+	if len(c.Args) == 0 {
+		if db == nil {
+			err := errors.New("no server to stop")
+			fmt.Println("flydb stop error: ", err)
+			return err
+		}
+		err := db.Close()
+		if err != nil {
+			fmt.Println("flydb stop error: ", err)
+			return err
+		}
+		fmt.Println("flydb stop success")
+		db = nil
+	}
+	return nil
 }
 
 func cleanServer(c *grumble.Context) error {
-	panic("implement me")
+	if len(c.Args) == 0 {
+		if db == nil {
+			err := errors.New("no server to clean")
+			fmt.Println("flydb clean error: ", err)
+			return err
+		}
+		err := db.Close()
+		if err != nil {
+			fmt.Println("flydb clean error: ", err)
+			return err
+		}
+		err = db.Clean()
+		if err != nil {
+			fmt.Println("flydb clean error: ", err)
+			return err
+		}
+
+		fmt.Println("flydb clean success")
+	}
+	return nil
 }

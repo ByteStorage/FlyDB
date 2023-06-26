@@ -114,6 +114,14 @@ func (db *DB) Close() error {
 	return nil
 }
 
+// Clean the db instance
+func (db *DB) Clean() error {
+	db.activeFile = nil
+	db.olderFiles = make(map[uint32]*data.DataFile)
+	db.index = index.NewIndexer(db.options.IndexType, db.options.DirPath)
+	return nil
+}
+
 // Sync the db instance
 func (db *DB) Sync() error {
 	zap.L().Info("sync db", zap.Any("options", db.options))
