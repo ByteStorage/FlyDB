@@ -423,3 +423,29 @@ func TestDB_Sync(t *testing.T) {
 	err = db.Sync()
 	assert.Nil(t, err)
 }
+
+func TestDB_Clean(t *testing.T) {
+	opts := config.DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-close")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := NewDB(opts)
+	defer destroyDB(db)
+
+	key := randkv.GetTestKey(10)
+	value := randkv.GetTestKey(10)
+
+	err = db.Put(key, value)
+	assert.Nil(t, err)
+
+	val, _ := db.Get(key)
+	assert.Equal(t, value, val)
+
+	err = db.Clean()
+	assert.Nil(t, err)
+
+	val, err = db.Get(key)
+	assert.NotNil(t, err)
+	assert.Nil(t, val)
+
+}
