@@ -1,4 +1,4 @@
-package FlyDB
+package _const
 
 import "errors"
 
