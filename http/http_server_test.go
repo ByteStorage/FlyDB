@@ -190,8 +190,8 @@ func TestPost(t *testing.T) {
 
 	// 构造请求
 	reqBody := map[string]string{
-		"key":   "test_post1",
-		"value": "test_post1_value",
+		"key":   "test_post",
+		"value": "test_post_value",
 	}
 	reqBytes, _ := json.Marshal(reqBody)
 
