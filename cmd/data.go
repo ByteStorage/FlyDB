@@ -40,11 +40,11 @@ func getData(c *grumble.Context) error {
 		fmt.Println("get data error: ", err)
 		return err
 	}
-	fmt.Println(string(value[:]))
+	fmt.Println(string(value))
 	return nil
 }
 
-func deleteDate(c *grumble.Context) error {
+func deleteKey(c *grumble.Context) error {
 	key := c.Args.String("key")
 	if key == "" {
 		fmt.Println("key is empty")
@@ -56,10 +56,10 @@ func deleteDate(c *grumble.Context) error {
 	}
 	err := db.Delete([]byte(key))
 	if err != nil {
-		fmt.Println("get data error: ", err)
+		fmt.Println("delete key error: ", err)
 		return err
 	}
-	fmt.Println("delete data success")
+	fmt.Println("delete key success")
 	return nil
 }
 
@@ -69,8 +69,15 @@ func getKeys(c *grumble.Context) error {
 		return nil
 	}
 	list := db.GetListKeys()
+	fmt.Println("Total keys: ", len(list))
 	for i, bytes := range list {
-		fmt.Println(i+1, "- ", string(bytes[:]))
+		fmt.Printf(string(bytes[:]) + "\t")
+		if i%8 == 7 {
+			fmt.Println()
+		}
+	}
+	if len(list)%8 != 0 {
+		fmt.Println()
 	}
 	return nil
 }

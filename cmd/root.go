@@ -44,8 +44,8 @@ func register(app *grumble.App) {
 
 	app.AddCommand(&grumble.Command{
 		Name: "delete",
-		Help: "delete data",
-		Run:  deleteDate,
+		Help: "delete key",
+		Run:  deleteKey,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 		},
