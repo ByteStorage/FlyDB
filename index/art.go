@@ -69,37 +69,6 @@ type ARTreeIterator struct {
 	values    []*Item // Key + Location index information
 }
 
-//func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
-//	var idx int
-//	if reverse {
-//		idx = tree.Size() - 1
-//	}
-//	values := make([]*Item, tree.Size())
-//
-//	// Store all the data in an array
-//	saveToValues := func(node art.Node) bool {
-//		item := &Item{
-//			key: node.Key(),
-//			pst: node.Value().(*data.LogRecordPst),
-//		}
-//		values[idx] = item
-//		if reverse {
-//			idx--
-//		} else {
-//			idx++
-//		}
-//		return true
-//	}
-//	tree.ForEach(saveToValues)
-//
-//	return &ARTreeIterator{
-//		currIndex: 0,
-//		reverse:   reverse,
-//		values:    values,
-//	}
-//
-//}
-
 func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
 	// Initialize the subscript position of the current traversal
 	var idx int
