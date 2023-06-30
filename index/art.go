@@ -69,7 +69,7 @@ type ARTreeIterator struct {
 	values    []*Item // Key + Location index information
 }
 
-func NewARTreeIterator(tree art.Tree, reverse bool) *BtreeIterator {
+func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
 	var idx int
 	if reverse {
 		idx = tree.Size() - 1
@@ -92,7 +92,7 @@ func NewARTreeIterator(tree art.Tree, reverse bool) *BtreeIterator {
 	}
 	tree.ForEach(saveToValues)
 
-	return &BtreeIterator{
+	return &ARTreeIterator{
 		currIndex: 0,
 		reverse:   reverse,
 		values:    values,
