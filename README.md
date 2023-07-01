@@ -1,6 +1,6 @@
 <img src="./assets/FlyDB-logo.png" alt="FlyDB-logo" style="display: block; margin: 0 auto; width: 45%;" />
 
-![GitHub top language](https://img.shields.io/github/languages/top/ByteStorage/flydb)   [![Go Reference](https://pkg.go.dev/badge/github.com/ByteStorage/flydb)](https://pkg.go.dev/github.com/ByteStorage/flydb)   ![LICENSE](https://img.shields.io/github/license/ByteStorage/flydb)   ![GitHub stars](https://img.shields.io/github/stars/ByteStorage/flydb)   ![GitHub forks](https://img.shields.io/github/forks/ByteStorage/flydb)   [![Go Report Card](https://goreportcard.com/badge/github.com/qishenonly/flydb)](https://goreportcard.com/report/github.com/qishenonly/flydb)
+![GitHub top language](https://img.shields.io/github/languages/top/ByteStorage/flydb)   [![Go Reference](https://pkg.go.dev/badge/github.com/ByteStorage/flydb)](https://pkg.go.dev/github.com/ByteStorage/flydb)   ![LICENSE](https://img.shields.io/github/license/ByteStorage/flydb)   ![GitHub stars](https://img.shields.io/github/stars/ByteStorage/flydb)   ![GitHub forks](https://img.shields.io/github/forks/ByteStorage/flydb)   [![Go Report Card](https://goreportcard.com/badge/github.com/qishenonly/flydb)](https://goreportcard.com/report/github.com/qishenonly/flydb) ![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/ByteStorage/FlyDB)![GitHub contributors](https://img.shields.io/github/contributors/ByteStorage/FlyDB)
 ## The project is under iterative development, please do not use it in production environment!
 
 English | [中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md)
@@ -16,7 +16,7 @@ English | [中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md
 You can install FlyDB using the Go command line tool:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.3
+go get github.com/ByteStorage/FlyDB@v1.0.4
 ```
 
 Or clone this project from github:
@@ -67,15 +67,27 @@ func main() {
 
 ## 🚀 Performance test
 
-We did a simple performance test of the V1.0.3 version of FlyDB. This test mainly focused on reading and writing large-scale data, and we selected 500,000 random data for testing.
+We did a simple performance test of the V1.0.4 version of FlyDB. This test mainly focused on reading and writing large-scale data, and we selected 500,000 random data for testing.
 
-Through testing, we found that in V1.0.3, with 500,000 data:
+Through testing, we found that in V1.0.4, with 500,000 data:
 
-PUT performance: 1.354297175s
+#### BTree Index
 
-GET performance: 1.068179401s
+PUT performance: 572.265968ms
 
-<img src="./assets/property.png" alt="vx" style="width: 33%;"  />
+GET performance: 355.943926ms
+
+<img src="./assets/v1.0.4-btree" alt="v1.0.4-btree" style="width: 33%;"  />
+
+#### ARTree Index
+
+PUT performance: 569.610614ms
+
+GET performance: 297.781977ms
+
+<img src="./assets/v1.0.4--art" alt="v1.0.4-art" style="width: 33%;"  />
+
+
 
 If you have a better way to optimize read and write performance, please submit your 'pr'.
 
@@ -91,7 +103,7 @@ Or add my wechat, invite you to enter the project community, and code masters to
 
 <img src="./assets/vx.png" alt="vx" style="width: 33%;"  />
 
-## 📜 TODO List
+## ✅ TODO List
 
 - [ ] Extended data structure support: including but not limited to string, list, hash, set, etc.
 - [ ] Compatible with Redis protocols and commands.
@@ -101,12 +113,23 @@ Or add my wechat, invite you to enter the project community, and code masters to
 - [ ] Data backup
 - [ ] Distributed cluster model.
 
-## How to contribute ?
+## 📜 Version update list
+
+V1.0.4: The short-term support version v1.0.4 uses mmap to optimize the index part, significantly improving read and write performance compared to the v1.0.3 version. The 50w data write speed has accelerated from 1.35 seconds to 0.56 seconds, and the read speed has accelerated from 1.06 seconds to 0.355 seconds.
+
+## 👀 Contributor
+
+<a href="https://github.com/ByteStorage/FlyDB/graphs/contributors">
+
+<img src="https://contrib.rocks/image?repo=ByteStorage/FlyDB" /> 
+</a>
+
+## 📝 How to contribute ?
 
 If you have any ideas or suggestions for FlyDB, please feel free to submit 'issues' or' pr 'on GitHub. We welcome your contributions!
 
 > Please refer to the complete specification procedure：[CONTRIBUTEING](https://github.com/ByteStorage/flydb/blob/master/CONTRIBUTING.md)
 
-## Licence
+## 📋 Licence
 
 FlyDB is released under the Apache license. For details, see LICENSE file.
