@@ -2,7 +2,7 @@ package cluster
 
 import (
 	"github.com/ByteStorage/FlyDB/cluster/meta"
-	"time"
+	"github.com/ByteStorage/FlyDB/config"
 )
 
 type server struct {
@@ -19,16 +19,9 @@ type Cluster interface {
 	// GetKeys gets all keys from cluster.
 	GetKeys() ([][]byte, error)
 	// UpdateConfig updates the config of cluster.
-	UpdateConfig(config *Config) error
+	UpdateConfig(config *config.Config) error
 }
 
-type Config struct {
-	ReplicationFactor  int
-	ShardingStrategy   string
-	SchedulingStrategy string
-	HeartbeatInterval  time.Duration
-}
-
-func NewCluster(config *Config) (Cluster, error) {
+func NewCluster(config *config.Config) (Cluster, error) {
 	panic("")
 }
