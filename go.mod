@@ -1,6 +1,6 @@
 module github.com/ByteStorage/FlyDB
 
-go 1.17
+go 1.18
 
 require (
 	github.com/desertbit/grumble v1.1.3
