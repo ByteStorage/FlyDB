@@ -5,10 +5,12 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 )
 
+// server is the implementation of Cluster interface.
 type server struct {
-	meta *meta.MetadataManager
+	meta *meta.MetadataManager // metadata manager, to manage the metadata of the cluster.
 }
 
+// Cluster is the interface of cluster.
 type Cluster interface {
 	// Put puts a key-value pair to cluster.
 	Put(key, value []byte) error
@@ -22,6 +24,7 @@ type Cluster interface {
 	UpdateConfig(config *config.Config) error
 }
 
+// NewCluster creates a new cluster.
 func NewCluster(config *config.Config) (Cluster, error) {
-	panic("")
+	panic("implement me")
 }

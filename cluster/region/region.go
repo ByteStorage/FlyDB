@@ -6,19 +6,21 @@ import (
 	"sync"
 )
 
+// region stores the data of a region.
 type region struct {
-	id         uint64
-	startKey   []byte
-	endKey     []byte
-	db         *engine.DB
-	raft       *raft.Raft
-	raftGroups map[uint64]*raft.Raft
-	leader     string
-	peers      []string
-	size       int64
-	mu         sync.RWMutex
+	id         uint64                // region id
+	startKey   []byte                // start key
+	endKey     []byte                // end key
+	db         *engine.DB            // db, to store the data.
+	raft       *raft.Raft            // raft, to store the raft group.
+	raftGroups map[uint64]*raft.Raft // raft groups, to store the raft groups of the region.
+	leader     string                // leader peer
+	peers      []string              // peers
+	size       int64                 // size
+	mu         sync.RWMutex          // mutex, to protect the region.
 }
 
+// Region is the interface of region.
 type Region interface {
 	// Put puts a key-value pair to region.
 	Put(key []byte, value []byte) error
