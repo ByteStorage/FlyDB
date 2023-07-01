@@ -45,3 +45,49 @@ type Region interface {
 	// GetSize gets the total size of the region.
 	GetSize() int64
 }
+
+func (r *region) Put(key []byte, value []byte) error {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.db.Put(key, value)
+}
+
+func (r *region) Get(key []byte) ([]byte, error) {
+	panic("implement me")
+}
+
+func (r *region) Delete(key []byte) error {
+	panic("implement me")
+}
+
+func (r *region) GetStartKey() []byte {
+	panic("implement me")
+}
+
+func (r *region) GetEndKey() []byte {
+	panic("implement me")
+}
+
+func (r *region) GetLeader() string {
+	panic("implement me")
+}
+
+func (r *region) GetPeers() []string {
+	panic("implement me")
+}
+
+func (r *region) TransferLeader(peer string) error {
+	panic("implement me")
+}
+
+func (r *region) AddPeer(peer string) error {
+	panic("implement me")
+}
+
+func (r *region) RemovePeer(peer string) error {
+	panic("implement me")
+}
+
+func (r *region) GetSize() int64 {
+	panic("implement me")
+}
