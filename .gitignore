@@ -1,4 +1,4 @@
 .idea/
 tmp/
 .git-old/
-./logs
+.lib/logger/logs/
