@@ -5,14 +5,16 @@ import (
 	"sync"
 )
 
+// store stores the data of a store.
 type store struct {
-	id         uint64
-	addr       string
-	regionList map[uint64]*region.Region
-	size       int64
-	mu         sync.RWMutex
+	id         uint64                    // store id
+	addr       string                    // store address
+	regionList map[uint64]*region.Region // region list, to store the regions in the store.
+	size       int64                     // size
+	mu         sync.RWMutex              // mutex, to protect the store.
 }
 
+// Store is the interface of store.
 type Store interface {
 	// GetRegionByKey gets region and leader peer by region key from cluster.
 	GetRegionByKey(key []byte) (*region.Region, error)

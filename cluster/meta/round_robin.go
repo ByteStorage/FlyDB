@@ -1,25 +1,20 @@
 package meta
 
-import "fmt"
-
+// RoundRobinScheduler is a scheduler that selects nodes in round-robin order.
 type RoundRobinScheduler struct {
-	nodes []*NodeStatus
-	next  int
+	nodes []*NodeStatus // all nodes
+	next  int           // next node index
 }
 
-func NewScheduler(config *SchedulerConfig) *Scheduler {
+// NewRoundRobinScheduler creates a new RoundRobinScheduler.
+func NewRoundRobinScheduler(config *SchedulerConfig) *Scheduler {
 	return &Scheduler{
 		config:   config,
 		strategy: nil,
 	}
 }
 
-func (s *RoundRobinScheduler) SelectNode(key []byte) (*NodeStatus, error) {
-	if len(s.nodes) == 0 {
-		return nil, fmt.Errorf("no available nodes")
-	}
-
-	node := s.nodes[s.next]
-	s.next = (s.next + 1) % len(s.nodes)
-	return node, nil
+// SelectNode selects a node in round-robin order.
+func (r *RoundRobinScheduler) SelectNode(nodes []*NodeStatus, key []byte, num int) (*NodeStatus, error) {
+	panic("implement me")
 }

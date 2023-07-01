@@ -6,37 +6,41 @@ import (
 )
 
 type NodeStatus struct {
-	ID            string
-	Address       string
-	Alive         bool
-	LastHeartbeat time.Time
-	Capacity      int
-	Availability  bool
+	ID            string    // node id
+	Address       string    // node address
+	Alive         bool      // whether the node is alive
+	LastHeartbeat time.Time // last heartbeat time
+	Capacity      int       // node capacity
+	Availability  bool      // whether the node is available
 }
 
 type Scheduler struct {
-	config   *SchedulerConfig
-	strategy SchedulingStrategy
-	mu       sync.RWMutex
+	config   *SchedulerConfig   // scheduler config
+	strategy SchedulingStrategy // scheduling strategy
+	mu       sync.RWMutex       // mutex, to protect the scheduler
 }
 
 type SchedulerConfig struct {
-	MaxLoad              int
-	MinLoad              int
-	ReplicationFactor    int
-	DataShardingStrategy string
-	PriorityStrategy     string
-	SchedulingAlgorithm  string
+	MaxLoad              int    // max load of a node
+	MinLoad              int    // min load of a node
+	ReplicationFactor    int    // replication factor
+	DataShardingStrategy string // data sharding strategy
+	PriorityStrategy     string // priority strategy
+	SchedulingAlgorithm  string // scheduling algorithm
 }
 
+// SchedulingStrategy is the interface that wraps the basic SelectNode method.
 type SchedulingStrategy interface {
-	SelectNode(nodes []*NodeStatus, key []byte) (*NodeStatus, error)
+	// SelectNode selects num node to schedule the key.
+	SelectNode(nodes []*NodeStatus, key []byte, num int) (*NodeStatus, error)
 }
 
+// SetSchedulingStrategy sets the scheduling strategy.
 func (s *Scheduler) SetSchedulingStrategy(strategy SchedulingStrategy) {
 	s.strategy = strategy
 }
 
+// ScheduleNode schedules the key to a node.
 func (s *Scheduler) ScheduleNode(key []byte) (*NodeStatus, error) {
-	panic("")
+	panic("implement me")
 }
