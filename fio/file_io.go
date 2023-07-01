@@ -47,5 +47,5 @@ func (fio *FileIO) Size() (int64, error) {
 }
 
 func NewIOManager(filename string) (IOManager, error) {
-	return NewFileIOManager(filename)
+	return NewMMapIOManager(filename)
 }
