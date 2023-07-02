@@ -10,22 +10,6 @@ import (
 	"time"
 )
 
-func BenchmarkDB_Put(b *testing.B) {
-	opts := config.DefaultOptions
-	dir, _ := os.MkdirTemp("", "flydb-benchmark")
-	opts.DirPath = dir
-	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewDB(opts)
-	defer destroyDB(db)
-	assert.Nil(b, err)
-	assert.NotNil(b, db)
-
-	for n := 0; n < b.N; n++ {
-		err = db.Put(randkv.GetTestKey(n), randkv.RandomValue(24))
-		assert.Nil(b, err)
-	}
-}
-
 func TestPutAndGet(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-benchmark")
