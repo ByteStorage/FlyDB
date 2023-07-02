@@ -45,7 +45,3 @@ func (fio *FileIO) Size() (int64, error) {
 	}
 	return stat.Size(), nil
 }
-
-func NewIOManager(filename string) (IOManager, error) {
-	return NewFileIOManager(filename)
-}

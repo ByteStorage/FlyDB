@@ -22,9 +22,9 @@ type DataFile struct {
 }
 
 // OpenDataFile 打开新的数据文件
-func OpenDataFile(dirPath string, fildID uint32) (*DataFile, error) {
+func OpenDataFile(dirPath string, fildID uint32, fileSize int64, fioType int8) (*DataFile, error) {
 	fileName := GetDataFileName(dirPath, fildID)
-	return newDataFile(fileName, fildID)
+	return newDataFile(fileName, fildID, fileSize, fioType)
 }
 
 func GetDataFileName(dirPath string, fildID uint32) string {
@@ -32,20 +32,20 @@ func GetDataFileName(dirPath string, fildID uint32) string {
 }
 
 // OpenHintFile 打开 Hint 索引文件
-func OpenHintFile(dirPath string) (*DataFile, error) {
+func OpenHintFile(dirPath string, fileSize int64, fioType int8) (*DataFile, error) {
 	fileName := filepath.Join(dirPath, HintFileSuffix)
-	return newDataFile(fileName, 0)
+	return newDataFile(fileName, 0, fileSize, fioType)
 }
 
 // OpenMergeFinaFile 打开标识 merge 完成的文件
-func OpenMergeFinaFile(dirPath string) (*DataFile, error) {
+func OpenMergeFinaFile(dirPath string, fileSize int64, fioType int8) (*DataFile, error) {
 	fileName := filepath.Join(dirPath, MergeFinaFileSuffix)
-	return newDataFile(fileName, 0)
+	return newDataFile(fileName, 0, fileSize, fioType)
 }
 
-func newDataFile(dirPath string, fildID uint32) (*DataFile, error) {
+func newDataFile(dirPath string, fildID uint32, fileSize int64, fioType int8) (*DataFile, error) {
 	//初始化 IOManager 管理器接口
-	ioManager, err := fio.NewIOManager(dirPath)
+	ioManager, err := fio.NewIOManager(dirPath, fileSize, fioType)
 	if err != nil {
 		return nil, err
 	}
