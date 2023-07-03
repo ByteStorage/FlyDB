@@ -1,27 +1,30 @@
 package data
 
 import (
+	"github.com/ByteStorage/FlyDB/fio"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
 
+const DefaultFileSize = 256 * 1024 * 1024
+
 func TestOpenDataFile(t *testing.T) {
-	dataFile1, err := OpenDataFile(os.TempDir(), 0)
+	dataFile1, err := OpenDataFile(os.TempDir(), 0, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile1)
 
-	dataFile2, err := OpenDataFile(os.TempDir(), 1)
+	dataFile2, err := OpenDataFile(os.TempDir(), 1, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile2)
 
-	dataFile3, err := OpenDataFile(os.TempDir(), 1)
+	dataFile3, err := OpenDataFile(os.TempDir(), 1, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile3)
 }
 
 func TestDataFile_Write(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 12312)
+	dataFile, err := OpenDataFile(os.TempDir(), 12312, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
@@ -36,7 +39,7 @@ func TestDataFile_Write(t *testing.T) {
 }
 
 func TestDataFile_Close(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 1111111)
+	dataFile, err := OpenDataFile(os.TempDir(), 1111111, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
@@ -45,7 +48,7 @@ func TestDataFile_Close(t *testing.T) {
 }
 
 func TestDataFile_Sync(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 2222222)
+	dataFile, err := OpenDataFile(os.TempDir(), 2222222, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
@@ -54,7 +57,7 @@ func TestDataFile_Sync(t *testing.T) {
 }
 
 func TestDataFile_ReadLogRecord(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 123)
+	dataFile, err := OpenDataFile(os.TempDir(), 123, DefaultFileSize, fio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 

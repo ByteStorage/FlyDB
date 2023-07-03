@@ -218,7 +218,7 @@ func (db *DB) setActiveDataFile() error {
 	}
 
 	// Open a new data file
-	dataFile, err := data.OpenDataFile(db.options.DirPath, initialFileID)
+	dataFile, err := data.OpenDataFile(db.options.DirPath, initialFileID, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -368,7 +368,7 @@ func (db *DB) loadDataFiles() error {
 
 	// Walk through each file id and open the corresponding data file
 	for i, fid := range fileIds {
-		dataFile, err := data.OpenDataFile(db.options.DirPath, uint32(fid))
+		dataFile, err := data.OpenDataFile(db.options.DirPath, uint32(fid), db.options.DataFileSize, db.options.FIOType)
 		if err != nil {
 			return err
 		}

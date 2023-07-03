@@ -23,6 +23,7 @@ var DefaultOptions = config.Options{
 	DataFileSize: 256 * 1024 * 1024, // 256MB
 	SyncWrite:    false,
 	IndexType:    Btree,
+	FIOType:      config.FileIOType,
 }
 
 // Cluster define the cluster of db

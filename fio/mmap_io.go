@@ -7,20 +7,18 @@ import (
 	"unsafe"
 )
 
-// DefaultMemMapSize 最大映射内存大小
-const DefaultMemMapSize = 256 * 1024 * 1024
-
-// MMapIO 标准系统文件IO
 type MMapIO struct {
-	fd     *os.File // 系统文件描述符
-	data   []byte   // 与文件对应的映射区
-	dirty  bool     // 是否更改过
-	offset int64    // 写入位置
+	fd       *os.File // system file descriptor
+	data     []byte   // the mapping area corresponding to the file
+	dirty    bool     // has changed
+	offset   int64    // next write location
+	fileSize int64    // max file size
 }
 
-// NewMMapIOManager 初始化标准文件 IO
-func NewMMapIOManager(fileName string) (*MMapIO, error) {
-	mmapIO := &MMapIO{}
+// NewMMapIOManager Initialize Mmap IO
+func NewMMapIOManager(fileName string, fileSize int64) (*MMapIO, error) {
+	mmapIO := &MMapIO{fileSize: fileSize}
+
 	fd, err := os.OpenFile(
 		fileName,
 		os.O_CREATE|os.O_RDWR|os.O_APPEND,
@@ -31,13 +29,13 @@ func NewMMapIOManager(fileName string) (*MMapIO, error) {
 	}
 	info, _ := fd.Stat()
 
-	// 将文件扩容到映射区大小, 保存时会裁剪
-	if err := fd.Truncate(DefaultMemMapSize); err != nil {
+	// Expand files to maximum file size, crop when saving
+	if err := fd.Truncate(fileSize); err != nil {
 		return nil, err
 	}
 
-	// 构建映射
-	b, err := syscall.Mmap(int(fd.Fd()), 0, DefaultMemMapSize, syscall.PROT_WRITE|syscall.PROT_READ, syscall.MAP_SHARED)
+	// Building mappings between memory and disk files
+	b, err := syscall.Mmap(int(fd.Fd()), 0, int(fileSize), syscall.PROT_WRITE|syscall.PROT_READ, syscall.MAP_SHARED)
 	if err != nil {
 		return nil, err
 	}
@@ -48,14 +46,16 @@ func NewMMapIOManager(fileName string) (*MMapIO, error) {
 	return mmapIO, nil
 }
 
+// Read Copy data from the mapping area to byte slice
 func (mio *MMapIO) Read(b []byte, offset int64) (int, error) {
 	return copy(b, mio.data[offset:]), nil
 }
 
+// Write Copy data from byte slice to the mapping area
 func (mio *MMapIO) Write(b []byte) (int, error) {
 	oldOffset := mio.offset
 	newOffset := mio.offset + int64(len(b))
-	if newOffset > DefaultMemMapSize {
+	if newOffset > mio.fileSize {
 		return 0, errors.New("exceed file max content length")
 	}
 
@@ -64,6 +64,7 @@ func (mio *MMapIO) Write(b []byte) (int, error) {
 	return copy(mio.data[oldOffset:], b), nil
 }
 
+// Sync Synchronize data from memory to disk
 func (mio *MMapIO) Sync() error {
 	if !mio.dirty {
 		return nil
@@ -78,6 +79,7 @@ func (mio *MMapIO) Sync() error {
 	return nil
 }
 
+// Close file
 func (mio *MMapIO) Close() (err error) {
 	if err = mio.fd.Truncate(mio.offset); err != nil {
 		return err
@@ -91,10 +93,12 @@ func (mio *MMapIO) Close() (err error) {
 	return mio.fd.Close()
 }
 
+// Size return the size of current file
 func (mio *MMapIO) Size() (int64, error) {
 	return mio.offset, nil
 }
 
+// UnMap Unmapping between memory and files
 func (mio *MMapIO) UnMap() error {
 	if mio.data == nil {
 		return nil

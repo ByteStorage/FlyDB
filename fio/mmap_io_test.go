@@ -8,7 +8,7 @@ import (
 
 func TestNewMMapIOManager(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	defer destoryFile(path)
 
 	assert.Nil(t, err)
@@ -17,7 +17,7 @@ func TestNewMMapIOManager(t *testing.T) {
 
 func TestMMapIO_Write(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	defer destoryFile(path)
 	assert.Nil(t, err)
 	assert.NotNil(t, mio)
@@ -36,7 +36,7 @@ func TestMMapIO_Write(t *testing.T) {
 
 func TestMMapIO_Read(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	defer destoryFile(path)
 
 	assert.Nil(t, err)
@@ -60,7 +60,7 @@ func TestMMapIO_Read(t *testing.T) {
 
 func TestMMapIO_Sync(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	defer destoryFile(path)
 
 	assert.Nil(t, err)
@@ -73,7 +73,7 @@ func TestMMapIO_Sync(t *testing.T) {
 
 func TestMMapIO_Close(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	defer destoryFile(path)
 
 	assert.Nil(t, err)
@@ -88,7 +88,7 @@ func TestMMapIO_Close(t *testing.T) {
 
 func TestMMapIO_Write_Speed(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	assert.Nil(t, err)
 	assert.NotNil(t, mio)
 
@@ -104,7 +104,7 @@ func TestMMapIO_Write_Speed(t *testing.T) {
 
 func TestMMapIO_Read_Speed(t *testing.T) {
 	path := filepath.Join("/tmp", "a.data")
-	mio, err := NewMMapIOManager(path)
+	mio, err := NewMMapIOManager(path, DefaultFileSize)
 	defer destoryFile(path)
 	assert.Nil(t, err)
 	assert.NotNil(t, mio)

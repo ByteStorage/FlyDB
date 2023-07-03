@@ -7,6 +7,7 @@ type Options struct {
 	DataFileSize int64  //数据文件的大小
 	SyncWrite    bool   // 每次写数据是否持久化
 	IndexType    IndexerType
+	FIOType      FIOType
 }
 
 // IteratorOptions 索引迭代器配置项
@@ -25,6 +26,14 @@ type WriteBatchOptions struct {
 	SyncWrites bool
 }
 
+type FIOType = int8
+
+const (
+	FileIOType = iota + 1 // Standard File IO
+	BufIOType             // File IO with buffer
+	MmapIOType            // Memory Mapping IO
+)
+
 type IndexerType = int8
 
 const (
@@ -40,6 +49,7 @@ var DefaultOptions = Options{
 	DataFileSize: 256 * 1024 * 1024, // 256MB
 	SyncWrite:    false,
 	IndexType:    Btree,
+	FIOType:      FileIOType,
 }
 
 var DefaultIteratorOptions = IteratorOptions{

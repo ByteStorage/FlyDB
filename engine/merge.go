@@ -85,7 +85,7 @@ func (db *DB) Merge() error {
 	}
 
 	// 打开 hint 文件存储索引
-	hintFile, err := data.OpenHintFile(mergePath)
+	hintFile, err := data.OpenHintFile(mergePath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (db *DB) Merge() error {
 	}
 
 	// 写标识 merge 完成的文件
-	mergeFinaFile, err := data.OpenMergeFinaFile(mergePath)
+	mergeFinaFile, err := data.OpenMergeFinaFile(mergePath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func (db *DB) loadMergeFiles() error {
 
 // 获取最近没有参与 merge 的文件 id
 func (db *DB) getRecentlyNonMergeFileId(dirPath string) (uint32, error) {
-	mergeFinaFile, err := data.OpenMergeFinaFile(dirPath)
+	mergeFinaFile, err := data.OpenMergeFinaFile(dirPath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return 0, err
 	}
@@ -247,7 +247,7 @@ func (db *DB) loadIndexFromHintFile() error {
 	}
 
 	// 打开 hint 文件
-	hintFile, err := data.OpenHintFile(db.options.DirPath)
+	hintFile, err := data.OpenHintFile(db.options.DirPath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
