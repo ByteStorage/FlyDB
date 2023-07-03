@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/ByteStorage/FlyDB/fileio"
+	"github.com/ByteStorage/FlyDB/engine/fileio"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"

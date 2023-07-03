@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/ByteStorage/FlyDB/data"
+	data2 "github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"io"
 	"os"
@@ -52,7 +52,7 @@ func (db *DB) Merge() error {
 	noMergeFileId := db.activeFile.FileID
 
 	// 取出所有需要 merge 的文件
-	var mergeFiles []*data.DataFile
+	var mergeFiles []*data2.DataFile
 	for _, files := range db.olderFiles {
 		mergeFiles = append(mergeFiles, files)
 	}
@@ -85,7 +85,7 @@ func (db *DB) Merge() error {
 	}
 
 	// 打开 hint 文件存储索引
-	hintFile, err := data.OpenHintFile(mergePath, db.options.DataFileSize, db.options.FIOType)
+	hintFile, err := data2.OpenHintFile(mergePath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -131,17 +131,17 @@ func (db *DB) Merge() error {
 	}
 
 	// 写标识 merge 完成的文件
-	mergeFinaFile, err := data.OpenMergeFinaFile(mergePath, db.options.DataFileSize, db.options.FIOType)
+	mergeFinaFile, err := data2.OpenMergeFinaFile(mergePath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
 
-	mergeFinaRecord := &data.LogRecord{
+	mergeFinaRecord := &data2.LogRecord{
 		Key:   []byte(mergeFinaKey),
 		Value: []byte(strconv.Itoa(int(noMergeFileId))),
 	}
 
-	encRecord, _ := data.EncodeLogRecord(mergeFinaRecord)
+	encRecord, _ := data2.EncodeLogRecord(mergeFinaRecord)
 	if err := mergeFinaFile.Write(encRecord); err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (db *DB) loadMergeFiles() error {
 	var mergeFinished bool
 	var mergeFileNames []string
 	for _, dir := range dirs {
-		if dir.Name() == data.MergeFinaFileSuffix {
+		if dir.Name() == data2.MergeFinaFileSuffix {
 			mergeFinished = true
 		}
 		mergeFileNames = append(mergeFileNames, dir.Name())
@@ -202,7 +202,7 @@ func (db *DB) loadMergeFiles() error {
 	// 删除旧的数据文件
 	var fileID uint32 = 0
 	for ; fileID < nonMergeFileID; fileID++ {
-		fileName := data.GetDataFileName(db.options.DirPath, fileID)
+		fileName := data2.GetDataFileName(db.options.DirPath, fileID)
 		if _, err := os.Stat(fileName); err == nil {
 			if err := os.Remove(fileName); err != nil {
 				return err
@@ -223,7 +223,7 @@ func (db *DB) loadMergeFiles() error {
 
 // 获取最近没有参与 merge 的文件 id
 func (db *DB) getRecentlyNonMergeFileId(dirPath string) (uint32, error) {
-	mergeFinaFile, err := data.OpenMergeFinaFile(dirPath, db.options.DataFileSize, db.options.FIOType)
+	mergeFinaFile, err := data2.OpenMergeFinaFile(dirPath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return 0, err
 	}
@@ -241,13 +241,13 @@ func (db *DB) getRecentlyNonMergeFileId(dirPath string) (uint32, error) {
 // 从 hint 文件中加载索引
 func (db *DB) loadIndexFromHintFile() error {
 	// 判断 hint 文件是否存在
-	hintFileName := filepath.Join(db.options.DirPath, data.HintFileSuffix)
+	hintFileName := filepath.Join(db.options.DirPath, data2.HintFileSuffix)
 	if _, err := os.Stat(hintFileName); os.IsNotExist(err) {
 		return nil
 	}
 
 	// 打开 hint 文件
-	hintFile, err := data.OpenHintFile(db.options.DirPath, db.options.DataFileSize, db.options.FIOType)
+	hintFile, err := data2.OpenHintFile(db.options.DirPath, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func (db *DB) loadIndexFromHintFile() error {
 		}
 
 		// 解码拿到实际的索引位置
-		pst := data.DecodeLogRecordPst(logRecord.Value)
+		pst := data2.DecodeLogRecordPst(logRecord.Value)
 		db.index.Put(logRecord.Key, pst)
 		offset += size
 	}

@@ -5,8 +5,8 @@ package engine
 
 import (
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/data"
-	"github.com/ByteStorage/FlyDB/index"
+	data2 "github.com/ByteStorage/FlyDB/engine/data"
+	"github.com/ByteStorage/FlyDB/engine/index"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"go.uber.org/zap"
 	"io"
@@ -22,12 +22,12 @@ import (
 type DB struct {
 	options    config.Options
 	lock       *sync.RWMutex
-	fileIds    []int                     // File id, which can only be used when the index is loaded
-	activeFile *data.DataFile            // The current active data file that can be used for writing
-	olderFiles map[uint32]*data.DataFile // Old data file that can only be read
-	index      index.Indexer             // Memory index
-	transSeqNo uint64                    // Transaction sequence number, globally increasing
-	isMerging  bool                      // Whether are merging
+	fileIds    []int                      // File id, which can only be used when the index is loaded
+	activeFile *data2.DataFile            // The current active data file that can be used for writing
+	olderFiles map[uint32]*data2.DataFile // Old data file that can only be read
+	index      index.Indexer              // Memory index
+	transSeqNo uint64                     // Transaction sequence number, globally increasing
+	isMerging  bool                       // Whether are merging
 }
 
 // NewDB open a new db instance
@@ -49,7 +49,7 @@ func NewDB(options config.Options) (*DB, error) {
 	db := &DB{
 		options:    options,
 		lock:       new(sync.RWMutex),
-		olderFiles: make(map[uint32]*data.DataFile),
+		olderFiles: make(map[uint32]*data2.DataFile),
 		index:      index.NewIndexer(options.IndexType, options.DirPath),
 	}
 
@@ -134,10 +134,10 @@ func (db *DB) Put(key []byte, value []byte) error {
 	}
 
 	// check LogRecord
-	logRecord := &data.LogRecord{
+	logRecord := &data2.LogRecord{
 		Key:   encodeLogRecordKeyWithSeq(key, nonTransactionSeqNo),
 		Value: value,
-		Type:  data.LogRecordNormal,
+		Type:  data2.LogRecordNormal,
 	}
 
 	// append log record
@@ -155,14 +155,14 @@ func (db *DB) Put(key []byte, value []byte) error {
 }
 
 // appendLogRecord ethod added lock logic split, to avoid batch write resulting in deadlock problems
-func (db *DB) appendLogRecordWithLock(logRecord *data.LogRecord) (*data.LogRecordPst, error) {
+func (db *DB) appendLogRecordWithLock(logRecord *data2.LogRecord) (*data2.LogRecordPst, error) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
 	return db.appendLogRecord(logRecord)
 }
 
 // appendLogRecord Append data to a file
-func (db *DB) appendLogRecord(logRecord *data.LogRecord) (*data.LogRecordPst, error) {
+func (db *DB) appendLogRecord(logRecord *data2.LogRecord) (*data2.LogRecordPst, error) {
 	// Check whether the active data file exists
 	// Initializes the data file if empty
 	if db.activeFile == nil {
@@ -172,7 +172,7 @@ func (db *DB) appendLogRecord(logRecord *data.LogRecord) (*data.LogRecordPst, er
 	}
 
 	// Write data coding
-	encRecord, size := data.EncodeLogRecord(logRecord)
+	encRecord, size := data2.EncodeLogRecord(logRecord)
 	if db.activeFile.WriteOff+size > db.options.DataFileSize {
 		// Persisting data files to ensure that existing data is persisted to disk
 		if err := db.activeFile.Sync(); err != nil {
@@ -201,7 +201,7 @@ func (db *DB) appendLogRecord(logRecord *data.LogRecord) (*data.LogRecordPst, er
 	}
 
 	// Build in-memory index information
-	pst := &data.LogRecordPst{
+	pst := &data2.LogRecordPst{
 		Fid:    db.activeFile.FileID,
 		Offset: writeOff,
 	}
@@ -218,7 +218,7 @@ func (db *DB) setActiveDataFile() error {
 	}
 
 	// Open a new data file
-	dataFile, err := data.OpenDataFile(db.options.DirPath, initialFileID, db.options.DataFileSize, db.options.FIOType)
+	dataFile, err := data2.OpenDataFile(db.options.DirPath, initialFileID, db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -281,9 +281,9 @@ func (db *DB) Fold(f func(key []byte, value []byte) bool) error {
 }
 
 // getValueByPosition Get the corresponding value based on the location index information
-func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error) {
+func (db *DB) getValueByPosition(logRecordPst *data2.LogRecordPst) ([]byte, error) {
 	// Find the corresponding data file according to the file id
-	var dataFile *data.DataFile
+	var dataFile *data2.DataFile
 	if logRecordPst.Fid == db.activeFile.FileID {
 		dataFile = db.activeFile
 	} else {
@@ -300,7 +300,7 @@ func (db *DB) getValueByPosition(logRecordPst *data.LogRecordPst) ([]byte, error
 	if err != nil {
 		return nil, nil
 	}
-	if logRecord.Type == data.LogRecordDeleted {
+	if logRecord.Type == data2.LogRecordDeleted {
 		return nil, _const.ErrKeyNotFound
 	}
 
@@ -321,9 +321,9 @@ func (db *DB) Delete(key []byte) error {
 	}
 
 	// Construct a logRecord to indicate that it was deleted
-	logRecord := &data.LogRecord{
+	logRecord := &data2.LogRecord{
 		Key:  encodeLogRecordKeyWithSeq(key, nonTransactionSeqNo),
-		Type: data.LogRecordDeleted,
+		Type: data2.LogRecordDeleted,
 	}
 
 	// Write to the data file
@@ -350,7 +350,7 @@ func (db *DB) loadDataFiles() error {
 	var fileIds []int
 	// Walk through all the files in the directory, finding all files ending in '.data'
 	for _, entry := range dirEntry {
-		if strings.HasSuffix(entry.Name(), data.DataFileSuffix) {
+		if strings.HasSuffix(entry.Name(), data2.DataFileSuffix) {
 			splitNames := strings.Split(entry.Name(), ".")
 			fileID, err := strconv.Atoi(splitNames[0])
 			// The data directory may be corrupted
@@ -368,7 +368,7 @@ func (db *DB) loadDataFiles() error {
 
 	// Walk through each file id and open the corresponding data file
 	for i, fid := range fileIds {
-		dataFile, err := data.OpenDataFile(db.options.DirPath, uint32(fid), db.options.DataFileSize, db.options.FIOType)
+		dataFile, err := data2.OpenDataFile(db.options.DirPath, uint32(fid), db.options.DataFileSize, db.options.FIOType)
 		if err != nil {
 			return err
 		}
@@ -394,7 +394,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 	// Check whether the merge occurred
 	var hasMerge bool = false
 	var nonMergeFileId uint32 = 0
-	mergeFileName := filepath.Join(db.options.DirPath, data.MergeFinaFileSuffix)
+	mergeFileName := filepath.Join(db.options.DirPath, data2.MergeFinaFileSuffix)
 	// If a file exists, retrieve the id of the file that did not participate in the merge
 	if _, err := os.Stat(mergeFileName); err == nil {
 		fileId, err := db.getRecentlyNonMergeFileId(db.options.DirPath)
@@ -405,9 +405,9 @@ func (db *DB) loadIndexFromDataFiles() error {
 		hasMerge = true
 	}
 
-	updataIndex := func(key []byte, typ data.LogRecrdType, pst *data.LogRecordPst) {
+	updataIndex := func(key []byte, typ data2.LogRecrdType, pst *data2.LogRecordPst) {
 		var ok bool
-		if typ == data.LogRecordDeleted {
+		if typ == data2.LogRecordDeleted {
 			ok = db.index.Delete(key)
 		} else {
 			ok = db.index.Put(key, pst)
@@ -418,7 +418,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 	}
 
 	// Temporary transaction data
-	transactionRecords := make(map[uint64][]*data.TransactionRecord)
+	transactionRecords := make(map[uint64][]*data2.TransactionRecord)
 	var currentSeqNo = nonTransactionSeqNo
 
 	// Iterate through all file ids, processing records in the file
@@ -430,7 +430,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 			continue
 		}
 
-		var dataFile *data.DataFile
+		var dataFile *data2.DataFile
 		if fileID == db.activeFile.FileID {
 			dataFile = db.activeFile
 		} else {
@@ -449,7 +449,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 			}
 
 			// Construct index memory and save it
-			logRecordPst := &data.LogRecordPst{
+			logRecordPst := &data2.LogRecordPst{
 				Fid:    fileID,
 				Offset: offset,
 			}
@@ -461,7 +461,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 				updataIndex(realKey, logRecord.Type, logRecordPst)
 			} else {
 				// When the transaction completes, the corresponding seqNo data can be updated to the in-memory index
-				if logRecord.Type == data.LogRecordTransFinished {
+				if logRecord.Type == data2.LogRecordTransFinished {
 					for _, transRecord := range transactionRecords[seqNo] {
 						updataIndex(transRecord.Record.Key, transRecord.Record.Type, transRecord.Pos)
 					}
@@ -469,7 +469,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 				} else {
 					// batch submission, do not know whether the transaction has been completed, temporarily stored
 					logRecord.Key = realKey
-					transactionRecords[seqNo] = append(transactionRecords[seqNo], &data.TransactionRecord{
+					transactionRecords[seqNo] = append(transactionRecords[seqNo], &data2.TransactionRecord{
 						Record: logRecord,
 						Pos:    logRecordPst,
 					})

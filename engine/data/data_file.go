@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"github.com/ByteStorage/FlyDB/fileio"
+	"github.com/ByteStorage/FlyDB/engine/fileio"
 	"hash/crc32"
 	"io"
 	"path/filepath"

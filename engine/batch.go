@@ -3,7 +3,7 @@ package engine
 import (
 	"encoding/binary"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/data"
+	"github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"sync"
 	"sync/atomic"

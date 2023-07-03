@@ -1,7 +1,7 @@
 package dh
 
 import (
-	cluster "github.com/ByteStorage/FlyDB/raft"
+	"github.com/ByteStorage/FlyDB/lib/raft"
 	"github.com/klauspost/reedsolomon"
 )
 

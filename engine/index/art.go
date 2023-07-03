@@ -2,7 +2,7 @@ package index
 
 import (
 	"bytes"
-	"github.com/ByteStorage/FlyDB/data"
+	"github.com/ByteStorage/FlyDB/engine/data"
 	art "github.com/plar/go-adaptive-radix-tree"
 	"sort"
 	"sync"
