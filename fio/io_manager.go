@@ -38,5 +38,5 @@ func NewIOManager(filename string, fileSize int64, fioType int8) (IOManager, err
 	case MmapIOType:
 		return NewMMapIOManager(filename, fileSize)
 	}
-	return NewFileIOManager(filename)
+	return NewMMapIOManager(filename, fileSize)
 }

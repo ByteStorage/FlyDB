@@ -48,8 +48,8 @@ var DefaultOptions = Options{
 	DirPath:      os.TempDir(),
 	DataFileSize: 256 * 1024 * 1024, // 256MB
 	SyncWrite:    false,
-	IndexType:    Btree,
-	FIOType:      FileIOType,
+	IndexType:    ART,
+	FIOType:      MmapIOType,
 }
 
 var DefaultIteratorOptions = IteratorOptions{
