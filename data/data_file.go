@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"github.com/ByteStorage/FlyDB/fio"
+	"github.com/ByteStorage/FlyDB/io"
 	"hash/crc32"
 	"io"
 	"path/filepath"
@@ -16,9 +16,9 @@ const (
 
 // DataFile 数据文件
 type DataFile struct {
-	FileID    uint32        //文件id
-	WriteOff  int64         //文件写到了哪个位置
-	IoManager fio.IOManager //io 读写操作
+	FileID    uint32       //文件id
+	WriteOff  int64        //文件写到了哪个位置
+	IoManager io.IOManager //io 读写操作
 }
 
 // OpenDataFile 打开新的数据文件
@@ -45,7 +45,7 @@ func OpenMergeFinaFile(dirPath string, fileSize int64, fioType int8) (*DataFile,
 
 func newDataFile(dirPath string, fildID uint32, fileSize int64, fioType int8) (*DataFile, error) {
 	//初始化 IOManager 管理器接口
-	ioManager, err := fio.NewIOManager(dirPath, fileSize, fioType)
+	ioManager, err := io.NewIOManager(dirPath, fileSize, fioType)
 	if err != nil {
 		return nil, err
 	}

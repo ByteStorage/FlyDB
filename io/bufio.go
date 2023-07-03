@@ -1,4 +1,4 @@
-package fio
+package io
 
 import (
 	"bufio"

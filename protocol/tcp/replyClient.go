@@ -1,7 +1,7 @@
 package tcp
 
 import (
-	"github.com/ByteStorage/FlyDB/sync/wait"
+	"github.com/ByteStorage/FlyDB/lib/sync/wait"
 	"net"
 	"time"
 )
