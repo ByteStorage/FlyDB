@@ -53,27 +53,39 @@ func (r *region) Put(key []byte, value []byte) error {
 }
 
 func (r *region) Get(key []byte) ([]byte, error) {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.db.Get(key)
 }
 
 func (r *region) Delete(key []byte) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.db.Delete(key)
 }
 
 func (r *region) GetStartKey() []byte {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.startKey
 }
 
 func (r *region) GetEndKey() []byte {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.endKey
 }
 
 func (r *region) GetLeader() string {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.leader
 }
 
 func (r *region) GetPeers() []string {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.peers
 }
 
 func (r *region) TransferLeader(peer string) error {
@@ -89,5 +101,7 @@ func (r *region) RemovePeer(peer string) error {
 }
 
 func (r *region) GetSize() int64 {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.size
 }
