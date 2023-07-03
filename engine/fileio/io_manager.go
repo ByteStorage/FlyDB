@@ -1,4 +1,4 @@
-package io
+package fileio
 
 const DataFilePerm = 0644 //0644 表示创建了一个文件，文件所有者可以读写，其他人只能读
 

@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/ByteStorage/FlyDB/io"
+	"github.com/ByteStorage/FlyDB/fileio"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -10,21 +10,21 @@ import (
 const DefaultFileSize = 256 * 1024 * 1024
 
 func TestOpenDataFile(t *testing.T) {
-	dataFile1, err := OpenDataFile(os.TempDir(), 0, DefaultFileSize, io.FileIOType)
+	dataFile1, err := OpenDataFile(os.TempDir(), 0, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile1)
 
-	dataFile2, err := OpenDataFile(os.TempDir(), 1, DefaultFileSize, io.FileIOType)
+	dataFile2, err := OpenDataFile(os.TempDir(), 1, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile2)
 
-	dataFile3, err := OpenDataFile(os.TempDir(), 1, DefaultFileSize, io.FileIOType)
+	dataFile3, err := OpenDataFile(os.TempDir(), 1, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile3)
 }
 
 func TestDataFile_Write(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 12312, DefaultFileSize, io.FileIOType)
+	dataFile, err := OpenDataFile(os.TempDir(), 12312, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
@@ -39,7 +39,7 @@ func TestDataFile_Write(t *testing.T) {
 }
 
 func TestDataFile_Close(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 1111111, DefaultFileSize, io.FileIOType)
+	dataFile, err := OpenDataFile(os.TempDir(), 1111111, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
@@ -48,7 +48,7 @@ func TestDataFile_Close(t *testing.T) {
 }
 
 func TestDataFile_Sync(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 2222222, DefaultFileSize, io.FileIOType)
+	dataFile, err := OpenDataFile(os.TempDir(), 2222222, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
@@ -57,7 +57,7 @@ func TestDataFile_Sync(t *testing.T) {
 }
 
 func TestDataFile_ReadLogRecord(t *testing.T) {
-	dataFile, err := OpenDataFile(os.TempDir(), 123, DefaultFileSize, io.FileIOType)
+	dataFile, err := OpenDataFile(os.TempDir(), 123, DefaultFileSize, fileio.FileIOType)
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
