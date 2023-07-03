@@ -14,49 +14,50 @@ const (
 	MergeFinaFileSuffix = "mergeFina"
 )
 
-// DataFile 数据文件
+// DataFile represents a data file.
 type DataFile struct {
-	FileID    uint32           //文件id
-	WriteOff  int64            //文件写到了哪个位置
-	IoManager fileio.IOManager //io 读写操作
+	FileID    uint32           // File ID
+	WriteOff  int64            // Position where the file is currently being written
+	IoManager fileio.IOManager // IO read/write operations
 }
 
-// OpenDataFile 打开新的数据文件
-func OpenDataFile(dirPath string, fildID uint32, fileSize int64, fioType int8) (*DataFile, error) {
-	fileName := GetDataFileName(dirPath, fildID)
-	return newDataFile(fileName, fildID, fileSize, fioType)
+// OpenDataFile opens a new data file.
+func OpenDataFile(dirPath string, fileID uint32, fileSize int64, fioType int8) (*DataFile, error) {
+	fileName := GetDataFileName(dirPath, fileID)
+	return newDataFile(fileName, fileID, fileSize, fioType)
 }
 
-func GetDataFileName(dirPath string, fildID uint32) string {
-	return filepath.Join(dirPath, fmt.Sprintf("%09d", fildID)+DataFileSuffix)
+// GetDataFileName returns the file name for a data file.
+func GetDataFileName(dirPath string, fileID uint32) string {
+	return filepath.Join(dirPath, fmt.Sprintf("%09d", fileID)+DataFileSuffix)
 }
 
-// OpenHintFile 打开 Hint 索引文件
+// OpenHintFile opens the hint index file.
 func OpenHintFile(dirPath string, fileSize int64, fioType int8) (*DataFile, error) {
 	fileName := filepath.Join(dirPath, HintFileSuffix)
 	return newDataFile(fileName, 0, fileSize, fioType)
 }
 
-// OpenMergeFinaFile 打开标识 merge 完成的文件
+// OpenMergeFinaFile opens the file that indicates merge completion.
 func OpenMergeFinaFile(dirPath string, fileSize int64, fioType int8) (*DataFile, error) {
 	fileName := filepath.Join(dirPath, MergeFinaFileSuffix)
 	return newDataFile(fileName, 0, fileSize, fioType)
 }
 
-func newDataFile(dirPath string, fildID uint32, fileSize int64, fioType int8) (*DataFile, error) {
-	//初始化 IOManager 管理器接口
+func newDataFile(dirPath string, fileID uint32, fileSize int64, fioType int8) (*DataFile, error) {
+	// Initialize the IOManager interface
 	ioManager, err := fileio.NewIOManager(dirPath, fileSize, fioType)
 	if err != nil {
 		return nil, err
 	}
 	return &DataFile{
-		FileID:    fildID,
+		FileID:    fileID,
 		WriteOff:  0,
 		IoManager: ioManager,
 	}, nil
 }
 
-// ReadLogRecord 根据 offset 从数据文件中读取 logRecord
+// ReadLogRecord reads a log record from the data file based on the offset.
 func (df *DataFile) ReadLogRecord(offset int64) (*LogRecord, int64, error) {
 	fileSize, err := df.IoManager.Size()
 	if err != nil {
@@ -68,14 +69,14 @@ func (df *DataFile) ReadLogRecord(offset int64) (*LogRecord, int64, error) {
 		headerBytes = fileSize - offset
 	}
 
-	// 读取 header 信息
+	// Read header information
 	headerBuf, err := df.readNBytes(headerBytes, offset)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	header, headerSize := decodeLogRecordHeader(headerBuf)
-	// 下面俩个条件表示读到了文件末尾，直接返回 EOF
+	// The following conditions indicate reaching the end of the file, directly return EOF
 	if header == nil {
 		return nil, 0, io.EOF
 	}
@@ -83,24 +84,24 @@ func (df *DataFile) ReadLogRecord(offset int64) (*LogRecord, int64, error) {
 		return nil, 0, io.EOF
 	}
 
-	// 取出对应的 key 和 value 的长度
+	// Retrieve the lengths of the key and value
 	keySize, valueSize := int64(header.keySize), int64(header.valueSize)
 	var recordSize = headerSize + keySize + valueSize
 
 	logRecord := &LogRecord{Type: header.recordType}
 
-	// 读取用户实际存储的 key/value 数据
+	// Read the actual user-stored key/value data
 	if keySize > 0 || valueSize > 0 {
 		kvBuf, err := df.readNBytes(keySize+valueSize, headerSize+offset)
 		if err != nil {
 			return nil, 0, err
 		}
-		// 解码
+		// Decode
 		logRecord.Key = kvBuf[:keySize]
 		logRecord.Value = kvBuf[keySize:]
 	}
 
-	// 校验 crc （检查数据的有效性）
+	// Verify CRC (check data integrity)
 	crc := getLogRecordCRC(logRecord, headerBuf[crc32.Size:headerSize])
 	if crc != header.crc {
 		return nil, 0, ErrInvalidCRC
@@ -117,7 +118,7 @@ func (df *DataFile) Write(buf []byte) error {
 	return nil
 }
 
-// WriteHintRecord 写入索引信息到 hint 文件中
+// WriteHintRecord writes index information to the hint file.
 func (df *DataFile) WriteHintRecord(key []byte, pst *LogRecordPst) error {
 	record := &LogRecord{
 		Key:   key,

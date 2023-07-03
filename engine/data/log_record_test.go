@@ -7,7 +7,7 @@ import (
 )
 
 func TestEncodeLogRecord(t *testing.T) {
-	// 正常情况
+	// Normal condition
 	record1 := &LogRecord{
 		Key:   []byte("name"),
 		Value: []byte("flydb"),
@@ -17,7 +17,7 @@ func TestEncodeLogRecord(t *testing.T) {
 	assert.NotNil(t, buf1)
 	assert.Greater(t, size, int64(5))
 
-	// value 为空
+	// value is null
 	record2 := &LogRecord{
 		Key:  []byte("name"),
 		Type: LogRecordNormal,
@@ -26,7 +26,7 @@ func TestEncodeLogRecord(t *testing.T) {
 	assert.NotNil(t, buf2)
 	assert.Greater(t, size2, int64(5))
 
-	// Deleted 情况
+	// Deleted condition
 	record3 := &LogRecord{
 		Key:   []byte("name"),
 		Value: []byte("flydb"),

@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-// 测试完成之后销毁 DB 数据目录
+// Destroy the DB data directory after the test is complete
 func destroyDB(db *DB) {
 	if db != nil {
 		if db.activeFile != nil {
@@ -44,43 +44,43 @@ func TestDB_Put(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	// 1.正常 Put 一条数据
+	// Put a data file normally
 	err = db.Put(randkv.GetTestKey(1), randkv.RandomValue(24))
 	assert.Nil(t, err)
 	val1, err := db.Get(randkv.GetTestKey(1))
 	assert.Nil(t, err)
 	assert.NotNil(t, val1)
 
-	// 2.重复 Put key 相同的数据
+	// Put the same data repeatedly
 	err = db.Put(randkv.GetTestKey(1), randkv.RandomValue(24))
 	assert.Nil(t, err)
 	val2, err := db.Get(randkv.GetTestKey(1))
 	assert.Nil(t, err)
 	assert.NotNil(t, val2)
 
-	// 3.key 为空
+	// The key is empty
 	err = db.Put(nil, randkv.RandomValue(24))
 	assert.Equal(t, _const.ErrKeyIsEmpty, err)
 
-	// 4.value 为空
+	// value is null
 	err = db.Put(randkv.GetTestKey(22), nil)
 	assert.Nil(t, err)
 	val3, err := db.Get(randkv.GetTestKey(22))
 	assert.Equal(t, 0, len(val3))
 	assert.Nil(t, err)
 
-	// 5.写到数据文件进行了转换
+	// The conversion is performed by writing to the data file
 	for i := 0; i < 1000000; i++ {
 		err := db.Put(randkv.GetTestKey(i), randkv.RandomValue(128))
 		assert.Nil(t, err)
 	}
 	assert.Equal(t, 2, len(db.olderFiles))
 
-	// 6.重启后再 Put 数据
+	// Restart and Put data again
 	err = db.Close()
 	assert.Nil(t, err)
 
-	// 重启数据库
+	// Restart the database
 	db2, err := NewDB(opts)
 	assert.Nil(t, err)
 	assert.NotNil(t, db2)
@@ -127,7 +127,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 
 	var workerNum = 100
 
-	// 1. 并行Put  workerNum条数据
+	// Put workerNum data in parallel
 	wg.Add(workerNum)
 	go func() {
 		for i := 0; i < workerNum; i++ {
@@ -135,7 +135,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 		}
 	}()
 
-	// 2. 并行Put  workerNum条和上一并行过程相同的数据
+	// Parallel Put workerNum to the same data as the previous parallel process
 	wg.Add(workerNum)
 	go func() {
 		for i := 0; i < workerNum; i++ {
@@ -143,10 +143,10 @@ func TestDB_ConcurrentPut(t *testing.T) {
 		}
 	}()
 
-	// 等待所有Put结束后，进行后续测试
+	// Wait for all Put to be completed and perform subsequent tests
 	wg.Wait()
 
-	// 3. 并行Get 之前插入的所有数据
+	// Get all the previously inserted data in parallel
 	wg.Add(workerNum)
 	go func() {
 		for i := 0; i < workerNum; i++ {
@@ -154,10 +154,10 @@ func TestDB_ConcurrentPut(t *testing.T) {
 		}
 	}()
 
-	// 等待并行Get结束后，进行后续测试
+	// Wait for the parallel Get to end and conduct subsequent tests
 	wg.Wait()
 
-	// 4. 转换为了旧的数据文件，从旧的数据文件上获取 value
+	// Convert to the old data file and get the value from the old data file
 	for i := workerNum; i < 1000000; i++ {
 		err := db.Put(randkv.GetTestKey(i), randkv.RandomValue(128))
 		assert.Nil(t, err)
@@ -171,11 +171,11 @@ func TestDB_ConcurrentPut(t *testing.T) {
 	}()
 	wg.Wait()
 
-	// 6.重启后，前面写入的数据都能拿到
+	// After the restart, all the data previously written can be obtained
 	err = db.Close()
 	assert.Nil(t, err)
 
-	// 重启数据库
+	// Restart the database
 	db2, err := NewDB(opts)
 
 	val1, err := db2.Get(randkv.GetTestKey(1))
@@ -197,7 +197,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, val4)
 
-	// 重启数据库后再并行测试Get
+	// Restart the database and test Get in parallel
 	wg.Add(workerNum)
 	go func() {
 		for i := 0; i < workerNum; i++ {
@@ -218,19 +218,19 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	// 1.正常读取一条数据
+	// Read a piece of data normally
 	err = db.Put(randkv.GetTestKey(11), randkv.RandomValue(24))
 	assert.Nil(t, err)
 	val1, err := db.Get(randkv.GetTestKey(11))
 	assert.Nil(t, err)
 	assert.NotNil(t, val1)
 
-	// 2.读取一个不存在的 key
+	// Read a nonexistent key
 	val2, err := db.Get([]byte("some key unknown"))
 	assert.Nil(t, val2)
 	assert.Equal(t, _const.ErrKeyNotFound, err)
 
-	// 3.值被重复 Put 后在读取
+	// The value is read after being repeatedly Put
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(24))
 	assert.Nil(t, err)
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(24))
@@ -238,7 +238,7 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, val3)
 
-	// 4.值被删除后再 Get
+	// Get the value after it is deleted
 	err = db.Put(randkv.GetTestKey(33), randkv.RandomValue(24))
 	assert.Nil(t, err)
 	err = db.Delete(randkv.GetTestKey(33))
@@ -247,7 +247,7 @@ func TestDB_Get(t *testing.T) {
 	assert.Equal(t, 0, len(val4))
 	assert.Equal(t, _const.ErrKeyNotFound, err)
 
-	// 5.转换为了旧的数据文件，从旧的数据文件上获取 value
+	// Convert it to the old data file and obtain the value from the old data file
 	for i := 100; i < 1000000; i++ {
 		err := db.Put(randkv.GetTestKey(i), randkv.RandomValue(128))
 		assert.Nil(t, err)
@@ -257,11 +257,11 @@ func TestDB_Get(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, val5)
 
-	// 6.重启后，前面写入的数据都能拿到
+	// After the restart, all the data previously written can be obtained
 	err = db.Close()
 	assert.Nil(t, err)
 
-	// 重启数据库
+	// Restart the database
 	db2, err := NewDB(opts)
 	val6, err := db2.Get(randkv.GetTestKey(11))
 	assert.Nil(t, err)
@@ -288,7 +288,7 @@ func TestDB_Delete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	// 1.正常删除一个存在的 key
+	// Delete an existing key
 	err = db.Put(randkv.GetTestKey(11), randkv.RandomValue(128))
 	assert.Nil(t, err)
 	err = db.Delete(randkv.GetTestKey(11))
@@ -296,15 +296,15 @@ func TestDB_Delete(t *testing.T) {
 	_, err = db.Get(randkv.GetTestKey(11))
 	assert.Equal(t, _const.ErrKeyNotFound, err)
 
-	// 2.删除一个不存在的 key
+	// Delete a key that does not exist
 	err = db.Delete([]byte("unknown key"))
 	assert.Nil(t, err)
 
-	// 3.删除一个空的 key
+	// Delete an empty key
 	err = db.Delete(nil)
 	assert.Equal(t, _const.ErrKeyIsEmpty, err)
 
-	// 4.值被删除之后重新 Put
+	// The value is deleted and Put again
 	err = db.Put(randkv.GetTestKey(22), randkv.RandomValue(128))
 	assert.Nil(t, err)
 	err = db.Delete(randkv.GetTestKey(22))
@@ -316,11 +316,11 @@ func TestDB_Delete(t *testing.T) {
 	assert.NotNil(t, val1)
 	assert.Nil(t, err)
 
-	// 5.重启之后，再进行校验
+	// After the restart, perform the verification again
 	err = db.Close()
 	assert.Nil(t, err)
 
-	// 重启数据库
+	// Restart the database
 	db2, err := NewDB(opts)
 	_, err = db2.Get(randkv.GetTestKey(11))
 	assert.Equal(t, _const.ErrKeyNotFound, err)
@@ -340,11 +340,11 @@ func TestDB_GetListKeys(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	// 数据库为空
+	// Database is empty
 	keys1 := db.GetListKeys()
 	assert.Equal(t, 0, len(keys1))
 
-	// 只有一条数据
+	// Only one piece of data
 	err = db.Put(randkv.GetTestKey(10), randkv.GetTestKey(20))
 	assert.Nil(t, err)
 	keys2 := db.GetListKeys()

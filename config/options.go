@@ -3,26 +3,27 @@ package config
 import "os"
 
 type Options struct {
-	DirPath      string //数据库数据目录
-	DataFileSize int64  //数据文件的大小
-	SyncWrite    bool   // 每次写数据是否持久化
+	DirPath      string // Database data directory
+	DataFileSize int64  // Size of data files
+	SyncWrite    bool   // Whether to persist data on every write
 	IndexType    IndexerType
 	FIOType      FIOType
 }
 
-// IteratorOptions 索引迭代器配置项
+// IteratorOptions is the configuration for index iteration.
 type IteratorOptions struct {
-	// 遍历前缀为指定值的 Key，默认为空
+	// Prefix specifies the prefix value for keys to iterate over. Default is empty.
 	Prefix []byte
-	// 是否反向遍历，默认 false 是正向
+	// Reverse indicates whether to iterate in reverse order.
+	// Default is false for forward iteration.
 	Reverse bool
 }
 
-// WriteBatchOptions 批量写入配置项
+// WriteBatchOptions is the configuration for batch writing.
 type WriteBatchOptions struct {
-	// 一个批次当中最大的数据量
+	// MaxBatchNum is the maximum number of data entries in a batch.
 	MaxBatchNum uint
-	// 提交时是否 sync 持久化
+	// SyncWrites indicates whether to sync (persist) the data on batch commit.
 	SyncWrites bool
 }
 
@@ -37,10 +38,10 @@ const (
 type IndexerType = int8
 
 const (
-	// Btree 索引
+	// Btree
 	Btree IndexerType = iota + 1
 
-	// ART (Adpative Radix Tree) 自适应基数树
+	// ART (Adpative Radix Tree)
 	ART
 )
 

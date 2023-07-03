@@ -4,12 +4,12 @@ import (
 	"os"
 )
 
-// FileIO 标准系统文件IO
+// FileIO represents the standard system file I/O.
 type FileIO struct {
-	fd *os.File //系统文件描述符
+	fd *os.File // System file descriptor
 }
 
-// NewFileIOManager 初始化标准文件 IO
+// NewFileIOManager initializes the standard file I/O manager.
 func NewFileIOManager(fileName string) (*FileIO, error) {
 	fd, err := os.OpenFile(
 		fileName,

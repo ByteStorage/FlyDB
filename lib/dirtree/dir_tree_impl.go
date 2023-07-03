@@ -9,13 +9,15 @@ import (
 var _ DirTreeInterface = &DirTree{}
 
 /**TODO:
-	这里初步计划只维护一个目录树
-			/
-   /节点1  /节点2  /节点3
-   /file1  /file2  /file3
-	大概结构如上，每个节点都是一个目录，
-	每个目录下面都有文件，这样的话只需要维护一个目录树就可以了，
-	而不需要维护节点与文件的映射关系，这里DirTree只是写了个简单的目录树，可以找找有没有优化的目录树
+The tentative plan here is to maintain only one directory tree
+				/
+	  / Node 1 / Node 2 / Node 3
+	  /file1  /file2  /file3
+Roughly structured as above, each node is a directory,
+There are files under each directory, so you only need to maintain one directory tree,
+And do not need to maintain the node and file mapping relationship,
+here DirTree just write a simple directory tree,
+you can find there is no optimized directory tree
 */
 
 // DirTree is a struct that represents a directory tree

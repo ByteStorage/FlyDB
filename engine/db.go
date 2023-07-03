@@ -18,7 +18,32 @@ import (
 	"sync"
 )
 
-// DB bitcask Storage engine instance
+// DB represents a FlyDB database instance,
+// a high-performance storage engine built on the bitcask model.
+// FlyDB utilizes a log-structured storage approach,
+// which optimizes data operations by efficiently managing writes, reads, and deletes.
+//
+// FlyDB shines in its ability to swiftly handle data operations,
+// offering exceptional performance. With just a single disk IO,
+// FlyDB completes each operation efficiently,
+// resulting in lightning-fast response times.
+//
+// One of the standout features of FlyDB is its efficient memory utilization.
+// It employs an in-memory index that stores key-value mappings,
+// facilitating rapid data access. This indexing mechanism enables FlyDB
+// bto quickly locate data within the storage structure. However,
+// it's important to note that the total size of data that can be stored is
+// limited by the available memory capacity.
+//
+// When your system's memory can accommodate a significant portion
+// of the key-value pairs, FlyDB emerges as an excellent choice of storage engine.
+// It not only delivers outstanding speed and responsiveness
+// but also minimizes disk IO overhead, allowing for seamless data operations.
+//
+// FlyDB's design philosophy revolves around balancing performance
+// and memory usage. By optimizing disk IO and leveraging in-memory indexing,
+// FlyDB provides a powerful and efficient storage solution for applications
+// that prioritize speed and responsiveness.
 type DB struct {
 	options    config.Options
 	lock       *sync.RWMutex
@@ -86,12 +111,6 @@ func checkOptions(options config.Options) error {
 	return nil
 }
 
-// NewFlyDbCluster create a new db cluster
-//func NewFlyDbCluster(masterList []string, slaveList []string, options config.Options) (*DB, error) {
-//	master.NewRaftCluster(masterList, slaveList)
-//	panic("implement me")
-//}
-
 // Close the db instance
 func (db *DB) Close() error {
 	zap.L().Info("close db", zap.Any("options", db.options))
@@ -154,7 +173,8 @@ func (db *DB) Put(key []byte, value []byte) error {
 	return nil
 }
 
-// appendLogRecord ethod added lock logic split, to avoid batch write resulting in deadlock problems
+// appendLogRecord ethod added lock logic split,
+// to avoid batch write resulting in deadlock problems
 func (db *DB) appendLogRecordWithLock(logRecord *data2.LogRecord) (*data2.LogRecordPst, error) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -218,7 +238,8 @@ func (db *DB) setActiveDataFile() error {
 	}
 
 	// Open a new data file
-	dataFile, err := data2.OpenDataFile(db.options.DirPath, initialFileID, db.options.DataFileSize, db.options.FIOType)
+	dataFile, err := data2.OpenDataFile(db.options.DirPath, initialFileID,
+		db.options.DataFileSize, db.options.FIOType)
 	if err != nil {
 		return err
 	}
@@ -250,33 +271,50 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 
 // GetListKeys Gets all the keys in the database
 func (db *DB) GetListKeys() [][]byte {
+	// Retrieve an iterator for the index
 	iterator := db.index.Iterator(false)
+
+	// Create a slice to store the keys
 	keys := make([][]byte, db.index.Size())
+
 	var idx int
+	// Iterate over the index
 	for iterator.Rewind(); iterator.Valid(); iterator.Next() {
+		// Retrieve the key from the current iterator position
 		keys[idx] = iterator.Key()
 		idx++
 	}
+
+	// Return the list of keys
 	return keys
 }
 
-// Fold
-// Get all the data and perform the operation specified by the user.
+// Fold get all the data and perform the operation specified by the user.
 // The function returns false to exit
 func (db *DB) Fold(f func(key []byte, value []byte) bool) error {
+	// Acquire a read lock to ensure data consistency
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 
+	// Retrieve an iterator for the index
 	iterator := db.index.Iterator(false)
+
+	// Iterate over the index
 	for iterator.Rewind(); iterator.Valid(); iterator.Next() {
+		// Retrieve the value associated with the current key
 		value, err := db.getValueByPosition(iterator.Value())
 		if err != nil {
 			return err
 		}
+
+		// Invoke the provided function with the key and value
+		// If the function returns false, stop folding and exit the loop
 		if !f(iterator.Key(), value) {
 			break
 		}
 	}
+
+	// Return nil to indicate successful folding
 	return nil
 }
 
@@ -397,6 +435,8 @@ func (db *DB) loadIndexFromDataFiles() error {
 	mergeFileName := filepath.Join(db.options.DirPath, data2.MergeFinaFileSuffix)
 	// If a file exists, retrieve the id of the file that did not participate in the merge
 	if _, err := os.Stat(mergeFileName); err == nil {
+		// Check if the merge file exists
+		// If it exists, determine the ID of the most recently non-merged file
 		fileId, err := db.getRecentlyNonMergeFileId(db.options.DirPath)
 		if err != nil {
 			return err
@@ -405,14 +445,18 @@ func (db *DB) loadIndexFromDataFiles() error {
 		hasMerge = true
 	}
 
+	// Define a function to update the in-memory index
 	updataIndex := func(key []byte, typ data2.LogRecrdType, pst *data2.LogRecordPst) {
 		var ok bool
 		if typ == data2.LogRecordDeleted {
+			// If the log record type is 'deleted', delete the key from the index
 			ok = db.index.Delete(key)
 		} else {
+			// Otherwise, update the key with the new position in the index
 			ok = db.index.Put(key, pst)
 		}
 		if !ok {
+			// Panic if the index update fails
 			panic(_const.ErrIndexUpdateFailed)
 		}
 	}
@@ -460,14 +504,16 @@ func (db *DB) loadIndexFromDataFiles() error {
 				// Non-transactional operation
 				updataIndex(realKey, logRecord.Type, logRecordPst)
 			} else {
-				// When the transaction completes, the corresponding seqNo data can be updated to the in-memory index
+				// When the transaction completes, update the corresponding seqNo data in the in-memory index
 				if logRecord.Type == data2.LogRecordTransFinished {
+					// Update the in-memory index with the transaction records
 					for _, transRecord := range transactionRecords[seqNo] {
 						updataIndex(transRecord.Record.Key, transRecord.Record.Type, transRecord.Pos)
 					}
+					// Remove the transaction records from the map
 					delete(transactionRecords, seqNo)
 				} else {
-					// batch submission, do not know whether the transaction has been completed, temporarily stored
+					// Batch submission, unsure if the transaction has been completed, temporarily store the records
 					logRecord.Key = realKey
 					transactionRecords[seqNo] = append(transactionRecords[seqNo], &data2.TransactionRecord{
 						Record: logRecord,

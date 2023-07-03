@@ -52,11 +52,9 @@ func TestBTree_Delete(t *testing.T) {
 
 func TestBTree_Iterator(t *testing.T) {
 	bt1 := NewBTree()
-	// 1. BTree 为空
 	iter1 := bt1.Iterator(false)
 	assert.Equal(t, false, iter1.Valid())
 
-	// 2. BTree 不为空
 	bt1.Put([]byte("abc"), &data.LogRecordPst{Fid: 1, Offset: 12})
 	iter2 := bt1.Iterator(false)
 	assert.True(t, iter2.Valid())
@@ -65,7 +63,6 @@ func TestBTree_Iterator(t *testing.T) {
 	iter2.Next()
 	assert.Equal(t, false, iter2.Valid())
 
-	// 3. 多条数据
 	bt1.Put([]byte("bcd"), &data.LogRecordPst{Fid: 2, Offset: 12})
 	bt1.Put([]byte("efg"), &data.LogRecordPst{Fid: 3, Offset: 12})
 	bt1.Put([]byte("def"), &data.LogRecordPst{Fid: 4, Offset: 12})
@@ -79,7 +76,6 @@ func TestBTree_Iterator(t *testing.T) {
 		assert.NotNil(t, iter4.Key())
 	}
 
-	// 4. Seek test
 	iter5 := bt1.Iterator(false)
 	for iter5.Seek([]byte("b")); iter5.Valid(); iter5.Next() {
 		assert.NotNil(t, iter5.Key())

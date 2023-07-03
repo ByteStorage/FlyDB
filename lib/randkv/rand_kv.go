@@ -11,12 +11,12 @@ var (
 	letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 )
 
-// GetTestKey 获取测试使用的 key
+// GetTestKey Gets the key used by the test
 func GetTestKey(i int) []byte {
 	return []byte(fmt.Sprintf("flydb-key-%09d", i))
 }
 
-// RandomValue 生成随机 value，用于测试
+// RandomValue Generate random values for testing
 func RandomValue(n int) []byte {
 	b := make([]byte, n)
 	for i := range b {

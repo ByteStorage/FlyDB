@@ -61,7 +61,7 @@ func TestDataFile_ReadLogRecord(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, dataFile)
 
-	// 只有一条 LogRecord
+	// There is only one LogRecord
 	record1 := &LogRecord{
 		Key:   []byte("name"),
 		Value: []byte("flydb"),
@@ -76,7 +76,7 @@ func TestDataFile_ReadLogRecord(t *testing.T) {
 	assert.Equal(t, size, readSize1)
 	assert.Equal(t, record1, readRec1)
 
-	// 多条 LogRecord 从不同位置读取
+	// Multiple logrecords are read from different locations
 	record2 := &LogRecord{
 		Key:   []byte("name"),
 		Value: []byte("bitcask-kv"),
@@ -89,7 +89,7 @@ func TestDataFile_ReadLogRecord(t *testing.T) {
 	assert.Equal(t, size2, readSize2)
 	assert.Equal(t, record2, readRec2)
 
-	// 被删除的数据在数据文件的末尾
+	// The deleted data is at the end of the data file
 	record3 := &LogRecord{
 		Key:   []byte("name"),
 		Value: []byte("delete-data"),
