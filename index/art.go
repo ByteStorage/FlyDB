@@ -70,15 +70,14 @@ type ARTreeIterator struct {
 }
 
 func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
-	// Initialize the subscript position of the current traversal
-	var idx int
-	if reverse {
-		idx = tree.Size() - 1
-	}
+	// Estimate the expected slice capacity based on tree size
+	expectedSize := tree.Size()
 
 	// Use a mutex for concurrent access to values array
 	var mutex sync.Mutex
-	values := make([]*Item, tree.Size())
+
+	// Initialize with empty slice and expected capacity
+	values := make([]*Item, 0, expectedSize)
 
 	// Store all the data in an array
 	saveToValues := func(node art.Node) bool {
@@ -86,23 +85,10 @@ func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
 			key: node.Key(),
 			pst: node.Value().(*data.LogRecordPst),
 		}
-
 		mutex.Lock()
 
-		// If the index reaches the boundary, expand the values array
-		if idx < 0 || idx >= len(values) {
-			newSize := len(values) * 2
-			newValues := make([]*Item, newSize)
-			copy(newValues, values)
-			values = newValues
-		}
-
-		values[idx] = item
-		if reverse {
-			idx--
-		} else {
-			idx++
-		}
+		// Append item to values slice
+		values = append(values, item)
 
 		mutex.Unlock()
 
@@ -110,15 +96,18 @@ func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
 	}
 	tree.ForEach(saveToValues)
 
-	// Trim the values array to remove any unused space
-	values = values[:idx]
+	// Reverse the values slice if reverse is true
+	if reverse {
+		for i, j := 0, len(values)-1; i < j; i, j = i+1, j-1 {
+			values[i], values[j] = values[j], values[i]
+		}
+	}
 
 	return &ARTreeIterator{
 		currIndex: 0,
 		reverse:   reverse,
 		values:    values,
 	}
-
 }
 
 func (artree *ARTreeIterator) Rewind() {
