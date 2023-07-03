@@ -4,9 +4,6 @@
 
 ![GitHub top language](https://img.shields.io/github/languages/top/ByteStorage/flydb)   [![Go Reference](https://pkg.go.dev/badge/github.com/ByteStorage/flydb)](https://pkg.go.dev/github.com/ByteStorage/flydb)   ![LICENSE](https://img.shields.io/github/license/ByteStorage/flydb)   ![GitHub stars](https://img.shields.io/github/stars/ByteStorage/flydb)   ![GitHub forks](https://img.shields.io/github/forks/ByteStorage/flydb)   [![Go Report Card](https://goreportcard.com/badge/github.com/qishenonly/flydb)](https://goreportcard.com/report/github.com/qishenonly/flydb)![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/ByteStorage/FlyDB)![GitHub contributors](https://img.shields.io/github/contributors/ByteStorage/FlyDB)
 
-## 
-
-## 该项目正在迭代开发中，请勿在生产环境中使用!
 
 **FlyDB**旨在在某些情况下作为内存键值存储(如**Redis**)的替代方案，旨在在性能和存储成本之间取得平衡。它通过优化资源分配和使用经济有效的存储介质来实现这一点。通过智能管理数据，**FlyDB**确保高效操作，同时最大限度地降低存储成本。它为需要在性能和存储成本之间取得平衡的场景提供了可靠的解决方案。
 
