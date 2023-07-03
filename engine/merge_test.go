@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// 没有任何数据的情况下进行 merge
+// merge without any data
 func TestDB_Merge(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-merge-1")
@@ -22,7 +22,7 @@ func TestDB_Merge(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// 全部都是有效的数据
+// All valid data
 func TestDB_Merge2(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-merge-2")
@@ -41,7 +41,7 @@ func TestDB_Merge2(t *testing.T) {
 	err = db.Merge()
 	assert.Nil(t, err)
 
-	// 重启校验
+	// Restart check
 	err = db.Close()
 	assert.Nil(t, err)
 
@@ -61,7 +61,7 @@ func TestDB_Merge2(t *testing.T) {
 
 }
 
-// 全部是无效的数据
+// All invalid data
 func TestDB_Merge3(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-merge-3")
@@ -84,7 +84,7 @@ func TestDB_Merge3(t *testing.T) {
 	err = db.Merge()
 	assert.Nil(t, err)
 
-	// 重启校验
+	// Restart check
 	err = db.Close()
 	assert.Nil(t, err)
 

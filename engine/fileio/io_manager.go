@@ -1,6 +1,9 @@
 package fileio
 
-const DataFilePerm = 0644 //0644 表示创建了一个文件，文件所有者可以读写，其他人只能读
+// 0644 Indicates that a file is created.
+// The file owner can read and write the file,
+// but others can only read the file
+const DataFilePerm = 0644
 
 const DefaultFileSize = 256 * 1024 * 1024
 
@@ -10,21 +13,22 @@ const (
 	MmapIOType            // Memory Mapping IO
 )
 
-// IOManager 抽象 IO 管理接口， 可以接入不同的 IO 类型， 目前支持标准文件 IO
+// IOManager is an abstract IO management interface that can accommodate different IO types.
+// Currently, it supports standard file IO.
 type IOManager interface {
-	// Read 从文件的给定位置读取对应的数据
+	// Read reads the corresponding data from the file at the given position.
 	Read([]byte, int64) (int, error)
 
-	// Write 写入字节数组到文件中
+	// Write writes a byte array to the file.
 	Write([]byte) (int, error)
 
-	// Sync 持久化数据
+	// Sync persists data.
 	Sync() error
 
-	// Close 关闭文件
+	// Close closes the file.
 	Close() error
 
-	// Size get file size
+	// Size gets the file size.
 	Size() (int64, error)
 }
 

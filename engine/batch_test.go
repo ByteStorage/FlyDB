@@ -18,7 +18,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	// 写数据之后不提交
+	// Do not submit data after writing
 	wb := db.NewWriteBatch(config.DefaultWriteBatchOptions)
 	err = wb.Put(randkv.GetTestKey(1), randkv.RandomValue(10))
 	assert.Nil(t, err)
@@ -28,7 +28,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	_, err = db.Get(randkv.GetTestKey(1))
 	assert.Equal(t, _const.ErrKeyNotFound, err)
 
-	// 正常提交数据
+	// Normal submission data
 	err = wb.Commit()
 	assert.Nil(t, err)
 
@@ -72,7 +72,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	err = wb.Commit()
 	assert.Nil(t, err)
 
-	// 重启
+	// Restart
 	err = db.Close()
 	assert.Nil(t, err)
 
@@ -82,7 +82,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	_, err = db2.Get(randkv.GetTestKey(1))
 	assert.Equal(t, _const.ErrKeyNotFound, err)
 
-	// 判断事务序列号
+	// Judgment transaction sequence number
 	assert.Equal(t, uint64(2), db.transSeqNo)
 }
 
@@ -94,7 +94,7 @@ func TestDB_WriteBatch1(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
-	// 批量提交中间手动停止
+	// Manual stop during batch submission
 	wbopt := config.DefaultWriteBatchOptions
 	wbopt.MaxBatchNum = 1000000
 	wb := db.NewWriteBatch(wbopt)

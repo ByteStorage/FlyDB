@@ -9,15 +9,17 @@ import (
 )
 
 /*
-BTree 索引，主要封装了 google 的btree库
+	BTree index, which mainly encapsulates Google's btree library
 */
 
 type BTree struct {
-	tree *btree.BTree //源码：多线程写不安全，要加锁;读不需要
+	// Source code: Not thread-safe for writing, requires locking; reading does not require locking
+	tree *btree.BTree
+
 	lock *sync.RWMutex
 }
 
-// NewBTree 初始化BTree
+// NewBTree initializes a new BTree.
 func NewBTree() *BTree {
 	return &BTree{
 		tree: btree.New(32),
@@ -68,24 +70,24 @@ func (bt *BTree) Iterator(reverse bool) Iterator {
 	return NewBTreeIterator(bt.tree, reverse)
 }
 
-// BTree 索引迭代器
+// BTreeIterator represents an iterator for BTree index.
 type BtreeIterator struct {
-	currIndex int     // 当前遍历的下标位置
-	reverse   bool    // 是否是反向遍历
-	values    []*Item // key + 位置索引信息
+	currIndex int     // Current index position during iteration
+	reverse   bool    // Whether it is a reverse iteration
+	values    []*Item // Key + position index information
 }
 
 func NewBTreeIterator(tree *btree.BTree, reverse bool) *BtreeIterator {
 	var idx int
 	values := make([]*Item, tree.Len())
 
-	// 将所有的数据存放到数组中
+	// Store all the data in an array
 	saveToValues := func(item btree.Item) bool {
 		values[idx] = item.(*Item)
 		idx++
 		return true
 	}
-	// 判断是否反向遍历
+	// Determine whether to traverse in reverse
 	if reverse {
 		tree.Descend(saveToValues)
 	} else {
@@ -105,7 +107,7 @@ func (bi *BtreeIterator) Rewind() {
 }
 
 func (bi *BtreeIterator) Seek(key []byte) {
-	// 二分查找
+	// Binary search
 	if bi.reverse {
 		bi.currIndex = sort.Search(len(bi.values), func(i int) bool {
 			return bytes.Compare(bi.values[i].key, key) <= 0

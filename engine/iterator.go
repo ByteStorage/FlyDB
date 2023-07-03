@@ -6,14 +6,14 @@ import (
 	"github.com/ByteStorage/FlyDB/engine/index"
 )
 
-// Iterator 迭代器
+// Iterator iterator
 type Iterator struct {
 	indexIter index.Iterator
 	db        *DB
 	options   config.IteratorOptions
 }
 
-// NewIterator 初始化迭代器
+// NewIterator Initializes the iterator
 func (db *DB) NewIterator(opt config.IteratorOptions) *Iterator {
 	indexIter := db.index.Iterator(opt.Reverse)
 	return &Iterator{
@@ -58,7 +58,9 @@ func (it *Iterator) Close() {
 	it.indexIter.Close()
 }
 
-// 根据Prefix 传进来的 key 判断是与迭代器里面的 key 的前缀相等，不相等往后迭代
+// According to the key passed by Prefix,
+// the key is equal to the key prefix in the iterator.
+// If it is not equal, the next iteration is performed
 func (it *Iterator) skipToNext() {
 	prefixLen := len(it.options.Prefix)
 	if prefixLen == 0 {
@@ -67,6 +69,8 @@ func (it *Iterator) skipToNext() {
 
 	for ; it.indexIter.Valid(); it.indexIter.Next() {
 		key := it.indexIter.Key()
+
+		// Check if the key has the desired prefix
 		if prefixLen <= len(key) && bytes.Compare(it.options.Prefix, key[:prefixLen]) == 0 {
 			break
 		}

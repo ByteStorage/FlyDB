@@ -35,6 +35,7 @@ func (db *DB) NewWriteBatch(opt config.WriteBatchOptions) *WriteBatch {
 
 // Put Data batch write
 func (wb *WriteBatch) Put(key []byte, value []byte) error {
+	// Check if the key is empty
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
 	}
@@ -46,19 +47,25 @@ func (wb *WriteBatch) Put(key []byte, value []byte) error {
 		Key:   key,
 		Value: value,
 	}
+
+	// Add the LogRecord to the temporaryDataWrites map using the key as a string
 	wb.temporaryDataWrites[string(key)] = logRecord
 	return nil
 }
 
 // Delete Batch deletion of data
 func (wb *WriteBatch) Delete(key []byte) error {
+	// Check if the key is empty
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
 	}
+
+	// Acquire a lock to ensure thread safety
 	wb.lock.Lock()
 	defer wb.lock.Unlock()
 
-	// If the data does not exist, return it directly
+	// If the data does not exist, delete it from
+	// temporaryDataWrites if present and return directly
 	logRecordPst := wb.db.index.Get(key)
 	if logRecordPst == nil {
 		if wb.temporaryDataWrites[string(key)] != nil {
@@ -73,6 +80,7 @@ func (wb *WriteBatch) Delete(key []byte) error {
 		Type: data.LogRecordDeleted,
 	}
 	wb.temporaryDataWrites[string(key)] = logRecord
+
 	return nil
 }
 
@@ -127,9 +135,11 @@ func (wb *WriteBatch) Commit() error {
 	for _, record := range wb.temporaryDataWrites {
 		pst := positions[string(record.Key)]
 		if record.Type == data.LogRecordNormal {
+			// Put the record in the index if it is of type LogRecordNormal
 			wb.db.index.Put(record.Key, pst)
 		}
 		if record.Type == data.LogRecordDeleted {
+			// Delete the record from the index if it is of type LogRecordDeleted
 			wb.db.index.Delete(record.Key)
 		}
 	}
@@ -146,8 +156,13 @@ func encodeLogRecordKeyWithSeq(key []byte, seqNo uint64) []byte {
 	seq := make([]byte, binary.MaxVarintLen64)
 	n := binary.PutUvarint(seq[:], seqNo)
 
+	// Create a byte slice to hold the encoded key
 	encodeKey := make([]byte, n+len(key))
+
+	// Copy the sequence number bytes to the encodeKey slice
 	copy(encodeKey[:n], seq[:n])
+
+	// Copy the original key bytes to the encodeKey slice starting from offset n
 	copy(encodeKey[n:], key)
 
 	return encodeKey
@@ -156,6 +171,10 @@ func encodeLogRecordKeyWithSeq(key []byte, seqNo uint64) []byte {
 // Parse the LogRecord key to get the actual key and transaction sequence number seq
 func parseLogRecordKeyAndSeq(key []byte) ([]byte, uint64) {
 	seqNo, n := binary.Uvarint(key)
+
+	// Extract the real key from the remaining bytes
 	realKey := key[n:]
+
 	return realKey, seqNo
 }
+
