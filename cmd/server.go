@@ -10,11 +10,12 @@ import (
 )
 
 var db *engine.DB
+var dirPath = "FlyDB-cmd"
 
 func startServer(c *grumble.Context) error {
 	if len(c.Args) == 0 {
 		options := config.DefaultOptions
-		options.DirPath = "FlyDB-cmd"
+		options.DirPath = dirPath
 		err := os.Mkdir(options.DirPath, os.ModePerm)
 		if err != nil && !os.IsExist(err) {
 			fmt.Println("flydb start error: ", err)
@@ -60,7 +61,7 @@ func cleanServer(c *grumble.Context) error {
 			}
 			db = nil
 		}
-		err := os.RemoveAll("FlyDB-cmd")
+		err := os.RemoveAll(dirPath)
 		if err != nil {
 			fmt.Println("flydb clean error: ", err)
 			return err
