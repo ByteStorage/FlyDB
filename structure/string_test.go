@@ -223,3 +223,22 @@ func TestStringStructure_Expire(t *testing.T) {
 	assert.Equal(t, err, ErrKeyExpired)
 	assert.Equal(t, string(v2), "")
 }
+
+func TestStringStructure_Persist(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Expire(randkv.GetTestKey(1), 1*time.Second)
+	assert.Nil(t, err)
+	v1, err := str.Get(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, string(v1), "1")
+
+	err = str.Persist(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	v2, err := str.Get(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, string(v2), "1")
+}

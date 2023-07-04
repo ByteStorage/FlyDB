@@ -15,6 +15,11 @@ type StringStructure struct {
 	db *engine.DB
 }
 
+var (
+	// ErrWrongNumberOfArguments is returned when the number of arguments is wrong
+	ErrWrongNumberOfArguments = errors.New("wrong number of arguments")
+)
+
 // NewStringStructure returns a new StringStructure
 // It will return a nil StringStructure if the database cannot be opened
 // or the database cannot be created
@@ -294,6 +299,18 @@ func (s *StringStructure) Expire(key []byte, ttl time.Duration) error {
 
 	// Set the value
 	return s.Set(key, value, ttl)
+}
+
+// Persist removes the expiration time of a key
+func (s *StringStructure) Persist(key []byte) error {
+	// Get the value
+	value, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Set the value
+	return s.Set(key, value, 0)
 }
 
 // encodeStringValue encodes the value
