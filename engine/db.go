@@ -560,7 +560,8 @@ func (db *DB) loadIndexFromDataFiles() error {
 func (db *DB) startGrpcServer() {
 	listener, err := net.Listen("tcp", db.options.Addr)
 	if err != nil {
-		panic(err)
+		_ = fmt.Errorf("tcp listen error: %v", err)
+		return
 	}
 	server := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
