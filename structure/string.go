@@ -284,6 +284,18 @@ func (s *StringStructure) Exists(key []byte) (bool, error) {
 	return true, nil
 }
 
+// Expire sets the expiration time of a key
+func (s *StringStructure) Expire(key []byte, ttl time.Duration) error {
+	// Get the value
+	value, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Set the value
+	return s.Set(key, value, ttl)
+}
+
 // encodeStringValue encodes the value
 // format: [type][expire][value]
 // type: 1 byte
