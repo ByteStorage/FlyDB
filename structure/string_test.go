@@ -173,3 +173,20 @@ func TestStringStructure_Decr(t *testing.T) {
 	v2, _ := str.Get(randkv.GetTestKey(1))
 	assert.Equal(t, string(v2), "-1")
 }
+
+func TestStringStructure_DecrBy(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.DecrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "-9")
+
+	err = str.DecrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "-19")
+}
