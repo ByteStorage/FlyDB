@@ -190,3 +190,18 @@ func TestStringStructure_DecrBy(t *testing.T) {
 	v2, _ := str.Get(randkv.GetTestKey(1))
 	assert.Equal(t, string(v2), "-19")
 }
+
+func TestStringStructure_Exists(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	ok1, err := str.Exists(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, ok1, true)
+
+	ok2, err := str.Exists(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, ok2, true)
+}

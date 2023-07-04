@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"strconv"
 	"time"
 )
@@ -117,10 +118,6 @@ func (s *StringStructure) StrLen(key []byte) (int, error) {
 }
 
 // GetSet sets the value of a key and returns its old value
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, error) {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -139,10 +136,6 @@ func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, 
 }
 
 // Append appends a value to the value of a key
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) Append(key, value []byte, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -158,10 +151,6 @@ func (s *StringStructure) Append(key, value []byte, ttl time.Duration) error {
 }
 
 // Incr increments the integer value of a key by 1
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) Incr(key []byte, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -186,10 +175,6 @@ func (s *StringStructure) Incr(key []byte, ttl time.Duration) error {
 }
 
 // IncrBy increments the integer value of a key by the given amount
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) IncrBy(key []byte, amount int, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -214,10 +199,6 @@ func (s *StringStructure) IncrBy(key []byte, amount int, ttl time.Duration) erro
 }
 
 // IncrByFloat increments the float value of a key by the given amount
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) IncrByFloat(key []byte, amount float64, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -242,10 +223,6 @@ func (s *StringStructure) IncrByFloat(key []byte, amount float64, ttl time.Durat
 }
 
 // Decr decrements the integer value of a key by 1
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) Decr(key []byte, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -270,10 +247,6 @@ func (s *StringStructure) Decr(key []byte, ttl time.Duration) error {
 }
 
 // DecrBy decrements the integer value of a key by the given amount
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) DecrBy(key []byte, amount int, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -295,6 +268,20 @@ func (s *StringStructure) DecrBy(key []byte, amount int, ttl time.Duration) erro
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
+}
+
+// Exists checks if a key exists
+func (s *StringStructure) Exists(key []byte) (bool, error) {
+	// Get the value
+	_, err := s.Get(key)
+	if err != nil {
+		if err == _const.ErrKeyNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 // encodeStringValue encodes the value
