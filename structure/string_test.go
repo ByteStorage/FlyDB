@@ -91,3 +91,154 @@ func TestStringStructure_GetSet(t *testing.T) {
 	assert.NotNil(t, value2)
 	assert.Equal(t, value1, value2)
 }
+
+func TestStringStructure_Append(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(10), 0)
+	//assert.Nil(t, err)
+	s1, _ := str.Get(randkv.GetTestKey(1))
+	t.Log(string(s1))
+
+	err = str.Append(randkv.GetTestKey(1), randkv.RandomValue(5), 0)
+	//assert.Nil(t, err)
+	s2, _ := str.Get(randkv.GetTestKey(1))
+	t.Log(string(s2))
+}
+
+func TestStringStructure_Incr(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.Incr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "2")
+
+	err = str.Incr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "3")
+}
+
+func TestStringStructure_IncrBy(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.IncrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "11")
+
+	err = str.IncrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "21")
+}
+
+func TestStringStructure_IncrByFloat(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.IncrByFloat(randkv.GetTestKey(1), 1.1, 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "2.1")
+
+	err = str.IncrByFloat(randkv.GetTestKey(1), 1.1, 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "3.2")
+}
+
+func TestStringStructure_Decr(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.Decr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "0")
+
+	err = str.Decr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "-1")
+}
+
+func TestStringStructure_DecrBy(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.DecrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "-9")
+
+	err = str.DecrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "-19")
+}
+
+func TestStringStructure_Exists(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	ok1, err := str.Exists(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, ok1, true)
+
+	ok2, err := str.Exists(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, ok2, true)
+}
+
+func TestStringStructure_Expire(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Expire(randkv.GetTestKey(1), 1*time.Second)
+	assert.Nil(t, err)
+	v1, err := str.Get(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, string(v1), "1")
+
+	time.Sleep(2 * time.Second)
+	v2, err := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, err, ErrKeyExpired)
+	assert.Equal(t, string(v2), "")
+}
+
+func TestStringStructure_Persist(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Expire(randkv.GetTestKey(1), 1*time.Second)
+	assert.Nil(t, err)
+	v1, err := str.Get(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, string(v1), "1")
+
+	err = str.Persist(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	v2, err := str.Get(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, string(v2), "1")
+}

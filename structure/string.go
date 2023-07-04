@@ -5,6 +5,8 @@ import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
+	"strconv"
 	"time"
 )
 
@@ -12,6 +14,11 @@ import (
 type StringStructure struct {
 	db *engine.DB
 }
+
+var (
+	// ErrWrongNumberOfArguments is returned when the number of arguments is wrong
+	ErrWrongNumberOfArguments = errors.New("wrong number of arguments")
+)
 
 // NewStringStructure returns a new StringStructure
 // It will return a nil StringStructure if the database cannot be opened
@@ -116,10 +123,6 @@ func (s *StringStructure) StrLen(key []byte) (int, error) {
 }
 
 // GetSet sets the value of a key and returns its old value
-// If the key does not exist, it will be created
-// If the key exists, it will be overwritten
-// If the key is expired, it will be deleted
-// If the key is not expired, it will be updated
 func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, error) {
 	// Get the old value
 	oldValue, err := s.Get(key)
@@ -135,6 +138,179 @@ func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, 
 
 	// Return the old value
 	return oldValue, nil
+}
+
+// Append appends a value to the value of a key
+func (s *StringStructure) Append(key, value []byte, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Append the value
+	newValue := append(oldValue, value...)
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// Incr increments the integer value of a key by 1
+func (s *StringStructure) Incr(key []byte, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to an integer
+	oldIntValue, err := strconv.Atoi(string(oldValue))
+	if err != nil {
+		return err
+	}
+
+	// Increment the integer value
+	newIntValue := oldIntValue + 1
+
+	// Convert the new integer value to a byte slice
+	newValue := []byte(strconv.Itoa(newIntValue))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// IncrBy increments the integer value of a key by the given amount
+func (s *StringStructure) IncrBy(key []byte, amount int, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to an integer
+	oldIntValue, err := strconv.Atoi(string(oldValue))
+	if err != nil {
+		return err
+	}
+
+	// Increment the integer value
+	newIntValue := oldIntValue + amount
+
+	// Convert the new integer value to a byte slice
+	newValue := []byte(strconv.Itoa(newIntValue))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// IncrByFloat increments the float value of a key by the given amount
+func (s *StringStructure) IncrByFloat(key []byte, amount float64, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to a float
+	oldFloatValue, err := strconv.ParseFloat(string(oldValue), 64)
+	if err != nil {
+		return err
+	}
+
+	// Increment the float value
+	newFloatValue := oldFloatValue + amount
+
+	// Convert the new float value to a byte slice
+	newValue := []byte(strconv.FormatFloat(newFloatValue, 'f', -1, 64))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// Decr decrements the integer value of a key by 1
+func (s *StringStructure) Decr(key []byte, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to an integer
+	oldIntValue, err := strconv.Atoi(string(oldValue))
+	if err != nil {
+		return err
+	}
+
+	// Decrement the integer value
+	newIntValue := oldIntValue - 1
+
+	// Convert the new integer value to a byte slice
+	newValue := []byte(strconv.Itoa(newIntValue))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// DecrBy decrements the integer value of a key by the given amount
+func (s *StringStructure) DecrBy(key []byte, amount int, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to an integer
+	oldIntValue, err := strconv.Atoi(string(oldValue))
+	if err != nil {
+		return err
+	}
+
+	// Decrement the integer value
+	newIntValue := oldIntValue - amount
+
+	// Convert the new integer value to a byte slice
+	newValue := []byte(strconv.Itoa(newIntValue))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// Exists checks if a key exists
+func (s *StringStructure) Exists(key []byte) (bool, error) {
+	// Get the value
+	_, err := s.Get(key)
+	if err != nil {
+		if err == _const.ErrKeyNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// Expire sets the expiration time of a key
+func (s *StringStructure) Expire(key []byte, ttl time.Duration) error {
+	// Get the value
+	value, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Set the value
+	return s.Set(key, value, ttl)
+}
+
+// Persist removes the expiration time of a key
+func (s *StringStructure) Persist(key []byte) error {
+	// Get the value
+	value, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Set the value
+	return s.Set(key, value, 0)
 }
 
 // encodeStringValue encodes the value
