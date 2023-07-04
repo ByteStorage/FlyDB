@@ -46,12 +46,17 @@ const (
 	ART
 )
 
+const (
+	DefaultAddr = "127.0.0.1:8999"
+)
+
 var DefaultOptions = Options{
 	DirPath:      os.TempDir(),
 	DataFileSize: 256 * 1024 * 1024, // 256MB
 	SyncWrite:    false,
 	IndexType:    ART,
 	FIOType:      MmapIOType,
+	Addr:         DefaultAddr,
 }
 
 var DefaultIteratorOptions = IteratorOptions{
