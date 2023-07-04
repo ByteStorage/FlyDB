@@ -241,6 +241,34 @@ func (s *StringStructure) IncrByFloat(key []byte, amount float64, ttl time.Durat
 	return s.Set(key, newValue, ttl)
 }
 
+// Decr decrements the integer value of a key by 1
+// If the key does not exist, it will be created
+// If the key exists, it will be overwritten
+// If the key is expired, it will be deleted
+// If the key is not expired, it will be updated
+func (s *StringStructure) Decr(key []byte, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to an integer
+	oldIntValue, err := strconv.Atoi(string(oldValue))
+	if err != nil {
+		return err
+	}
+
+	// Decrement the integer value
+	newIntValue := oldIntValue - 1
+
+	// Convert the new integer value to a byte slice
+	newValue := []byte(strconv.Itoa(newIntValue))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
 // encodeStringValue encodes the value
 // format: [type][expire][value]
 // type: 1 byte

@@ -156,3 +156,20 @@ func TestStringStructure_IncrByFloat(t *testing.T) {
 	v2, _ := str.Get(randkv.GetTestKey(1))
 	assert.Equal(t, string(v2), "3.2")
 }
+
+func TestStringStructure_Decr(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.Decr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "0")
+
+	err = str.Decr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "-1")
+}
