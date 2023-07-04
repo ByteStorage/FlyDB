@@ -137,6 +137,25 @@ func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, 
 	return oldValue, nil
 }
 
+// Append appends a value to the value of a key
+// If the key does not exist, it will be created
+// If the key exists, it will be overwritten
+// If the key is expired, it will be deleted
+// If the key is not expired, it will be updated
+func (s *StringStructure) Append(key, value []byte, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Append the value
+	newValue := append(oldValue, value...)
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
 // encodeStringValue encodes the value
 // format: [type][expire][value]
 // type: 1 byte

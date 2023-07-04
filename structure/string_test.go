@@ -91,3 +91,17 @@ func TestStringStructure_GetSet(t *testing.T) {
 	assert.NotNil(t, value2)
 	assert.Equal(t, value1, value2)
 }
+
+func TestStringStructure_Append(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(10), 0)
+	//assert.Nil(t, err)
+	s1, _ := str.Get(randkv.GetTestKey(1))
+	t.Log(string(s1))
+
+	err = str.Append(randkv.GetTestKey(1), randkv.RandomValue(5), 0)
+	//assert.Nil(t, err)
+	s2, _ := str.Get(randkv.GetTestKey(1))
+	t.Log(string(s2))
+}
