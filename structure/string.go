@@ -213,6 +213,34 @@ func (s *StringStructure) IncrBy(key []byte, amount int, ttl time.Duration) erro
 	return s.Set(key, newValue, ttl)
 }
 
+// IncrByFloat increments the float value of a key by the given amount
+// If the key does not exist, it will be created
+// If the key exists, it will be overwritten
+// If the key is expired, it will be deleted
+// If the key is not expired, it will be updated
+func (s *StringStructure) IncrByFloat(key []byte, amount float64, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to a float
+	oldFloatValue, err := strconv.ParseFloat(string(oldValue), 64)
+	if err != nil {
+		return err
+	}
+
+	// Increment the float value
+	newFloatValue := oldFloatValue + amount
+
+	// Convert the new float value to a byte slice
+	newValue := []byte(strconv.FormatFloat(newFloatValue, 'f', -1, 64))
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
 // encodeStringValue encodes the value
 // format: [type][expire][value]
 // type: 1 byte
