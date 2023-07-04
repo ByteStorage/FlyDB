@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package cluster;
+option go_package = 	"flydb/lib/proto";
+
+service FlyDBService {
+  rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Put(PutRequest) returns (PutResponse) {}
+  rpc Del(DelRequest) returns (DelResponse) {}
+  rpc Keys(KeysRequest) returns (KeysResponse) {}
+}
+
+message GetRequest {
+  string key = 1;
+}
+
+message GetResponse {
+  string value = 1;
+}
+
+message PutRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message PutResponse {
+  bool ok = 1;
+}
+
+message DelRequest {
+  string key = 1;
+}
+
+message DelResponse {
+  bool ok = 1;
+}
+
+message KeysRequest {
+  string pattern = 1;
+}
+
+message KeysResponse {
+  repeated string keys = 1;
+}
