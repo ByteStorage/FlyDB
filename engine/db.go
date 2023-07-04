@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	data2 "github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/engine/index"
@@ -566,7 +567,7 @@ func (db *DB) startGrpcServer() {
 	go func() {
 		err := server.Serve(listener)
 		if err != nil {
-			panic(err)
+			_ = fmt.Errorf("db server start error: %v", err)
 		}
 	}()
 	// graceful shutdown
