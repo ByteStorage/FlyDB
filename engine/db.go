@@ -4,7 +4,6 @@
 package engine
 
 import (
-	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	data2 "github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/engine/index"
@@ -16,13 +15,11 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 )
 
 // DB represents a FlyDB database instance,
@@ -60,7 +57,7 @@ type DB struct {
 	index      index.Indexer              // Memory index
 	transSeqNo uint64                     // Transaction sequence number, globally increasing
 	isMerging  bool                       // Whether are merging
-	addr       string                     // The address of the current node
+	server     *grpc.Server               // gRPC listener
 }
 
 // NewDB open a new db instance
@@ -144,6 +141,8 @@ func (db *DB) Close() error {
 			return err
 		}
 	}
+	// close grpc server
+	db.server.Stop()
 	return nil
 }
 
@@ -560,20 +559,17 @@ func (db *DB) loadIndexFromDataFiles() error {
 func (db *DB) startGrpcServer() {
 	listener, err := net.Listen("tcp", db.options.Addr)
 	if err != nil {
-		_ = fmt.Errorf("tcp listen error: %v", err)
+		panic("tcp listen error: " + err.Error())
 		return
 	}
 	server := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
+	db.server = server
 	go func() {
 		err := server.Serve(listener)
 		if err != nil {
-			_ = fmt.Errorf("db server start error: %v", err)
+			panic("db server start error: " + err.Error())
 		}
 	}()
-	// graceful shutdown
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
 
-	<-sig
 }
