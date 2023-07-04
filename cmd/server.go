@@ -67,6 +67,10 @@ func cleanServer(c *grumble.Context) error {
 			return err
 		}
 		err = os.RemoveAll("/tmp/.FlyDB_Cli.history")
+		if err != nil {
+			fmt.Println("flydb clean error: ", err)
+			return err
+		}
 		fmt.Println("flydb clean success")
 	}
 	return nil
