@@ -9,13 +9,19 @@ import (
 	"github.com/ByteStorage/FlyDB/engine/index"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"io"
+	"net"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 )
 
 // DB represents a FlyDB database instance,
@@ -53,6 +59,7 @@ type DB struct {
 	index      index.Indexer              // Memory index
 	transSeqNo uint64                     // Transaction sequence number, globally increasing
 	isMerging  bool                       // Whether are merging
+	addr       string                     // The address of the current node
 }
 
 // NewDB open a new db instance
@@ -98,6 +105,9 @@ func NewDB(options config.Options) (*DB, error) {
 		return nil, err
 	}
 
+	// start grpc server
+	db.startGrpcServer()
+
 	return db, nil
 }
 
@@ -107,6 +117,9 @@ func checkOptions(options config.Options) error {
 	}
 	if options.DataFileSize <= 0 {
 		return _const.ErrOptionDataFileSizeNotPositive
+	}
+	if options.Addr == "" {
+		return _const.ErrOptionAddrIsEmpty
 	}
 	return nil
 }
@@ -541,4 +554,24 @@ func (db *DB) loadIndexFromDataFiles() error {
 	db.transSeqNo = currentSeqNo
 
 	return nil
+}
+
+func (db *DB) startGrpcServer() {
+	listener, err := net.Listen("tcp", db.options.Addr)
+	if err != nil {
+		panic(err)
+	}
+	server := grpc.NewServer()
+	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
+	go func() {
+		err := server.Serve(listener)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	// graceful shutdown
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
+
+	<-sig
 }

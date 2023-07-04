@@ -8,6 +8,7 @@ type Options struct {
 	SyncWrite    bool   // Whether to persist data on every write
 	IndexType    IndexerType
 	FIOType      FIOType
+	Addr         string // Addr DB Server Listen
 }
 
 // IteratorOptions is the configuration for index iteration.
