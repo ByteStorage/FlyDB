@@ -1,9 +1,16 @@
-package cmd
+package client
 
 import (
 	"fmt"
+	"github.com/ByteStorage/FlyDB/engine/grpc/client"
 	"github.com/desertbit/grumble"
 )
+
+func newClient() *client.Client {
+	return &client.Client{
+		Addr: addr,
+	}
+}
 
 func putData(c *grumble.Context) error {
 	key := c.Args.String("key")
@@ -12,11 +19,7 @@ func putData(c *grumble.Context) error {
 		fmt.Println("key or value is empty")
 		return nil
 	}
-	if db == nil {
-		fmt.Println("start server first")
-		return nil
-	}
-	err := db.Put([]byte(key), []byte(value))
+	err := newClient().Put([]byte(key), []byte(value))
 	if err != nil {
 		fmt.Println("put data error: ", err)
 		return err
@@ -31,11 +34,7 @@ func getData(c *grumble.Context) error {
 		fmt.Println("key is empty")
 		return nil
 	}
-	if db == nil {
-		fmt.Println("start server first")
-		return nil
-	}
-	value, err := db.Get([]byte(key))
+	value, err := newClient().Get([]byte(key))
 	if err != nil {
 		fmt.Println("get data error: ", err)
 		return err
@@ -50,11 +49,7 @@ func deleteKey(c *grumble.Context) error {
 		fmt.Println("key is empty")
 		return nil
 	}
-	if db == nil {
-		fmt.Println("start server first")
-		return nil
-	}
-	err := db.Delete([]byte(key))
+	err := newClient().Del([]byte(key))
 	if err != nil {
 		fmt.Println("delete key error: ", err)
 		return err
@@ -64,11 +59,11 @@ func deleteKey(c *grumble.Context) error {
 }
 
 func getKeys(c *grumble.Context) error {
-	if db == nil {
-		fmt.Println("start server first")
-		return nil
+	list, err := newClient().Keys()
+	if err != nil {
+		fmt.Println("get keys error: ", err)
+		return err
 	}
-	list := db.GetListKeys()
 	fmt.Println("Total keys: ", len(list))
 	for i, bytes := range list {
 		fmt.Printf(string(bytes[:]) + "\t")

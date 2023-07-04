@@ -1,39 +1,52 @@
 package client
 
-import "github.com/desertbit/grumble"
+import (
+	"errors"
+	"fmt"
+	"github.com/desertbit/grumble"
+	"github.com/fatih/color"
+	"os"
+	"path"
+	"strings"
+)
 
-func Register(app *grumble.App) {
-	app.AddCommand(&grumble.Command{
-		Name: "put",
-		Help: "put data",
-		Run:  putData,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-			a.String("value", "value", grumble.Default(""))
-		},
-	})
+var addr string
 
-	app.AddCommand(&grumble.Command{
-		Name: "get",
-		Help: "get data",
-		Run:  getData,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-		},
-	})
+// App FlyDB command app
+var App = grumble.New(&grumble.Config{
+	Name:                  "FlyDB Cli",
+	Description:           "A command of FlyDB",
+	HistoryFile:           path.Join(os.TempDir(), ".FlyDB_Cli.history"),
+	HistoryLimit:          10000,
+	ErrorColor:            color.New(color.FgRed, color.Bold, color.Faint),
+	HelpHeadlineColor:     color.New(color.FgGreen),
+	HelpHeadlineUnderline: false,
+	HelpSubCommands:       true,
+	Prompt:                "flydb $> ",
+	PromptColor:           color.New(color.FgBlue, color.Bold),
+	Flags:                 func(f *grumble.Flags) {},
+})
 
-	app.AddCommand(&grumble.Command{
-		Name: "delete",
-		Help: "delete key",
-		Run:  deleteKey,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-		},
+func init() {
+	App.OnInit(func(a *grumble.App, fm grumble.FlagMap) error {
+		if len(os.Args) != 1 {
+			fmt.Println("usage: flydb-cli [addr]")
+			return errors.New("usage: flydb-cli [addr]")
+		}
+		addr = os.Args[1]
+		return nil
 	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "keys",
-		Help: "list keys",
-		Run:  getKeys,
+	App.SetPrintASCIILogo(func(a *grumble.App) {
+		fmt.Println(strings.Join([]string{`
+              ______    __             ____     ____ 
+             / ____/   / /   __  __   / __ \   / __ )
+            / /       / /   / / / /  / / / /  / /_/ /
+           / /_      / /   / / / /  / / / /  / __ |
+          / __/     / /   / /_/ /  / / / /  / / / / 
+         / /       / /    \__, /  / /_/ /  / /_/ /  
+        /_/       /_/    ,__/ /  /_____/  /_____/  
+                        /____/                                              
+`}, "\r\n"))
 	})
+	register(App)
 }
