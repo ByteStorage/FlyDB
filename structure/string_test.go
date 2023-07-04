@@ -105,3 +105,20 @@ func TestStringStructure_Append(t *testing.T) {
 	s2, _ := str.Get(randkv.GetTestKey(1))
 	t.Log(string(s2))
 }
+
+func TestStringStructure_Incr(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.Incr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	t.Log(string(v1))
+
+	err = str.Incr(randkv.GetTestKey(1), 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	t.Log(string(v2))
+}

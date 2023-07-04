@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
+	"strconv"
 	"time"
 )
 
@@ -151,6 +152,34 @@ func (s *StringStructure) Append(key, value []byte, ttl time.Duration) error {
 
 	// Append the value
 	newValue := append(oldValue, value...)
+
+	// Set the value
+	return s.Set(key, newValue, ttl)
+}
+
+// Incr increments the integer value of a key by 1
+// If the key does not exist, it will be created
+// If the key exists, it will be overwritten
+// If the key is expired, it will be deleted
+// If the key is not expired, it will be updated
+func (s *StringStructure) Incr(key []byte, ttl time.Duration) error {
+	// Get the old value
+	oldValue, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to an integer
+	oldIntValue, err := strconv.Atoi(string(oldValue))
+	if err != nil {
+		return err
+	}
+
+	// Increment the integer value
+	newIntValue := oldIntValue + 1
+
+	// Convert the new integer value to a byte slice
+	newValue := []byte(strconv.Itoa(newIntValue))
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
