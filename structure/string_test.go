@@ -115,10 +115,27 @@ func TestStringStructure_Incr(t *testing.T) {
 	err := str.Incr(randkv.GetTestKey(1), 0)
 	assert.Nil(t, err)
 	v1, _ := str.Get(randkv.GetTestKey(1))
-	t.Log(string(v1))
+	assert.Equal(t, string(v1), "2")
 
 	err = str.Incr(randkv.GetTestKey(1), 0)
 	assert.Nil(t, err)
 	v2, _ := str.Get(randkv.GetTestKey(1))
-	t.Log(string(v2))
+	assert.Equal(t, string(v2), "3")
+}
+
+func TestStringStructure_IncrBy(t *testing.T) {
+	str := initdb()
+
+	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err := str.IncrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v1, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v1), "11")
+
+	err = str.IncrBy(randkv.GetTestKey(1), 10, 0)
+	assert.Nil(t, err)
+	v2, _ := str.Get(randkv.GetTestKey(1))
+	assert.Equal(t, string(v2), "21")
 }
