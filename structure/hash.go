@@ -229,3 +229,40 @@ func (hs *HashStructure) HSet(key, field, value []byte) (bool, error) {
 
 	return !exist, nil
 }
+
+// HGet gets the string value of a hash field.
+func (hs *HashStructure) HGet(key, field []byte) ([]byte, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 {
+		return nil, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return nil, err
+	}
+
+	// If the counter is 0, return nil
+	if hashMeta.counter == 0 {
+		return nil, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	value, err := hs.db.Get(hfBuf)
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
+}
