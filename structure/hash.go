@@ -177,3 +177,55 @@ func NewHashStructure(options config.Options) (*HashStructure, error) {
 	}
 	return &HashStructure{db: db}, nil
 }
+
+// HSet sets the string value of a hash field.
+func (hs *HashStructure) HSet(key, field, value []byte) (bool, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	var exist = true
+
+	// Get the field from the database
+	_, err = hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		exist = false
+	}
+
+	// new a write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// If the field is not found, increase the counter
+	if !exist {
+		hashMeta.counter++
+		_ = batch.Put(key, hashMeta.encodeHashMeta())
+	}
+
+	// Put the field to the database
+	_ = batch.Put(hfBuf, value)
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return !exist, nil
+}
