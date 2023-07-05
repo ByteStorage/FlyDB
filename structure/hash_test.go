@@ -175,3 +175,36 @@ func TestHashStructure_HIncrBy(t *testing.T) {
 	assert.Equal(t, v4, int64(0))
 
 }
+
+func TestHashStructure_HIncrByFloat(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), []byte("10"))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), []byte("10"))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field3"), []byte("10"))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	v1, err := hash.HIncrByFloat(randkv.GetTestKey(1), []byte("field1"), 1.1)
+	assert.Nil(t, err)
+	assert.Equal(t, v1, float64(11.1))
+
+	v2, err := hash.HIncrByFloat(randkv.GetTestKey(1), []byte("field2"), -1.1)
+	assert.Nil(t, err)
+	assert.Equal(t, v2, float64(8.9))
+
+	v3, err := hash.HIncrByFloat(randkv.GetTestKey(1), []byte("field3"), 0)
+	assert.Nil(t, err)
+	assert.Equal(t, v3, float64(10))
+
+	v4, err := hash.HIncrByFloat(randkv.GetTestKey(1), []byte("field4"), 1.1)
+	assert.Nil(t, err)
+	assert.Equal(t, v4, float64(0))
+
+}
