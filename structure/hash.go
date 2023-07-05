@@ -325,3 +325,40 @@ func (hs *HashStructure) HDel(key []byte, fields ...[]byte) (bool, error) {
 
 	return true, nil
 }
+
+// HExists determines whether a hash field exists or not.
+func (hs *HashStructure) HExists(key, field []byte) (bool, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return false
+	if hashMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	_, err = hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		return false, nil
+	}
+
+	return true, nil
+}
