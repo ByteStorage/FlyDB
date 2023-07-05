@@ -8,7 +8,7 @@ const (
 	// Hash is a hash data structure
 	Hash
 	// List is a list data structure
-	List
+	List DataStructure = iota + 1
 	// Set is a set data structure
 	Set
 	// ZSet is a zset data structure
