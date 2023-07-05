@@ -110,3 +110,35 @@ func TestHashStructure_HLen(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, l, 3)
 }
+
+func TestHashStructure_HUpdate(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field3"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	ok4, err := hash.HUpdate(randkv.GetTestKey(1), []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok4)
+
+	ok5, err := hash.HUpdate(randkv.GetTestKey(1), []byte("field2"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok5)
+
+	ok6, err := hash.HUpdate(randkv.GetTestKey(1), []byte("field4"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.False(t, ok6)
+
+	l, err := hash.HLen(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, l, 3)
+}

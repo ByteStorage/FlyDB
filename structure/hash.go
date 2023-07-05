@@ -383,3 +383,52 @@ func (hs *HashStructure) HLen(key []byte) (int, error) {
 
 	return int(hashMeta.counter), nil
 }
+
+// HUpdate updates the string value of a hash field.
+func (hs *HashStructure) HUpdate(key, field, value []byte) (bool, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return 0
+	if hashMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	_, err = hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		return false, nil
+	}
+
+	// new a write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// Put the field to the database
+	_ = batch.Put(hfBuf, value)
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
