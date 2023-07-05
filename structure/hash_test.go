@@ -90,3 +90,23 @@ func TestHashStructure_HExists(t *testing.T) {
 	assert.False(t, ok3)
 
 }
+
+func TestHashStructure_HLen(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field3"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	l, err := hash.HLen(randkv.GetTestKey(1))
+	assert.Nil(t, err)
+	assert.Equal(t, l, 3)
+}

@@ -362,3 +362,24 @@ func (hs *HashStructure) HExists(key, field []byte) (bool, error) {
 
 	return true, nil
 }
+
+// HLen gets the number of fields contained in a hash.
+func (hs *HashStructure) HLen(key []byte) (int, error) {
+	// Check the parameters
+	if len(key) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return 0, err
+	}
+
+	// If the counter is 0, return 0
+	if hashMeta.counter == 0 {
+		return 0, nil
+	}
+
+	return int(hashMeta.counter), nil
+}
