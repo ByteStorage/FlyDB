@@ -2,6 +2,7 @@ package structure
 
 import (
 	"encoding/binary"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"time"
@@ -117,3 +118,62 @@ func (hs *HashStructure) findHashMeta(key []byte, dataType DataStructure) (*Hash
 	return hashMeta, nil
 }
 
+type HashField struct {
+	field   []byte
+	key     []byte
+	version int64
+}
+
+// encodeHashField encodes a HashField and returns the byte array and length.
+// +-------------+------------+------------+
+// |  field      |  key       |  version   |
+// +-------------+------------+------------+
+// |  variable   |  variable  |  8 bytes   |
+// +-------------+------------+------------+
+func (hf *HashField) encodeHashField() []byte {
+	buf := make([]byte, len(hf.field)+len(hf.key)+8)
+
+	// offset is the offset of the buf
+	var offset = 0
+
+	// copy the field to buf
+	offset += copy(buf[offset:], hf.field)
+
+	// copy the key to buf
+	offset += copy(buf[offset:], hf.key)
+
+	// copy the version to buf
+	binary.BigEndian.PutUint64(buf[offset:], uint64(hf.version))
+
+	return buf[:offset+8]
+}
+
+// decodeHashField decodes the HashField from a byte buffer.
+func decodeHashField(buf []byte) *HashField {
+	var offset = 0
+
+	// get the field from buf
+	field := buf[offset:]
+
+	// get the key from buf
+	offset += len(field)
+	key := buf[offset:]
+
+	// get the version from buf
+	offset += len(key)
+	version := int64(binary.BigEndian.Uint64(buf[offset:]))
+
+	return &HashField{
+		field:   field,
+		key:     key,
+		version: version,
+	}
+}
+
+func NewHashStructure(options config.Options) (*HashStructure, error) {
+	db, err := engine.NewDB(options)
+	if err != nil {
+		return nil, err
+	}
+	return &HashStructure{db: db}, nil
+}
