@@ -44,3 +44,32 @@ func TestHashStructure_HGet(t *testing.T) {
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 }
+
+func TestHashStructure_HDel(t *testing.T) {
+	hash := initHashDB()
+
+	ok, err := hash.HDel(randkv.GetTestKey(1), []byte("field1"))
+	assert.Nil(t, err)
+	assert.False(t, ok)
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HDel(randkv.GetTestKey(1), []byte("field1"))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	ok4, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok4)
+
+	ok5, err := hash.HDel(randkv.GetTestKey(1), []byte("field1"), []byte("field2"))
+	assert.Nil(t, err)
+	assert.True(t, ok5)
+
+}

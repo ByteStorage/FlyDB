@@ -266,3 +266,62 @@ func (hs *HashStructure) HGet(key, field []byte) ([]byte, error) {
 
 	return value, nil
 }
+
+// HDel deletes one or more hash fields.
+func (hs *HashStructure) HDel(key []byte, fields ...[]byte) (bool, error) {
+	// Check the parameters
+	if len(key) == 0 || len(fields) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return 0
+	if hashMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	var count int64
+
+	// new a write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// Delete the fields one by one
+	for _, field := range fields {
+		// If the field is not found, continue
+		hf.field = field
+		hfBuf := hf.encodeHashField()
+		_, err = hs.db.Get(hfBuf)
+		if err != nil && err == _const.ErrKeyNotFound {
+			continue
+		}
+
+		// Delete the field
+		_ = batch.Delete(hfBuf)
+
+		// Decrease the counter
+		hashMeta.counter--
+		count++
+	}
+
+	// Put the hash metadata to the database
+	_ = batch.Put(key, hashMeta.encodeHashMeta())
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
