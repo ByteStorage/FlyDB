@@ -555,3 +555,64 @@ func (hs *HashStructure) HIncrByFloat(key, field []byte, increment float64) (flo
 
 	return val, nil
 }
+
+// HDecrBy decrements the integer value of a hash field by the given number.
+func (hs *HashStructure) HDecrBy(key, field []byte, decrement int64) (int64, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return 0, err
+	}
+
+	// If the counter is 0, return 0
+	if hashMeta.counter == 0 {
+		return 0, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	value, err := hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		return 0, nil
+	}
+
+	// Convert the value to int64
+	val, err := strconv.ParseInt(string(value), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	// Subtract the decrement from the value
+	val -= decrement
+
+	// Convert the value to string
+	value = []byte(strconv.FormatInt(val, 10))
+
+	// new a write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// Put the field to the database
+	_ = batch.Put(hfBuf, value)
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return 0, err
+	}
+
+	return val, nil
+}
