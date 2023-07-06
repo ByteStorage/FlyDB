@@ -10,7 +10,7 @@ type TcpServerConfiguration struct {
 // Configuration is global tcp server config
 var Configuration *TcpServerConfiguration
 
-// Init init global tcp server config
+// Init global tcp server config
 func Init() *TcpServerConfiguration {
 	Configuration = &TcpServerConfiguration{
 		Host:       "127.0.0.1",

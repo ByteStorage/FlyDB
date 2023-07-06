@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package dbs;
+option go_package = 	"flydb/lib/proto/dbs";
+
+service FlyDBService {
+  rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Put(PutRequest) returns (PutResponse) {}
+  rpc Del(DelRequest) returns (DelResponse) {}
+  rpc Keys(KeysRequest) returns (KeysResponse) {}
+}
+
+message GetRequest {
+  bytes key = 1;
+}
+
+message GetResponse {
+  bytes value = 1;
+}
+
+message PutRequest {
+  bytes key = 1;
+  bytes value = 2;
+}
+
+message PutResponse {
+  bool ok = 1;
+}
+
+message DelRequest {
+  bytes key = 1;
+}
+
+message DelResponse {
+  bool ok = 1;
+}
+
+message KeysRequest {
+  bytes pattern = 1;
+}
+
+message KeysResponse {
+  repeated bytes keys = 1;
+}
