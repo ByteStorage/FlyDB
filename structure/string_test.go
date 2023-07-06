@@ -22,6 +22,7 @@ func initdb() *StringStructure {
 
 func TestStringStructure_Get(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
@@ -44,6 +45,7 @@ func TestStringStructure_Get(t *testing.T) {
 
 func TestStringStructure_Del(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
@@ -57,6 +59,7 @@ func TestStringStructure_Del(t *testing.T) {
 
 func TestStringStructure_Type(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
@@ -70,6 +73,7 @@ func TestStringStructure_Type(t *testing.T) {
 
 func TestStringStructure_StrLen(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
@@ -81,6 +85,7 @@ func TestStringStructure_StrLen(t *testing.T) {
 
 func TestStringStructure_GetSet(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
@@ -94,6 +99,7 @@ func TestStringStructure_GetSet(t *testing.T) {
 
 func TestStringStructure_Append(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), randkv.RandomValue(10), 0)
 	//assert.Nil(t, err)
@@ -108,6 +114,7 @@ func TestStringStructure_Append(t *testing.T) {
 
 func TestStringStructure_Incr(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -125,6 +132,7 @@ func TestStringStructure_Incr(t *testing.T) {
 
 func TestStringStructure_IncrBy(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -142,6 +150,7 @@ func TestStringStructure_IncrBy(t *testing.T) {
 
 func TestStringStructure_IncrByFloat(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -159,6 +168,7 @@ func TestStringStructure_IncrByFloat(t *testing.T) {
 
 func TestStringStructure_Decr(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -176,6 +186,7 @@ func TestStringStructure_Decr(t *testing.T) {
 
 func TestStringStructure_DecrBy(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -193,6 +204,7 @@ func TestStringStructure_DecrBy(t *testing.T) {
 
 func TestStringStructure_Exists(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -208,6 +220,7 @@ func TestStringStructure_Exists(t *testing.T) {
 
 func TestStringStructure_Expire(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)
@@ -226,6 +239,7 @@ func TestStringStructure_Expire(t *testing.T) {
 
 func TestStringStructure_Persist(t *testing.T) {
 	str := initdb()
+	defer str.db.Clean()
 
 	err = str.Set(randkv.GetTestKey(1), []byte("1"), 0)
 	assert.Nil(t, err)

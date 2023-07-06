@@ -18,7 +18,7 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// SlaveGrpcServiceClient is the client API for SlaveGrpcService service.
+// SlaveGrpcServiceClient is the client API for SlaveGrpcService dbs.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SlaveGrpcServiceClient interface {
@@ -112,7 +112,7 @@ func (c *slaveGrpcServiceClient) Heartbeat(ctx context.Context, in *SlaveHeartbe
 	return out, nil
 }
 
-// SlaveGrpcServiceServer is the server API for SlaveGrpcService service.
+// SlaveGrpcServiceServer is the server API for SlaveGrpcService dbs.
 // All implementations must embed UnimplementedSlaveGrpcServiceServer
 // for forward compatibility
 type SlaveGrpcServiceServer interface {
@@ -157,7 +157,7 @@ func (UnimplementedSlaveGrpcServiceServer) Heartbeat(context.Context, *SlaveHear
 }
 func (UnimplementedSlaveGrpcServiceServer) mustEmbedUnimplementedSlaveGrpcServiceServer() {}
 
-// UnsafeSlaveGrpcServiceServer may be embedded to opt out of forward compatibility for this service.
+// UnsafeSlaveGrpcServiceServer may be embedded to opt out of forward compatibility for this dbs.
 // Use of this interface is not recommended, as added methods to SlaveGrpcServiceServer will
 // result in compilation errors.
 type UnsafeSlaveGrpcServiceServer interface {
@@ -312,7 +312,7 @@ func _SlaveGrpcService_Heartbeat_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-// SlaveGrpcService_ServiceDesc is the grpc.ServiceDesc for SlaveGrpcService service.
+// SlaveGrpcService_ServiceDesc is the grpc.ServiceDesc for SlaveGrpcService dbs.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SlaveGrpcService_ServiceDesc = grpc.ServiceDesc{

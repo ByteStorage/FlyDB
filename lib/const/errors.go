@@ -13,4 +13,5 @@ var (
 
 	ErrOptionDirPathIsEmpty          = errors.New("OptionDirPathError : database dir path is empty")
 	ErrOptionDataFileSizeNotPositive = errors.New("OptionDataFileSizeError : database data file size must be greater than 0")
+	ErrOptionAddrIsEmpty             = errors.New("OptionAddrError : database addr is empty")
 )
