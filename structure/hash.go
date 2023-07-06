@@ -653,3 +653,76 @@ func (hs *HashStructure) HStrLen(key, field []byte) (int, error) {
 
 	return len(value), nil
 }
+
+// HMove moves field from the hash stored at source to the hash stored at destination.
+func (hs *HashStructure) HMove(source, destination, field []byte) (bool, error) {
+	// Check the parameters
+	if len(source) == 0 || len(destination) == 0 || len(field) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given source
+	sourceMeta, err := hs.findHashMeta(source, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return 0
+	if sourceMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Find the hash metadata by the given destination
+	destinationMeta, err := hs.findHashMeta(destination, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return 0
+	if destinationMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     source,
+		version: sourceMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Create a new HashField
+	destinationHf := &HashField{
+		field:   field,
+		key:     destination,
+		version: destinationMeta.version,
+	}
+
+	// Encode the HashField
+	destinationHfBuf := destinationHf.encodeHashField()
+
+	// Get the field from the database
+	value, err := hs.db.Get(destinationHfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		return false, nil
+	}
+
+	// new a write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// Delete the field from the source
+	_ = batch.Delete(hfBuf)
+
+	// Put the field to the destination
+	_ = batch.Put(hfBuf, value)
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

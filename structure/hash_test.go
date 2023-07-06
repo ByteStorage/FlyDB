@@ -274,3 +274,60 @@ func TestHashStructure_HStrLen(t *testing.T) {
 	assert.Equal(t, l4, 0)
 
 }
+
+func TestHashStructure_HMove(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), []byte("111-1000"))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), []byte("111-100"))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field3"), []byte("111-10"))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	ok4, err := hash.HSet(randkv.GetTestKey(2), []byte("field1"), []byte("222-1000"))
+	assert.Nil(t, err)
+	assert.True(t, ok4)
+
+	ok5, err := hash.HSet(randkv.GetTestKey(2), []byte("field2"), []byte("222-100"))
+	assert.Nil(t, err)
+	assert.True(t, ok5)
+
+	ok6, err := hash.HSet(randkv.GetTestKey(2), []byte("field3"), []byte("222-10"))
+	assert.Nil(t, err)
+	assert.True(t, ok6)
+
+	ok7, err := hash.HMove(randkv.GetTestKey(2), randkv.GetTestKey(1), []byte("field1"))
+	assert.Nil(t, err)
+	assert.True(t, ok7)
+
+	ok8, err := hash.HMove(randkv.GetTestKey(2), randkv.GetTestKey(1), []byte("field2"))
+	assert.Nil(t, err)
+	assert.True(t, ok8)
+
+	ok9, err := hash.HMove(randkv.GetTestKey(2), randkv.GetTestKey(1), []byte("field3"))
+	assert.Nil(t, err)
+	assert.True(t, ok9)
+
+	ok10, err := hash.HMove(randkv.GetTestKey(2), randkv.GetTestKey(1), []byte("field4"))
+	assert.Nil(t, err)
+	assert.False(t, ok10)
+
+	v1, err := hash.HGet(randkv.GetTestKey(2), []byte("field1"))
+	assert.Nil(t, err)
+	assert.Equal(t, v1, []byte("111-1000"))
+
+	v2, err := hash.HGet(randkv.GetTestKey(2), []byte("field2"))
+	assert.Nil(t, err)
+	assert.Equal(t, v2, []byte("111-100"))
+
+	v3, err := hash.HGet(randkv.GetTestKey(2), []byte("field3"))
+	assert.Nil(t, err)
+	assert.Equal(t, v3, []byte("111-10"))
+
+}
