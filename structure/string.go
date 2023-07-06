@@ -42,26 +42,6 @@ func stringToBytesWithKey(key string) []byte {
 	return []byte(key)
 }
 
-// interfaceToBytes converts an interface to a byte slice
-func interfaceToBytes(value interface{}) ([]byte, error) {
-	switch value := value.(type) {
-	case string:
-		return []byte(value), nil
-	case int:
-		return []byte(strconv.Itoa(value)), nil
-	case int64:
-		return []byte(strconv.FormatInt(value, 10)), nil
-	case float64:
-		return []byte(strconv.FormatFloat(value, 'f', -1, 64)), nil
-	case bool:
-		return []byte(strconv.FormatBool(value)), nil
-	case []byte:
-		return value, nil
-	default:
-		return nil, errors.New("unsupported type")
-	}
-}
-
 // Set sets the value of a key
 // If the key does not exist, it will be created
 // If the key exists, it will be overwritten
