@@ -53,11 +53,11 @@ func TestHashMap_Delete(t *testing.T) {
 
 func TestHashMap_Iterator(t *testing.T) {
 	hm1 := NewBTree()
-	// 1. BTree 为空
+	// 1. HashMap is empty
 	iter1 := hm1.Iterator(false)
 	assert.Equal(t, false, iter1.Valid())
 
-	// 2. BTree 不为空
+	// 2. HashMap is not empty
 	hm1.Put([]byte("abc"), &data.LogRecordPst{Fid: 1, Offset: 12})
 	iter2 := hm1.Iterator(false)
 	assert.True(t, iter2.Valid())
@@ -66,7 +66,7 @@ func TestHashMap_Iterator(t *testing.T) {
 	iter2.Next()
 	assert.Equal(t, false, iter2.Valid())
 
-	// 3. 多条数据
+	// 3. when there are multiple pieces of data
 	hm1.Put([]byte("bcd"), &data.LogRecordPst{Fid: 2, Offset: 12})
 	hm1.Put([]byte("efg"), &data.LogRecordPst{Fid: 3, Offset: 12})
 	hm1.Put([]byte("def"), &data.LogRecordPst{Fid: 4, Offset: 12})

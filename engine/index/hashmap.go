@@ -30,7 +30,7 @@ func NewHashMap() *HashMap {
 }
 
 // Implement the methods of the index interface
-// Put 向索引中存储 key 对应的数据位置信息
+// Put stores the data location information of key into the index
 func (hm *HashMap) Put(key []byte, pst *data.LogRecordPst) bool {
 	hm.lock.Lock()
 	defer hm.lock.Unlock()
@@ -39,7 +39,7 @@ func (hm *HashMap) Put(key []byte, pst *data.LogRecordPst) bool {
 	return true
 }
 
-// Get 根据 key 取出对应的索引位置信息
+// Get gains the data location of the key in the index
 func (hm *HashMap) Get(key []byte) *data.LogRecordPst {
 	value, ok := hm.hashmap.Get(string(key))
 	if !ok {
@@ -48,7 +48,7 @@ func (hm *HashMap) Get(key []byte) *data.LogRecordPst {
 	return value
 }
 
-// Delete 根据 key 删除对应的索引位置信息
+// Delete deletes data location of one key in index
 func (hm *HashMap) Delete(key []byte) bool {
 	hm.lock.Lock()
 	hm.lock.Unlock()
@@ -56,12 +56,12 @@ func (hm *HashMap) Delete(key []byte) bool {
 	return hm.hashmap.Del(string(key))
 }
 
-// Size 索引中的数据量
+// Size returns the size of the data in index
 func (hm *HashMap) Size() int {
 	return hm.hashmap.Len()
 }
 
-// Iterator 索引迭代器
+// Iterator returns a index Iterator
 func (hm *HashMap) Iterator(reverse bool) Iterator {
 	if hm.hashmap == nil {
 		return nil
@@ -80,11 +80,16 @@ type HashMapIterator struct {
 
 // create a HashMapIterator
 func NewHashMapIterator(hm *HashMap, reverse bool) *HashMapIterator {
+	// if the HashMap is empty, returns a nil HashMapIterator
+	// to avoid making a nil slice values
+	if hm.Size() == 0 {
+		return nil
+	}
 	values := make([]*Item, hm.Size())
 
 	// store all data into an slice values
-	// 使用hashmap实现中的range函数来做
-	// 需要定义一个操作函数
+	// We use range() method in the hashmap implement to do this
+	// define an operator method
 	saveFunc := func(key string, value *data.LogRecordPst) bool {
 		item := &Item{
 			key: []byte(key),
@@ -109,12 +114,13 @@ func NewHashMapIterator(hm *HashMap, reverse bool) *HashMapIterator {
 	}
 }
 
-// Rewind 重新回到迭代器的起点，即第一个数据
+// Rewind goes back to the begining of the Iterator,ie. the index of the first data
 func (hmIt *HashMapIterator) Rewind() {
 	hmIt.currIndex = 0
 }
 
-// Seek 根据传入的 key 查找到一个 >= 或 <= 的目标 key，从这个目标 key 开始遍历
+// Seek finds a >= or <= target key according to the incoming key,
+// and starts traversing from this target key
 func (hmIt *HashMapIterator) Seek(key []byte) {
 	if hmIt.reverse {
 		hmIt.currIndex = sort.Search(len(hmIt.values), func(i int) bool {
@@ -127,27 +133,29 @@ func (hmIt *HashMapIterator) Seek(key []byte) {
 	}
 }
 
-// Next 跳转到下一个 key
+// Next jumps to the next key
 func (hmIt *HashMapIterator) Next() {
 	hmIt.currIndex += 1
 }
 
-// Valid 是否有效，即是否已经遍历完了所有 key，用于退出遍历 ==> true->是  false-->否
+// Valid refers to whether it is valid, that is,
+// whether all keys have been traversed,
+// used to exit the traverse ==> true->yes false-->no
 func (hmIt *HashMapIterator) Valid() bool {
 	return hmIt.currIndex < len(hmIt.values)
 }
 
-// Key 当前遍历位置的 key 数据
+// Key returns the key data at the current traversal position
 func (hmIt *HashMapIterator) Key() []byte {
 	return hmIt.values[hmIt.currIndex].key
 }
 
-// Value 当前遍历位置的 value 数据
+// Value returns the value data of the current traversal position
 func (hmIt *HashMapIterator) Value() *data.LogRecordPst {
 	return hmIt.values[hmIt.currIndex].pst
 }
 
-// Close 关闭迭代器，释放相应资源
+// Close closes the iterator and releases the corresponding resources
 func (hmIt *HashMapIterator) Close() {
 	hmIt.values = nil
 }
