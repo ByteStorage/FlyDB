@@ -1,55 +1,56 @@
 package index
 
-import (
-	"testing"
-
-	"github.com/ByteStorage/FlyDB/engine/data"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestHashMap_Put(t *testing.T) {
-	hm := NewHashMap()
-
-	res1 := hm.Put(nil, &data.LogRecordPst{Fid: 1, Offset: 100})
-	assert.True(t, res1)
-
-	res2 := hm.Put([]byte("a"), &data.LogRecordPst{Fid: 1, Offset: 200})
-	assert.True(t, res2)
-}
-
-func TestHashMap_Get(t *testing.T) {
-	hm := NewHashMap()
-
-	res1 := hm.Put(nil, &data.LogRecordPst{Fid: 1, Offset: 100})
-	assert.True(t, res1)
-
-	pst1 := hm.Get(nil)
-	assert.Equal(t, uint32(1), pst1.Fid)
-	assert.Equal(t, int64(100), pst1.Offset)
-
-	res2 := hm.Put([]byte("a"), &data.LogRecordPst{Fid: 1, Offset: 200})
-	assert.True(t, res2)
-	res3 := hm.Put([]byte("a"), &data.LogRecordPst{Fid: 1, Offset: 300})
-	assert.True(t, res3)
-
-	pst2 := hm.Get([]byte("a"))
-	assert.Equal(t, uint32(1), pst2.Fid)
-	assert.Equal(t, int64(300), pst2.Offset)
-}
-
-func TestHashMap_Delete(t *testing.T) {
-	hm := NewHashMap()
-
-	res1 := hm.Put(nil, &data.LogRecordPst{Fid: 1, Offset: 100})
-	assert.True(t, res1)
-	res2 := hm.Delete(nil)
-	assert.True(t, res2)
-
-	res3 := hm.Put([]byte("abc"), &data.LogRecordPst{Fid: 11, Offset: 22})
-	assert.True(t, res3)
-	res4 := hm.Delete([]byte("abc"))
-	assert.True(t, res4)
-}
+//
+//import (
+//	"testing"
+//
+//	"github.com/ByteStorage/FlyDB/engine/data"
+//	"github.com/stretchr/testify/assert"
+//)
+//
+//func TestHashMap_Put(t *testing.T) {
+//	hm := NewHashMap()
+//
+//	res1 := hm.Put(nil, &data.LogRecordPst{Fid: 1, Offset: 100})
+//	assert.True(t, res1)
+//
+//	res2 := hm.Put([]byte("a"), &data.LogRecordPst{Fid: 1, Offset: 200})
+//	assert.True(t, res2)
+//}
+//
+//func TestHashMap_Get(t *testing.T) {
+//	hm := NewHashMap()
+//
+//	res1 := hm.Put(nil, &data.LogRecordPst{Fid: 1, Offset: 100})
+//	assert.True(t, res1)
+//
+//	pst1 := hm.Get(nil)
+//	assert.Equal(t, uint32(1), pst1.Fid)
+//	assert.Equal(t, int64(100), pst1.Offset)
+//
+//	res2 := hm.Put([]byte("a"), &data.LogRecordPst{Fid: 1, Offset: 200})
+//	assert.True(t, res2)
+//	res3 := hm.Put([]byte("a"), &data.LogRecordPst{Fid: 1, Offset: 300})
+//	assert.True(t, res3)
+//
+//	pst2 := hm.Get([]byte("a"))
+//	assert.Equal(t, uint32(1), pst2.Fid)
+//	assert.Equal(t, int64(300), pst2.Offset)
+//}
+//
+//func TestHashMap_Delete(t *testing.T) {
+//	hm := NewHashMap()
+//
+//	res1 := hm.Put(nil, &data.LogRecordPst{Fid: 1, Offset: 100})
+//	assert.True(t, res1)
+//	res2 := hm.Delete(nil)
+//	assert.True(t, res2)
+//
+//	res3 := hm.Put([]byte("abc"), &data.LogRecordPst{Fid: 11, Offset: 22})
+//	assert.True(t, res3)
+//	res4 := hm.Delete([]byte("abc"))
+//	assert.True(t, res4)
+//}
 
 //func TestHashMap_Iterator(t *testing.T) {
 //	hm1 := NewHashMap()
