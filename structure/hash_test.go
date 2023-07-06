@@ -331,3 +331,32 @@ func TestHashStructure_HMove(t *testing.T) {
 	assert.Equal(t, v3, []byte("111-10"))
 
 }
+
+func TestHashStructure_HSetNX(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSetNX(randkv.GetTestKey(1), []byte("field1"), []byte("1000"))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSetNX(randkv.GetTestKey(1), []byte("field2"), []byte("100"))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSetNX(randkv.GetTestKey(1), []byte("field3"), []byte("10"))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	ok4, err := hash.HSetNX(randkv.GetTestKey(1), []byte("field1"), []byte("1000"))
+	assert.Nil(t, err)
+	assert.False(t, ok4)
+
+	ok5, err := hash.HSetNX(randkv.GetTestKey(1), []byte("field2"), []byte("100"))
+	assert.Nil(t, err)
+	assert.False(t, ok5)
+
+	ok6, err := hash.HSetNX(randkv.GetTestKey(1), []byte("field3"), []byte("10"))
+	assert.Nil(t, err)
+	assert.False(t, ok6)
+
+}

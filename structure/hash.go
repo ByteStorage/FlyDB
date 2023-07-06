@@ -726,3 +726,40 @@ func (hs *HashStructure) HMove(source, destination, field []byte) (bool, error) 
 
 	return true, nil
 }
+
+// HSetNX sets field in the hash stored at key to value, only if field does not yet exist.
+func (hs *HashStructure) HSetNX(key, field, value []byte) (bool, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	_, err = hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		_, err := hs.HSet(key, field, value)
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	} else {
+		return false, nil
+	}
+
+}
