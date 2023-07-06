@@ -9,6 +9,66 @@ import (
 	"time"
 )
 
+// NewHashStructure Returns a new NewHashStructure
+// If the database cannot be opened, it returns a nil NewHashStructure
+// Otherwise, the database cannot be created
+// If the database does not exist, it will be created
+
+// HSet Sets the string value of a hash field.
+// This operation is atomic
+// If key does not exist, a new key holding a hash is created
+// If field already exists in the hash, it is overwritten
+// If key does not hold a hash, an error is returned
+
+// HGet Returns the value associated with field in the hash stored at key
+// If the hash table does not exist, a nil slice is returned
+// If the key does not exist, a nil slice is returned
+// If the field does not exist, a nil slice is returned
+
+// HDel Removes the specified fields from the hash stored at key
+// This operation is atomic
+// Specified fields that do not exist within this hash are ignored
+// If key does not exist, it is treated as an empty hash and this command returns error
+
+// HExists Returns if field is an existing field in the hash stored at key
+// Returns true if the hash stored at key contains field
+// Returns false if the hash does not contain field, or key does not exist
+
+// HIncrBy Increments the number stored at field in the hash stored at key by increment
+// The range of values supported by HINCRBY is limited to 64 bit signed integers
+
+// HIncrByFloat Increments the specified field of a hash stored at key, and representing a floating point number
+// An error is returned if one of the following conditions occur:
+// The field contains a value of the wrong type (not a string)
+// The current field content or the specified increment are not parsable as a float number
+
+// HLens Returns the number of fields contained in the hash stored at key
+// If the key does not exist, 0 is returned
+// If the key is not a hash, an error is returned
+
+// HStrLen Returns the string length of the value associated with field in the hash stored at key
+// If the key does not exist, 0 is returned
+// If the field is not present or the key does not exist, 0 is returned
+
+// HMove Moves field from the hash stored at source to the hash stored at destination
+// This operation is atomic
+// In every given moment the key will either exist or not exist
+// Even if the field already exists in the destination hash, it is overwritten
+
+// HUpdate Updates the hash stored at key by only replacing fields with new values from the given hash
+// Other fields are left untouched
+// If key does not exist, a new key holding a hash is created
+// If key does not hold a hash, an error is returned
+
+// HSetNX Sets field in the hash stored at key to value, only if field does not yet exist
+// If key does not exist, a new key holding a hash is created
+// If field already exists, this operation has no effect
+// If key does not hold a hash, an error is returned
+
+// HTypes Returns if field is an existing field in the hash stored at key
+// Returns "hash" if the hash stored at key contains field and the type is hash
+// Returns "" if the hash does not contain field, or key does not exist
+
 type HashMetadata struct {
 	dataType        byte  // Represents the data type of the hash object.
 	dataSize        int64 // Represents the size of the hash object.
