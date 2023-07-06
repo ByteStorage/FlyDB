@@ -25,8 +25,11 @@ func ReturnNewDB() *engine.DB {
 func destroyRegion(r Region) {
 	// Close the region's database
 	db := r.(*TestRegionStruct).db
-	_ = db.Close()
-	err := os.RemoveAll(dirpath)
+	err := db.Close()
+	if err != nil {
+		return
+	}
+	err = os.RemoveAll(dirpath)
 	if err != nil {
 		return
 	}
@@ -122,8 +125,67 @@ func TestRegion_GetSize(t *testing.T) {
 	assert.Equal(t, int64(100), size)
 }
 
+
 func TestRegion_TransferLeader(t *testing.T) {
 	region := NewTestRegion()
 	defer destroyRegion(region)
 	// TODO: write tests for this function when start raft is ready.
+}
+
+func TestRegion_RemovePeer(t *testing.T) {
+	// Create a test region instance
+	region := NewTestRegion()
+	_ = []struct {
+		name          string
+		peers         []string
+		peerToAdd     string
+		expectedPeers []string
+		expectError   bool
+	}{
+		{
+			name:          "remove a peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer2",
+			expectedPeers: []string{"peer1"},
+			expectError:   false,
+		},
+		{
+			name:          "remove a non existing peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer3",
+			expectedPeers: []string{"peer1", "peer2"},
+			expectError:   true,
+		},
+	}
+	destroyRegion(region)
+
+}
+
+func TestRegion_AddPeer(t *testing.T) {
+	// Create a test region instance
+	region := NewTestRegion()
+	_ = []struct {
+		name          string
+		peers         []string
+		peerToAdd     string
+		expectedPeers []string
+		expectError   bool
+	}{
+		{
+			name:          "add a new peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer3",
+			expectedPeers: []string{"peer1", "peer2", "peer3"},
+			expectError:   false,
+		},
+		{
+			name:          "add duplicate peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer1",
+			expectedPeers: []string{"peer1", "peer2"},
+			expectError:   true,
+		},
+	}
+	destroyRegion(region)
+
 }

@@ -106,7 +106,21 @@ func (r *region) TransferLeader(peer string) error {
 }
 
 func (r *region) AddPeer(peer string) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	contains := func(arr []string, it string) bool {
+		for _, n := range arr {
+			if n == it {
+				return true
+			}
+		}
+		return false
+	}
+	if !contains(r.peers, peer) {
+		r.peers = append(r.peers, peer)
+		return r.raft.AddVoter(raft.ServerID(peer), raft.ServerAddress(peer), 0, 0).Error()
+	}
+	return errors.New("peer already exists")
 }
 
 func (r *region) RemovePeer(peer string) error {

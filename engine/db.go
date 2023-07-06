@@ -8,6 +8,7 @@ import (
 	data2 "github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/engine/index"
 	"github.com/ByteStorage/FlyDB/lib/const"
+	s "github.com/ByteStorage/FlyDB/lib/proto/dbs"
 	"go.uber.org/zap"
 	"io"
 	"os"
@@ -45,6 +46,8 @@ import (
 // FlyDB provides a powerful and efficient storage solution for applications
 // that prioritize speed and responsiveness.
 type DB struct {
+	// gRPC dbs
+	s.FlyDBServiceServer
 	options    config.Options
 	lock       *sync.RWMutex
 	fileIds    []int                      // File id, which can only be used when the index is loaded
@@ -97,7 +100,6 @@ func NewDB(options config.Options) (*DB, error) {
 	if err := db.loadIndexFromDataFiles(); err != nil {
 		return nil, err
 	}
-
 	return db, nil
 }
 
@@ -250,8 +252,8 @@ func (db *DB) setActiveDataFile() error {
 // Get Read data according to the key
 func (db *DB) Get(key []byte) ([]byte, error) {
 	zap.L().Info("get", zap.ByteString("key", key))
-	db.lock.Lock()
-	defer db.lock.Unlock()
+	db.lock.RLock()
+	defer db.lock.RUnlock()
 
 	// Determine the validity of the key
 	if len(key) == 0 {
@@ -345,6 +347,7 @@ func (db *DB) getValueByPosition(logRecordPst *data2.LogRecordPst) ([]byte, erro
 	return logRecord.Value, nil
 }
 
+// Delete data according to the key
 func (db *DB) Delete(key []byte) error {
 	zap.L().Info("delete", zap.ByteString("key", key))
 
@@ -541,4 +544,15 @@ func (db *DB) loadIndexFromDataFiles() error {
 	db.transSeqNo = currentSeqNo
 
 	return nil
+}
+
+// Clean the DB data directory after the test is complete
+func (db *DB) Clean() {
+	if db != nil {
+		_ = db.Close()
+		err := os.RemoveAll(db.options.DirPath)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

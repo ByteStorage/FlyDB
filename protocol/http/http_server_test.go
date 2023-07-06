@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func newHttpHandler() (*HttpHandler, error) {
@@ -24,21 +26,15 @@ func newHttpHandler() (*HttpHandler, error) {
 
 func TestNewHTTPServer(t *testing.T) {
 	server, err := newHttpHandler()
-	defer func(server *HttpHandler) {
-		err := server.Close()
-		if err != nil {
-
-		}
-	}(server)
-	if err != nil {
-		t.Error(err)
-	}
+	time.Sleep(time.Millisecond * 100)
+	defer server.Clean()
+	assert.Nil(t, err)
 }
 
 // 测试Put方法
 func TestPut(t *testing.T) {
 	handler, _ := newHttpHandler()
-	defer handler.Close()
+	defer handler.Clean()
 	// 创建一个测试用的http server
 	server := httptest.NewServer(http.HandlerFunc(handler.PutHandler))
 	defer server.Close()
@@ -92,7 +88,7 @@ func TestPut(t *testing.T) {
 
 func TestDel(t *testing.T) {
 	handler, _ := newHttpHandler()
-	defer handler.Close()
+	defer handler.Clean()
 	// 创建一个测试用的http server
 	server := httptest.NewServer(http.HandlerFunc(handler.DelHandler))
 	defer server.Close()
@@ -140,7 +136,7 @@ func TestDel(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	handler, _ := newHttpHandler()
-	defer handler.Close()
+	defer handler.Clean()
 	// 创建一个测试用的http server
 	server := httptest.NewServer(http.HandlerFunc(handler.GetHandler))
 	defer server.Close()
@@ -187,7 +183,7 @@ func TestGet(t *testing.T) {
 
 func TestPost(t *testing.T) {
 	handler, _ := newHttpHandler()
-	defer handler.Close()
+	defer handler.Clean()
 	// 创建一个测试用的 HTTP 服务器
 	server := httptest.NewServer(http.HandlerFunc(handler.PostHandler))
 	defer server.Close()
@@ -242,7 +238,7 @@ func TestPost(t *testing.T) {
 
 func TestGetListKeysHandler(t *testing.T) {
 	handler, _ := newHttpHandler()
-	defer handler.Close()
+	defer handler.DB.Clean()
 	// 创建一个测试用的http server
 	server := httptest.NewServer(http.HandlerFunc(handler.GetListKeysHandler))
 	defer server.Close()

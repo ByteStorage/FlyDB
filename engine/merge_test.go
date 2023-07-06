@@ -14,7 +14,7 @@ func TestDB_Merge(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-merge-1")
 	opts.DirPath = dir
 	db, err := NewDB(opts)
-	defer destroyDB(db)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -29,7 +29,7 @@ func TestDB_Merge2(t *testing.T) {
 	opts.DataFileSize = 32 * 1024 * 1024
 	opts.DirPath = dir
 	db, err := NewDB(opts)
-	defer destroyDB(db)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -68,7 +68,7 @@ func TestDB_Merge3(t *testing.T) {
 	opts.DataFileSize = 32 * 1024 * 1024
 	opts.DirPath = dir
 	db, err := NewDB(opts)
-	defer destroyDB(db)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 

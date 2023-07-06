@@ -39,6 +39,7 @@ func init() {
 	opts.DirPath = filepath.Join("benchmark", "flydbtest")
 
 	FlyDB, err = flydb.NewFlyDB(opts)
+	defer FlyDB.Clean()
 	if err != nil {
 		panic(err)
 	}
