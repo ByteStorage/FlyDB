@@ -125,12 +125,6 @@ func TestRegion_GetSize(t *testing.T) {
 	assert.Equal(t, int64(100), size)
 }
 
-func TestRegion_TransferLeader(t *testing.T) {
-	region := NewTestRegion()
-	defer destroyRegion(region)
-	// TODO: write tests for this function when start raft is ready.
-}
-
 func TestRegion_RemovePeer(t *testing.T) {
 	// Create a test region instance
 	region := NewTestRegion()
