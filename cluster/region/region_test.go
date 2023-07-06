@@ -121,3 +121,32 @@ func TestRegion_GetSize(t *testing.T) {
 	size := region.GetSize()
 	assert.Equal(t, int64(100), size)
 }
+
+func TestRegion_RemovePeer(t *testing.T) {
+	// Create a test region instance
+	region := NewTestRegion()
+	_ = []struct {
+		name          string
+		peers         []string
+		peerToAdd     string
+		expectedPeers []string
+		expectError   bool
+	}{
+		{
+			name:          "remove a peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer2",
+			expectedPeers: []string{"peer1"},
+			expectError:   false,
+		},
+		{
+			name:          "remove a non existing peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer3",
+			expectedPeers: []string{"peer1", "peer2"},
+			expectError:   true,
+		},
+	}
+	destroyRegion(region)
+
+}
