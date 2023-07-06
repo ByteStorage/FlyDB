@@ -52,13 +52,15 @@ func TestHashMap_Delete(t *testing.T) {
 }
 
 func TestHashMap_Iterator(t *testing.T) {
-	hm1 := NewBTree()
+	hm1 := NewHashMap()
 	// 1. HashMap is empty
+
 	iter1 := hm1.Iterator(false)
 	assert.Equal(t, false, iter1.Valid())
 
 	// 2. HashMap is not empty
 	hm1.Put([]byte("abc"), &data.LogRecordPst{Fid: 1, Offset: 12})
+
 	iter2 := hm1.Iterator(false)
 	assert.True(t, iter2.Valid())
 	assert.NotNil(t, iter2.Key())

@@ -63,12 +63,14 @@ func (hm *HashMap) Size() int {
 
 // Iterator returns a index Iterator
 func (hm *HashMap) Iterator(reverse bool) Iterator {
+	// if the HashMap is empty, returns a default iterator
 	if hm.hashmap == nil {
-		return nil
+		return NewDefaultHashMapIterator(reverse)
 	}
 	hm.lock.RLock()
 	defer hm.lock.RUnlock()
-	return NewHashMapIterator(hm, reverse)
+	// if the HashMap is not empty, returns a iterator
+	return NewHashMapIterator(hm.hashmap, reverse)
 }
 
 // HashMapIterator struct
@@ -78,19 +80,27 @@ type HashMapIterator struct {
 	values    []*Item // Key + Location index information
 }
 
-// create a HashMapIterator
-func NewHashMapIterator(hm *HashMap, reverse bool) *HashMapIterator {
-	// if the HashMap is empty, returns a nil HashMapIterator
-	// to avoid making a nil slice values
-	if hm.Size() == 0 {
-		return nil
+// create a default HashMap Iterator for the empty HashMap
+func NewDefaultHashMapIterator(reverse bool) *HashMapIterator {
+	return &HashMapIterator{
+		currIndex: 0,
+		reverse:   reverse,
+		values:    nil,
 	}
-	values := make([]*Item, hm.Size())
+}
 
+// create a HashMapIterator
+func NewHashMapIterator(hm *hashmap.Map[string, *data.LogRecordPst], reverse bool) *HashMapIterator {
+	// Use values slice to store all data in values
+	values := make([]*Item, hm.Len())
+
+	// count the number of elements in the values slice
+	var count int = 0
 	// store all data into an slice values
 	// We use range() method in the hashmap implement to do this
 	// define an operator method
 	saveFunc := func(key string, value *data.LogRecordPst) bool {
+		count++
 		item := &Item{
 			key: []byte(key),
 			pst: value,
@@ -99,7 +109,11 @@ func NewHashMapIterator(hm *HashMap, reverse bool) *HashMapIterator {
 		return true
 	}
 	// call range() method
-	hm.hashmap.Range(saveFunc)
+	hm.Range(saveFunc)
+
+	// filter out nil values
+	values = values[count:]
+
 	// if reverse needed, reverse the slice
 	if reverse {
 		for i, j := 0, len(values)-1; i < j; i, j = i+1, j-1 {
