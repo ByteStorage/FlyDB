@@ -18,7 +18,7 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// MasterGrpcServiceClient is the client API for MasterGrpcService service.
+// MasterGrpcServiceClient is the client API for MasterGrpcService dbs.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MasterGrpcServiceClient interface {
@@ -152,7 +152,7 @@ func (c *masterGrpcServiceClient) ReceiveHeartbeat(ctx context.Context, in *Mast
 	return out, nil
 }
 
-// MasterGrpcServiceServer is the server API for MasterGrpcService service.
+// MasterGrpcServiceServer is the server API for MasterGrpcService dbs.
 // All implementations must embed UnimplementedMasterGrpcServiceServer
 // for forward compatibility
 type MasterGrpcServiceServer interface {
@@ -213,7 +213,7 @@ func (UnimplementedMasterGrpcServiceServer) ReceiveHeartbeat(context.Context, *M
 }
 func (UnimplementedMasterGrpcServiceServer) mustEmbedUnimplementedMasterGrpcServiceServer() {}
 
-// UnsafeMasterGrpcServiceServer may be embedded to opt out of forward compatibility for this service.
+// UnsafeMasterGrpcServiceServer may be embedded to opt out of forward compatibility for this dbs.
 // Use of this interface is not recommended, as added methods to MasterGrpcServiceServer will
 // result in compilation errors.
 type UnsafeMasterGrpcServiceServer interface {
@@ -440,7 +440,7 @@ func _MasterGrpcService_ReceiveHeartbeat_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-// MasterGrpcService_ServiceDesc is the grpc.ServiceDesc for MasterGrpcService service.
+// MasterGrpcService_ServiceDesc is the grpc.ServiceDesc for MasterGrpcService dbs.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MasterGrpcService_ServiceDesc = grpc.ServiceDesc{

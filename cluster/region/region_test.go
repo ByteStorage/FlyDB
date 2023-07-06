@@ -25,8 +25,11 @@ func ReturnNewDB() *engine.DB {
 func destroyRegion(r Region) {
 	// Close the region's database
 	db := r.(*TestRegionStruct).db
-	_ = db.Close()
-	err := os.RemoveAll(dirpath)
+	err := db.Close()
+	if err != nil {
+		return
+	}
+	err = os.RemoveAll(dirpath)
 	if err != nil {
 		return
 	}

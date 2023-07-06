@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestDB_WriteBatch(t *testing.T) {
@@ -14,7 +15,7 @@ func TestDB_WriteBatch(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-batch-1")
 	opts.DirPath = dir
 	db, err := NewDB(opts)
-	defer destroyDB(db)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -51,7 +52,7 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-batch-2")
 	opts.DirPath = dir
 	db, err := NewDB(opts)
-	defer destroyDB(db)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -77,6 +78,8 @@ func TestDB_WriteBatchRestart(t *testing.T) {
 	assert.Nil(t, err)
 
 	db2, err := NewDB(opts)
+	time.Sleep(time.Millisecond * 100)
+	defer db2.Clean()
 	assert.Nil(t, err)
 
 	_, err = db2.Get(randkv.GetTestKey(1))
@@ -91,6 +94,7 @@ func TestDB_WriteBatch1(t *testing.T) {
 	dir := "/tmp/batch-3"
 	opts.DirPath = dir
 	db, err := NewDB(opts)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
