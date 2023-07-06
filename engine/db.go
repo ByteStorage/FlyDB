@@ -10,16 +10,19 @@ import (
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"io"
 	"net"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 )
 
 // DB represents a FlyDB database instance,
@@ -102,10 +105,6 @@ func NewDB(options config.Options) (*DB, error) {
 	if err := db.loadIndexFromDataFiles(); err != nil {
 		return nil, err
 	}
-
-	// start grpc server
-	db.startGrpcServer()
-
 	return db, nil
 }
 
@@ -141,8 +140,6 @@ func (db *DB) Close() error {
 			return err
 		}
 	}
-	// close grpc server
-	db.server.Stop()
 	return nil
 }
 
@@ -263,8 +260,8 @@ func (db *DB) setActiveDataFile() error {
 // Get Read data according to the key
 func (db *DB) Get(key []byte) ([]byte, error) {
 	zap.L().Info("get", zap.ByteString("key", key))
-	db.lock.Lock()
-	defer db.lock.Unlock()
+	db.lock.RLock()
+	defer db.lock.RUnlock()
 
 	// Determine the validity of the key
 	if len(key) == 0 {
@@ -556,7 +553,8 @@ func (db *DB) loadIndexFromDataFiles() error {
 	return nil
 }
 
-func (db *DB) startGrpcServer() {
+// StartGrpcServer starts the grpc server
+func (db *DB) StartGrpcServer() {
 	listener, err := net.Listen("tcp", db.options.Addr)
 	if err != nil {
 		panic("tcp listen error: " + err.Error())
@@ -571,5 +569,41 @@ func (db *DB) startGrpcServer() {
 			panic("db server start error: " + err.Error())
 		}
 	}()
+	//wait for server start
+	for {
+		conn, err := grpc.Dial(db.options.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			continue
+		}
+		err = conn.Close()
+		if err != nil {
+			continue
+		}
+		break
+	}
+	if db.options.IsCli {
+		// graceful shutdown
+		sig := make(chan os.Signal)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
 
+		<-sig
+	}
+}
+
+func (db *DB) StopGrpcServer() {
+	if db.server != nil {
+		db.server.Stop()
+	}
+}
+
+// Clean the DB data directory after the test is complete
+func (db *DB) Clean() {
+	if db != nil {
+		db.StopGrpcServer()
+		_ = db.Close()
+		err := os.RemoveAll(db.options.DirPath)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

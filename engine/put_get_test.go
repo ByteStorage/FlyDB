@@ -16,7 +16,7 @@ func TestPutAndGet(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer destroyDB(db)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
