@@ -121,3 +121,9 @@ func TestRegion_GetSize(t *testing.T) {
 	size := region.GetSize()
 	assert.Equal(t, int64(100), size)
 }
+
+func TestRegion_TransferLeader(t *testing.T) {
+	region := NewTestRegion()
+	defer destroyRegion(region)
+	// TODO: write tests for this function when start raft is ready.
+}

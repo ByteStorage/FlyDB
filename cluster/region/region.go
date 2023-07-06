@@ -1,6 +1,7 @@
 package region
 
 import (
+	"errors"
 	"github.com/ByteStorage/FlyDB/engine"
 	"github.com/hashicorp/raft"
 	"sync"
@@ -89,7 +90,19 @@ func (r *region) GetPeers() []string {
 }
 
 func (r *region) TransferLeader(peer string) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, p := range r.peers {
+		if p == peer {
+			err := r.raft.LeadershipTransferToServer(raft.ServerID(peer), raft.ServerAddress(peer)).Error()
+			if err != nil {
+				return err
+			}
+			r.leader = peer
+			return nil
+		}
+	}
+	return errors.New("no such peer exists")
 }
 
 func (r *region) AddPeer(peer string) error {
