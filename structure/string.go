@@ -32,11 +32,6 @@ func NewStringStructure(options config.Options) (*StringStructure, error) {
 	return &StringStructure{db: db}, nil
 }
 
-// encodeStringValue encodes a string value
-func StringToBytesWithKeyAndValue(key, value string) ([]byte, []byte) {
-	return []byte(key), []byte(value)
-}
-
 // stringToBytesWithKey converts a string to a byte slice
 func stringToBytesWithKey(key string) []byte {
 	return []byte(key)
