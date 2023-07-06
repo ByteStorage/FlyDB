@@ -121,3 +121,32 @@ func TestRegion_GetSize(t *testing.T) {
 	size := region.GetSize()
 	assert.Equal(t, int64(100), size)
 }
+
+func TestRegion_AddPeer(t *testing.T) {
+	// Create a test region instance
+	region := NewTestRegion()
+	_ = []struct {
+		name          string
+		peers         []string
+		peerToAdd     string
+		expectedPeers []string
+		expectError   bool
+	}{
+		{
+			name:          "add a new peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer3",
+			expectedPeers: []string{"peer1", "peer2", "peer3"},
+			expectError:   false,
+		},
+		{
+			name:          "add duplicate peer",
+			peers:         region.GetPeers(),
+			peerToAdd:     "peer1",
+			expectedPeers: []string{"peer1", "peer2"},
+			expectError:   true,
+		},
+	}
+	destroyRegion(region)
+
+}
