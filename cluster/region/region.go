@@ -112,7 +112,15 @@ func (r *region) AddPeer(peer string) error {
 }
 
 func (r *region) RemovePeer(peer string) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for i := 0; i < len(r.peers); i++ {
+		if r.peers[i] == peer {
+			r.peers = append(r.peers[:i], r.peers[i+1:]...)
+			return r.raft.DemoteVoter(raft.ServerID(peer), 0, 0).Error()
+		}
+	}
+	return errors.New("the specified peer does not exist")
 }
 
 func (r *region) GetSize() int64 {
