@@ -15,6 +15,7 @@ func main() {
 	if len(args) == 1 {
 		//start server
 		server.StartServer()
+		return
 	}
 	switch args[1] {
 	case "start":

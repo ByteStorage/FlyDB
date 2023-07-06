@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package cluster;
-option go_package = 	"flydb/lib/proto";
+package dbs;
+option go_package = 	"flydb/lib/proto/dbs";
 
 service FlyDBService {
   rpc Get(GetRequest) returns (GetResponse) {}

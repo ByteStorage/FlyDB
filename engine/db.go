@@ -8,21 +8,15 @@ import (
 	data2 "github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/engine/index"
 	"github.com/ByteStorage/FlyDB/lib/const"
+	s "github.com/ByteStorage/FlyDB/lib/proto/dbs"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	"io"
-	"net"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 )
 
 // DB represents a FlyDB database instance,
@@ -52,6 +46,8 @@ import (
 // FlyDB provides a powerful and efficient storage solution for applications
 // that prioritize speed and responsiveness.
 type DB struct {
+	// gRPC dbs
+	s.FlyDBServiceServer
 	options    config.Options
 	lock       *sync.RWMutex
 	fileIds    []int                      // File id, which can only be used when the index is loaded
@@ -60,7 +56,6 @@ type DB struct {
 	index      index.Indexer              // Memory index
 	transSeqNo uint64                     // Transaction sequence number, globally increasing
 	isMerging  bool                       // Whether are merging
-	server     *grpc.Server               // gRPC listener
 }
 
 // NewDB open a new db instance
@@ -114,9 +109,6 @@ func checkOptions(options config.Options) error {
 	}
 	if options.DataFileSize <= 0 {
 		return _const.ErrOptionDataFileSizeNotPositive
-	}
-	if options.Addr == "" {
-		return _const.ErrOptionAddrIsEmpty
 	}
 	return nil
 }
@@ -355,6 +347,7 @@ func (db *DB) getValueByPosition(logRecordPst *data2.LogRecordPst) ([]byte, erro
 	return logRecord.Value, nil
 }
 
+// Delete data according to the key
 func (db *DB) Delete(key []byte) error {
 	zap.L().Info("delete", zap.ByteString("key", key))
 
@@ -553,53 +546,9 @@ func (db *DB) loadIndexFromDataFiles() error {
 	return nil
 }
 
-// StartGrpcServer starts the grpc server
-func (db *DB) StartGrpcServer() {
-	listener, err := net.Listen("tcp", db.options.Addr)
-	if err != nil {
-		panic("tcp listen error: " + err.Error())
-		return
-	}
-	server := grpc.NewServer()
-	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
-	db.server = server
-	go func() {
-		err := server.Serve(listener)
-		if err != nil {
-			panic("db server start error: " + err.Error())
-		}
-	}()
-	//wait for server start
-	for {
-		conn, err := grpc.Dial(db.options.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			continue
-		}
-		err = conn.Close()
-		if err != nil {
-			continue
-		}
-		break
-	}
-	if db.options.IsCli {
-		// graceful shutdown
-		sig := make(chan os.Signal)
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
-
-		<-sig
-	}
-}
-
-func (db *DB) StopGrpcServer() {
-	if db.server != nil {
-		db.server.Stop()
-	}
-}
-
 // Clean the DB data directory after the test is complete
 func (db *DB) Clean() {
 	if db != nil {
-		db.StopGrpcServer()
 		_ = db.Close()
 		err := os.RemoveAll(db.options.DirPath)
 		if err != nil {

@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"github.com/desertbit/grumble"
 	"github.com/fatih/color"
@@ -9,8 +8,6 @@ import (
 	"path"
 	"strings"
 )
-
-var addr string
 
 // App FlyDB command app
 var App = grumble.New(&grumble.Config{
@@ -29,11 +26,6 @@ var App = grumble.New(&grumble.Config{
 
 func init() {
 	App.OnInit(func(a *grumble.App, fm grumble.FlagMap) error {
-		if len(os.Args) != 1 {
-			fmt.Println("usage: flydb-cli [addr]")
-			return errors.New("usage: flydb-cli [addr]")
-		}
-		addr = os.Args[1]
 		return nil
 	})
 	App.SetPrintASCIILogo(func(a *grumble.App) {

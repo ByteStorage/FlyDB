@@ -8,8 +8,6 @@ type Options struct {
 	SyncWrite    bool   // Whether to persist data on every write
 	IndexType    IndexerType
 	FIOType      FIOType
-	Addr         string // Addr DB Server Listen
-	IsCli        bool   // Is Cli
 }
 
 // IteratorOptions is the configuration for index iteration.
@@ -57,8 +55,6 @@ var DefaultOptions = Options{
 	SyncWrite:    false,
 	IndexType:    ART,
 	FIOType:      MmapIOType,
-	Addr:         DefaultAddr,
-	IsCli:        false,
 }
 
 var DefaultIteratorOptions = IteratorOptions{

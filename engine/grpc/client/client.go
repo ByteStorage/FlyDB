@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 	"errors"
-	"github.com/ByteStorage/FlyDB/lib/proto"
+	"github.com/ByteStorage/FlyDB/lib/proto/dbs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -14,12 +14,12 @@ type Client struct {
 }
 
 // newGrpcClient returns a grpc client
-func newGrpcClient(addr string) (proto.FlyDBServiceClient, error) {
+func newGrpcClient(addr string) (dbs.FlyDBServiceClient, error) {
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	client := proto.NewFlyDBServiceClient(conn)
+	client := dbs.NewFlyDBServiceClient(conn)
 	return client, nil
 }
 
@@ -29,7 +29,7 @@ func (c *Client) Put(key []byte, value []byte) error {
 	if err != nil {
 		return err
 	}
-	put, err := client.Put(context.Background(), &proto.PutRequest{Key: string(key), Value: string(value)})
+	put, err := client.Put(context.Background(), &dbs.PutRequest{Key: string(key), Value: string(value)})
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (c *Client) Get(key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	get, err := client.Get(context.Background(), &proto.GetRequest{Key: string(key)})
+	get, err := client.Get(context.Background(), &dbs.GetRequest{Key: string(key)})
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *Client) Del(key []byte) error {
 	if err != nil {
 		return err
 	}
-	del, err := client.Del(context.Background(), &proto.DelRequest{Key: string(key)})
+	del, err := client.Del(context.Background(), &dbs.DelRequest{Key: string(key)})
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (c *Client) Keys() ([][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	keys, err := client.Keys(context.Background(), &proto.KeysRequest{})
+	keys, err := client.Keys(context.Background(), &dbs.KeysRequest{})
 	if err != nil {
 		return nil, err
 	}

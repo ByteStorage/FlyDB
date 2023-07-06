@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: db.proto
+// source: lib/proto/dbs/db.proto
 
-package proto
+package dbs
 
 import (
 	context "context"
@@ -38,7 +38,7 @@ func NewFlyDBServiceClient(cc grpc.ClientConnInterface) FlyDBServiceClient {
 
 func (c *flyDBServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/cluster.FlyDBService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/dbs.FlyDBService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *flyDBServiceClient) Get(ctx context.Context, in *GetRequest, opts ...gr
 
 func (c *flyDBServiceClient) Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*PutResponse, error) {
 	out := new(PutResponse)
-	err := c.cc.Invoke(ctx, "/cluster.FlyDBService/Put", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/dbs.FlyDBService/Put", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (c *flyDBServiceClient) Put(ctx context.Context, in *PutRequest, opts ...gr
 
 func (c *flyDBServiceClient) Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*DelResponse, error) {
 	out := new(DelResponse)
-	err := c.cc.Invoke(ctx, "/cluster.FlyDBService/Del", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/dbs.FlyDBService/Del", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *flyDBServiceClient) Del(ctx context.Context, in *DelRequest, opts ...gr
 
 func (c *flyDBServiceClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error) {
 	out := new(KeysResponse)
-	err := c.cc.Invoke(ctx, "/cluster.FlyDBService/Keys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/dbs.FlyDBService/Keys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func _FlyDBService_Get_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/cluster.FlyDBService/Get",
+		FullMethod: "/dbs.FlyDBService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FlyDBServiceServer).Get(ctx, req.(*GetRequest))
@@ -140,7 +140,7 @@ func _FlyDBService_Put_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/cluster.FlyDBService/Put",
+		FullMethod: "/dbs.FlyDBService/Put",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FlyDBServiceServer).Put(ctx, req.(*PutRequest))
@@ -158,7 +158,7 @@ func _FlyDBService_Del_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/cluster.FlyDBService/Del",
+		FullMethod: "/dbs.FlyDBService/Del",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FlyDBServiceServer).Del(ctx, req.(*DelRequest))
@@ -176,7 +176,7 @@ func _FlyDBService_Keys_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/cluster.FlyDBService/Keys",
+		FullMethod: "/dbs.FlyDBService/Keys",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FlyDBServiceServer).Keys(ctx, req.(*KeysRequest))
@@ -188,7 +188,7 @@ func _FlyDBService_Keys_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FlyDBService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "cluster.FlyDBService",
+	ServiceName: "dbs.FlyDBService",
 	HandlerType: (*FlyDBServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -209,5 +209,5 @@ var FlyDBService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "db.proto",
+	Metadata: "lib/proto/dbs/db.proto",
 }

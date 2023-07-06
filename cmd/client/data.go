@@ -6,9 +6,11 @@ import (
 	"github.com/desertbit/grumble"
 )
 
+var Addr string
+
 func newClient() *client.Client {
 	return &client.Client{
-		Addr: addr,
+		Addr: Addr,
 	}
 }
 
