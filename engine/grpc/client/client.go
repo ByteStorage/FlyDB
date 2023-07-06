@@ -29,7 +29,7 @@ func (c *Client) Put(key []byte, value []byte) error {
 	if err != nil {
 		return err
 	}
-	put, err := client.Put(context.Background(), &dbs.PutRequest{Key: string(key), Value: string(value)})
+	put, err := client.Put(context.Background(), &dbs.PutRequest{Key: key, Value: value})
 	if err != nil {
 		return err
 	}
@@ -45,11 +45,11 @@ func (c *Client) Get(key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	get, err := client.Get(context.Background(), &dbs.GetRequest{Key: string(key)})
+	get, err := client.Get(context.Background(), &dbs.GetRequest{Key: key})
 	if err != nil {
 		return nil, err
 	}
-	return []byte(get.Value), nil
+	return get.Value, nil
 }
 
 // Del deletes a key-value pair from the db by client api
@@ -58,7 +58,7 @@ func (c *Client) Del(key []byte) error {
 	if err != nil {
 		return err
 	}
-	del, err := client.Del(context.Background(), &dbs.DelRequest{Key: string(key)})
+	del, err := client.Del(context.Background(), &dbs.DelRequest{Key: key})
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (c *Client) Keys() ([][]byte, error) {
 	}
 	result := make([][]byte, len(keys.Keys))
 	for i, key := range keys.Keys {
-		result[i] = []byte(key)
+		result[i] = key
 	}
 	return result, nil
 }

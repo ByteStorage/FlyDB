@@ -99,7 +99,7 @@ func (s *Service) Get(ctx context.Context, req *dbs.GetRequest) (*dbs.GetRespons
 	if err != nil {
 		return &dbs.GetResponse{}, err
 	}
-	return &dbs.GetResponse{Value: string(value)}, nil
+	return &dbs.GetResponse{Value: value}, nil
 }
 
 // Del is a grpc s for del
@@ -114,9 +114,9 @@ func (s *Service) Del(ctx context.Context, req *dbs.DelRequest) (*dbs.DelRespons
 // Keys is a grpc s for keys
 func (s *Service) Keys(ctx context.Context, req *dbs.KeysRequest) (*dbs.KeysResponse, error) {
 	list := s.db.GetListKeys()
-	keys := make([]string, len(list))
+	keys := make([][]byte, len(list))
 	for i, bytes := range list {
-		keys[i] = string(bytes)
+		keys[i] = bytes
 	}
 	return &dbs.KeysResponse{Keys: keys}, nil
 }
