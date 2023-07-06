@@ -360,3 +360,35 @@ func TestHashStructure_HSetNX(t *testing.T) {
 	assert.False(t, ok6)
 
 }
+
+func TestHashStructure_HTypes(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), []byte("1000"))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), []byte("100"))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field3"), []byte("10"))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	type1, err := hash.HTypes(randkv.GetTestKey(1), []byte("field1"))
+	assert.Nil(t, err)
+	assert.Equal(t, type1, "hash")
+
+	type2, err := hash.HTypes(randkv.GetTestKey(1), []byte("field2"))
+	assert.Nil(t, err)
+	assert.Equal(t, type2, "hash")
+
+	type3, err := hash.HTypes(randkv.GetTestKey(1), []byte("field3"))
+	assert.Nil(t, err)
+	assert.Equal(t, type3, "hash")
+
+	type4, err := hash.HTypes(randkv.GetTestKey(1), []byte("field4"))
+	assert.Equal(t, "", type4)
+	assert.Equal(t, err, _const.ErrKeyNotFound)
+}

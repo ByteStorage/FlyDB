@@ -763,3 +763,40 @@ func (hs *HashStructure) HSetNX(key, field, value []byte) (bool, error) {
 	}
 
 }
+
+// HTypes returns if field is an existing hash key in the hash stored at key.
+func (hs *HashStructure) HTypes(key, field []byte) (string, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 {
+		return "", _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return "", err
+	}
+
+	// If the counter is 0, return 0
+	if hashMeta.counter == 0 {
+		return "", nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	_, err = hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		return "", _const.ErrKeyNotFound
+	} else {
+		return "hash", nil
+	}
+}
