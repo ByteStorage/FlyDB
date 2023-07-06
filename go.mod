@@ -3,7 +3,6 @@ module github.com/ByteStorage/FlyDB
 go 1.18
 
 require (
-	github.com/cornelk/hashmap v1.0.8
 	github.com/desertbit/grumble v1.1.3
 	github.com/fatih/color v1.13.0
 	github.com/google/btree v1.1.2
