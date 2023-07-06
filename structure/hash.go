@@ -616,3 +616,40 @@ func (hs *HashStructure) HDecrBy(key, field []byte, decrement int64) (int64, err
 
 	return val, nil
 }
+
+// HStrLen returns the string length of the value associated with field in the hash stored at key.
+func (hs *HashStructure) HStrLen(key, field []byte) (int, error) {
+	// Check the parameters
+	if len(key) == 0 || len(field) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(key, Hash)
+	if err != nil {
+		return 0, err
+	}
+
+	// If the counter is 0, return 0
+	if hashMeta.counter == 0 {
+		return 0, nil
+	}
+
+	// Create a new HashField
+	hf := &HashField{
+		field:   field,
+		key:     key,
+		version: hashMeta.version,
+	}
+
+	// Encode the HashField
+	hfBuf := hf.encodeHashField()
+
+	// Get the field from the database
+	value, err := hs.db.Get(hfBuf)
+	if err != nil && err == _const.ErrKeyNotFound {
+		return 0, nil
+	}
+
+	return len(value), nil
+}

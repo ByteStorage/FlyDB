@@ -241,3 +241,36 @@ func TestHashStructure_HDecrBy(t *testing.T) {
 	assert.Equal(t, v4, int64(0))
 
 }
+
+func TestHashStructure_HStrLen(t *testing.T) {
+	hash := initHashDB()
+
+	ok1, err := hash.HSet(randkv.GetTestKey(1), []byte("field1"), []byte("1000"))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet(randkv.GetTestKey(1), []byte("field2"), []byte("100"))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet(randkv.GetTestKey(1), []byte("field3"), []byte("10"))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	l1, err := hash.HStrLen(randkv.GetTestKey(1), []byte("field1"))
+	assert.Nil(t, err)
+	assert.Equal(t, l1, 4)
+
+	l2, err := hash.HStrLen(randkv.GetTestKey(1), []byte("field2"))
+	assert.Nil(t, err)
+	assert.Equal(t, l2, 3)
+
+	l3, err := hash.HStrLen(randkv.GetTestKey(1), []byte("field3"))
+	assert.Nil(t, err)
+	assert.Equal(t, l3, 2)
+
+	l4, err := hash.HStrLen(randkv.GetTestKey(1), []byte("field4"))
+	assert.Nil(t, err)
+	assert.Equal(t, l4, 0)
+
+}
