@@ -1,6 +1,7 @@
 package region
 
 import (
+	"errors"
 	"github.com/ByteStorage/FlyDB/engine"
 	"github.com/hashicorp/raft"
 	"sync"
@@ -89,15 +90,49 @@ func (r *region) GetPeers() []string {
 }
 
 func (r *region) TransferLeader(peer string) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, p := range r.peers {
+		if p == peer {
+			err := r.raft.LeadershipTransferToServer(raft.ServerID(peer), raft.ServerAddress(peer)).Error()
+			if err != nil {
+				return err
+			}
+			r.leader = peer
+			return nil
+		}
+	}
+	return errors.New("no such peer exists")
 }
 
 func (r *region) AddPeer(peer string) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	contains := func(arr []string, it string) bool {
+		for _, n := range arr {
+			if n == it {
+				return true
+			}
+		}
+		return false
+	}
+	if !contains(r.peers, peer) {
+		r.peers = append(r.peers, peer)
+		return r.raft.AddVoter(raft.ServerID(peer), raft.ServerAddress(peer), 0, 0).Error()
+	}
+	return errors.New("peer already exists")
 }
 
 func (r *region) RemovePeer(peer string) error {
-	panic("implement me")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for i := 0; i < len(r.peers); i++ {
+		if r.peers[i] == peer {
+			r.peers = append(r.peers[:i], r.peers[i+1:]...)
+			return r.raft.DemoteVoter(raft.ServerID(peer), 0, 0).Error()
+		}
+	}
+	return errors.New("the specified peer does not exist")
 }
 
 func (r *region) GetSize() int64 {

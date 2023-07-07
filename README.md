@@ -63,6 +63,11 @@ func main() {
     	}
 }
 ```
+>You can also run this command.
+
+```shell
+./build.sh
+```
 
 ## 🚀 Performance test
 
