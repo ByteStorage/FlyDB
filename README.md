@@ -15,7 +15,7 @@ English | [中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md
 You can install FlyDB using the Go command line tool:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.4
+go get github.com/ByteStorage/FlyDB@v1.0.6
 ```
 
 Or clone this project from github:
@@ -163,6 +163,10 @@ Or add my wechat, invite you to enter the project community, and code masters to
 ## 📜 Version update list
 
 V1.0.4: The short-term support version v1.0.4 uses mmap to optimize the index part, significantly improving read and write performance compared to the v1.0.3 version. The 50w data write speed has accelerated from 1.35 seconds to 0.56 seconds, and the read speed has accelerated from 1.06 seconds to 0.355 seconds.
+
+V1.0.5: Short-term support version v1.0.5 supports data structures of type String and List. Some codes are optimized.
+
+V1.0.6: Short-term support version v1.0.6 supports data structures of Hash type. Some codes are optimized.
 
 ## 👀 Contributor
 
