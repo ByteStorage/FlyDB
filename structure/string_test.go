@@ -112,90 +112,171 @@ func TestStringStructure_Incr(t *testing.T) {
 	str := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", []byte("1"), 0)
+	err = str.Set("1", "1", 0)
 	assert.Nil(t, err)
 
 	err := str.Incr("1", 0)
 	assert.Nil(t, err)
 	v1, _ := str.Get("1")
-	assert.Equal(t, string(v1), "2")
+	assert.Equal(t, v1, "2")
+
+	err = str.Incr("1", 0)
+	v2, _ := str.Get("1")
+	assert.Equal(t, v2, "3")
+
+	err = str.Set("1", 1, 0)
+	assert.Nil(t, err)
 
 	err = str.Incr("1", 0)
 	assert.Nil(t, err)
-	v2, _ := str.Get("1")
-	assert.Equal(t, string(v2), "3")
+	v3, _ := str.Get("1")
+	assert.Equal(t, v3, "2")
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Incr("1", 0)
+	assert.Nil(t, err)
+	v4, _ := str.Get("1")
+	assert.Equal(t, v4, "2")
 }
 
 func TestStringStructure_IncrBy(t *testing.T) {
 	str := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", []byte("1"), 0)
+	err = str.Set("1", 1, 0)
 	assert.Nil(t, err)
 
 	err := str.IncrBy("1", 10, 0)
 	assert.Nil(t, err)
+
 	v1, _ := str.Get("1")
-	assert.Equal(t, string(v1), "11")
+	assert.Equal(t, v1, "11")
 
 	err = str.IncrBy("1", 10, 0)
 	assert.Nil(t, err)
+
 	v2, _ := str.Get("1")
-	assert.Equal(t, string(v2), "21")
+	assert.Equal(t, v2, "21")
+
+	err = str.Set("1", "1", 0)
+	assert.Nil(t, err)
+
+	err = str.IncrBy("1", 10, 0)
+	assert.Nil(t, err)
+
+	v2, _ = str.Get("1")
+	assert.Equal(t, v2, "11")
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.IncrBy("1", 10, 0)
+	assert.Nil(t, err)
+	v4, _ := str.Get("1")
+	assert.Equal(t, v4, "11")
 }
 
 func TestStringStructure_IncrByFloat(t *testing.T) {
 	str := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", []byte("1"), 0)
+	err = str.Set("1", "1", 0)
 	assert.Nil(t, err)
 
 	err := str.IncrByFloat("1", 1.1, 0)
 	assert.Nil(t, err)
 	v1, _ := str.Get("1")
-	assert.Equal(t, string(v1), "2.1")
+	assert.Equal(t, v1, "2.1")
 
 	err = str.IncrByFloat("1", 1.1, 0)
 	assert.Nil(t, err)
 	v2, _ := str.Get("1")
-	assert.Equal(t, string(v2), "3.2")
+	assert.Equal(t, v2, "3.2")
+
+	err = str.Set("1", 1, 0)
+	assert.Nil(t, err)
+
+	err = str.IncrByFloat("1", 1.1, 0)
+	assert.Nil(t, err)
+	v3, _ := str.Get("1")
+	assert.Equal(t, v3, "2.1")
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.IncrByFloat("1", 1.1, 0)
+	assert.Nil(t, err)
+	v4, _ := str.Get("1")
+	assert.Equal(t, v4, "2.1")
 }
 
 func TestStringStructure_Decr(t *testing.T) {
 	str := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", []byte("1"), 0)
+	err = str.Set("1", "1", 0)
 	assert.Nil(t, err)
 
 	err := str.Decr("1", 0)
 	assert.Nil(t, err)
 	v1, _ := str.Get("1")
-	assert.Equal(t, string(v1), "0")
+	assert.Equal(t, v1, "0")
+
+	err = str.Decr("1", 0)
+	v2, _ := str.Get("1")
+	assert.Equal(t, v2, "-1")
+
+	err = str.Set("1", 1, 0)
+	assert.Nil(t, err)
 
 	err = str.Decr("1", 0)
 	assert.Nil(t, err)
-	v2, _ := str.Get("1")
-	assert.Equal(t, string(v2), "-1")
+	v3, _ := str.Get("1")
+	assert.Equal(t, v3, "0")
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Decr("1", 0)
+	assert.Nil(t, err)
+	v4, _ := str.Get("1")
+	assert.Equal(t, v4, "0")
 }
 
 func TestStringStructure_DecrBy(t *testing.T) {
 	str := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", []byte("1"), 0)
+	err = str.Set("1", 1, 0)
 	assert.Nil(t, err)
 
 	err := str.DecrBy("1", 10, 0)
 	assert.Nil(t, err)
 	v1, _ := str.Get("1")
-	assert.Equal(t, string(v1), "-9")
+	assert.Equal(t, v1, "-9")
 
 	err = str.DecrBy("1", 10, 0)
 	assert.Nil(t, err)
 	v2, _ := str.Get("1")
-	assert.Equal(t, string(v2), "-19")
+	assert.Equal(t, v2, "-19")
+
+	err = str.Set("1", "1", 0)
+	assert.Nil(t, err)
+
+	err = str.DecrBy("1", 10, 0)
+	assert.Nil(t, err)
+	v3, _ := str.Get("1")
+	assert.Equal(t, v3, "-9")
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.DecrBy("1", 10, 0)
+	assert.Nil(t, err)
+	v4, _ := str.Get("1")
+	assert.Equal(t, v4, "-9")
 }
 
 func TestStringStructure_Exists(t *testing.T) {
@@ -225,12 +306,12 @@ func TestStringStructure_Expire(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, string(v1), "1")
+	assert.Equal(t, v1, "1")
 
 	time.Sleep(2 * time.Second)
 	v2, err := str.Get("1")
 	assert.Equal(t, err, ErrKeyExpired)
-	assert.Equal(t, string(v2), "")
+	assert.Equal(t, v2, nil)
 }
 
 func TestStringStructure_Persist(t *testing.T) {
@@ -244,11 +325,11 @@ func TestStringStructure_Persist(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, string(v1), "1")
+	assert.Equal(t, v1, "1")
 
 	err = str.Persist("1")
 	assert.Nil(t, err)
 	v2, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, string(v2), "1")
+	assert.Equal(t, v2, "1")
 }
