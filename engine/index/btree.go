@@ -51,10 +51,8 @@ func (bt *BTree) Delete(key []byte) bool {
 
 	it := &Item{key: key}
 	oldItem := bt.tree.Delete(it)
-	if oldItem == nil {
-		return false
-	}
-	return true
+
+	return oldItem != nil
 }
 
 func (bt *BTree) Size() int {

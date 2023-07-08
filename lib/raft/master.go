@@ -15,13 +15,10 @@ import (
 
 func (m *Master) ListenSlave() {
 	timeTick := time.NewTicker(200 * time.Millisecond)
-	for {
-		select {
-		case <-timeTick.C:
-			for k, t := range m.Heartbeat {
-				if t.Add(5*time.Second).Unix() < time.Now().Unix() {
-					delete(m.Heartbeat, k)
-				}
+	for range timeTick.C {
+		for k, t := range m.Heartbeat {
+			if t.Add(5*time.Second).Unix() < time.Now().Unix() {
+				delete(m.Heartbeat, k)
 			}
 		}
 	}
@@ -29,18 +26,15 @@ func (m *Master) ListenSlave() {
 
 func (m *Master) WaitForLeader() {
 	timeTick := time.NewTicker(100 * time.Millisecond)
-	for {
+	for range timeTick.C {
+		ch := m.Raft.LeaderCh()
 		select {
-		case <-timeTick.C:
-			ch := m.Raft.LeaderCh()
-			select {
-			case isLeader := <-ch:
-				if isLeader {
-					return
-				}
-			default:
-				continue
+		case isLeader := <-ch:
+			if isLeader {
+				return
 			}
+		default:
+			continue
 		}
 	}
 }
@@ -63,7 +57,7 @@ func (m *Master) StartGrpcServer() {
 		}
 	}()
 	// graceful shutdown
-	sig := make(chan os.Signal)
+	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
 
 	<-sig
