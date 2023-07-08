@@ -14,7 +14,7 @@ func newClient() *client.Client {
 	}
 }
 
-func putData(c *grumble.Context) error {
+func stringPutData(c *grumble.Context) error {
 	key := c.Args.String("key")
 	value := c.Args.String("value")
 	if key == "" || value == "" {
@@ -30,7 +30,7 @@ func putData(c *grumble.Context) error {
 	return nil
 }
 
-func getData(c *grumble.Context) error {
+func stringGetData(c *grumble.Context) error {
 	key := c.Args.String("key")
 	if key == "" {
 		fmt.Println("key is empty")
@@ -45,7 +45,7 @@ func getData(c *grumble.Context) error {
 	return nil
 }
 
-func deleteKey(c *grumble.Context) error {
+func stringDeleteKey(c *grumble.Context) error {
 	key := c.Args.String("key")
 	if key == "" {
 		fmt.Println("key is empty")

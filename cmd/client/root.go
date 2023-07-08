@@ -6,7 +6,7 @@ func register(app *grumble.App) {
 	app.AddCommand(&grumble.Command{
 		Name: "put",
 		Help: "put data",
-		Run:  putData,
+		Run:  stringPutData,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 			a.String("value", "value", grumble.Default(""))
@@ -16,7 +16,7 @@ func register(app *grumble.App) {
 	app.AddCommand(&grumble.Command{
 		Name: "get",
 		Help: "get data",
-		Run:  getData,
+		Run:  stringGetData,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 		},
@@ -25,7 +25,7 @@ func register(app *grumble.App) {
 	app.AddCommand(&grumble.Command{
 		Name: "delete",
 		Help: "delete key",
-		Run:  deleteKey,
+		Run:  stringDeleteKey,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 		},
