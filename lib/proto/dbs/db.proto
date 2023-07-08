@@ -5,40 +5,48 @@ option go_package = 	"flydb/lib/proto/dbs";
 
 service FlyDBService {
   rpc Get(GetRequest) returns (GetResponse) {}
-  rpc Put(PutRequest) returns (PutResponse) {}
+  rpc Put(SetRequest) returns (SetResponse) {}
   rpc Del(DelRequest) returns (DelResponse) {}
-  rpc Keys(KeysRequest) returns (KeysResponse) {}
 }
 
 message GetRequest {
-  bytes key = 1;
+  string key = 1;
 }
 
 message GetResponse {
-  bytes value = 1;
+  oneof value {
+    string StringValue = 1;
+    int32 Int32Value = 2;
+    int64 Int64Value = 3;
+    float Float32Value = 4;
+    double Float64Value = 5;
+    bool BoolValue = 6;
+    bytes BytesValue = 7;
+  }
 }
 
-message PutRequest {
-  bytes key = 1;
-  bytes value = 2;
+message SetRequest {
+  string key = 1;
+  oneof value {
+    string StringValue = 2;
+    int32 Int32Value = 3;
+    int64 Int64Value = 4;
+    float Float32Value = 5;
+    double Float64Value = 6;
+    bool BoolValue = 7;
+    bytes BytesValue = 8;
+  };
+  int64 expire = 9;
 }
 
-message PutResponse {
+message SetResponse {
   bool ok = 1;
 }
 
 message DelRequest {
-  bytes key = 1;
+  string key = 1;
 }
 
 message DelResponse {
   bool ok = 1;
-}
-
-message KeysRequest {
-  bytes pattern = 1;
-}
-
-message KeysResponse {
-  repeated bytes keys = 1;
 }
