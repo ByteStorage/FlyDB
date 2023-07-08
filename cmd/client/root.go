@@ -31,9 +31,4 @@ func register(app *grumble.App) {
 		},
 	})
 
-	app.AddCommand(&grumble.Command{
-		Name: "keys",
-		Help: "list keys",
-		Run:  getKeys,
-	})
 }
