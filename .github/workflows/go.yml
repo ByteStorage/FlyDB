@@ -25,6 +25,9 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
+      - name: Check Format
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+
       - name: Build
         run: go build -v ./...
 
