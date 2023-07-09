@@ -47,6 +47,33 @@ func TestHashStructure_HGet(t *testing.T) {
 
 }
 
+func TestHashStructure_HMGet(t *testing.T) {
+	hash := initHashDB()
+	defer hash.db.Close()
+
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	v1 := randkv.RandomValue(10)
+	ok2, err := hash.HSet("1", []byte("field1"), v1)
+	assert.Nil(t, err)
+	assert.False(t, ok2)
+
+	v2 := randkv.RandomValue(10)
+	ok3, err := hash.HSet("1", []byte("field2"), v2)
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	mulVal, err := hash.HMGet("1", []byte("field1"), []byte("field2"))
+	assert.Equal(t, v1, mulVal[0])
+	assert.Equal(t, v2, mulVal[1])
+
+	_, err = hash.HGet("1", []byte("field3"))
+	assert.Equal(t, err, _const.ErrKeyNotFound)
+
+}
+
 func TestHashStructure_HDel(t *testing.T) {
 	hash := initHashDB()
 	defer hash.db.Close()

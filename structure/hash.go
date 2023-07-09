@@ -220,6 +220,65 @@ func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
 	return valueToInterface, nil
 }
 
+// HMGet gets the string value of a hash field.
+func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error) {
+	// Convert the parameters to bytes
+	key := stringToBytesWithKey(k)
+	var interfaces []interface{}
+
+	for _, fi := range f {
+		// Convert the parameters to bytes
+		field, err, _ := interfaceToBytes(fi)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check the parameters
+		if len(key) == 0 || len(field) == 0 {
+			return nil, _const.ErrKeyIsEmpty
+		}
+
+		// Find the hash metadata by the given key
+		hashMeta, err := hs.findHashMeta(k, Hash)
+		if err != nil {
+			return nil, err
+		}
+
+		// If the counter is 0, return nil
+		if hashMeta.counter == 0 {
+			return nil, nil
+		}
+
+		// Create a new HashField
+		hf := &HashField{
+			field:   field,
+			key:     key,
+			version: hashMeta.version,
+		}
+
+		// Encode the HashField
+		hfBuf := hf.encodeHashField()
+
+		// Get the field from the database
+		value, err := hs.db.Get(hfBuf)
+		if err != nil {
+			return nil, err
+		}
+
+		// Get the value type from the hashValueTypes
+		valueType := hs.hashValueType
+
+		// Values of different types need to be converted to corresponding types
+		valueToInterface, err := byteToInterface(value, valueType)
+		if err != nil {
+			return nil, err
+		}
+		interfaces = append(interfaces, valueToInterface)
+	}
+
+	return interfaces, nil
+}
+
 // HDel deletes one field from a hash.
 func (hs *HashStructure) HDel(k string, f interface{}) (bool, error) {
 	// Convert the parameters to bytes
