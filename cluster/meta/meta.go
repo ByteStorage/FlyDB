@@ -1,6 +1,7 @@
 package meta
 
 import (
+	"errors"
 	"github.com/ByteStorage/FlyDB/cluster/region"
 	"github.com/ByteStorage/FlyDB/cluster/store"
 	"github.com/ByteStorage/FlyDB/config"
@@ -34,4 +35,62 @@ type meta struct {
 	regions       map[uint64]*region.Region // regions, to store the regions in the cluster.
 	mu            sync.RWMutex              // mutex, to protect the metadata.
 	scheduler     *Scheduler                // scheduler, to schedule the cluster.
+}
+
+func (m *meta) GetStore(addr string) (*store.Store, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	store, ok := m.stores[addr]
+	if !ok {
+		return nil, errors.New("store not found")
+	}
+
+	return store, nil
+}
+
+func (m *meta) AddStore(addr string) error {
+	panic("implement me")
+}
+
+func (m *meta) RemoveStore(addr string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, ok := m.stores[addr]; !ok {
+		return errors.New("store not found")
+	}
+
+	// Remove the store from the metadata
+	delete(m.stores, addr)
+
+	return nil
+}
+
+func (m *meta) GetAllStores() []*store.Store {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	stores := make([]*store.Store, 0, len(m.stores))
+	for _, store := range m.stores {
+		stores = append(stores, store)
+	}
+
+	return stores
+}
+
+func (m *meta) GetRegionByID(id uint64) (*region.Region, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	region, ok := m.regions[id]
+	if !ok {
+		return nil, errors.New("region not found")
+	}
+
+	return region, nil
+}
+
+func (m *meta) GetStoreByID(id uint64) (*store.Store, error) {
+	panic("implement me")
 }
