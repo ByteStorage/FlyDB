@@ -81,3 +81,7 @@ type Iterator interface {
 	// Close closes the iterator and releases any resources.
 	Close()
 }
+
+func Compare(a, b []byte) int {
+	return bytes.Compare(a, b)
+}
