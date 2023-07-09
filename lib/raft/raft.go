@@ -128,18 +128,18 @@ func NewRaftCluster(masterList []string, slaveList []string) *Cluster {
 }
 
 func (c *Cluster) startMasters() {
-	for _, m := range c.Master {
-		m.c = c
+	for idx := range c.Master {
+		c.Master[idx].c = c
 		//start grpc server
-		m.StartGrpcServer()
+		c.Master[idx].StartGrpcServer()
 		//start raft
-		m.NewRaft()
+		c.Master[idx].NewRaft()
 		//wait for leader
-		m.WaitForLeader()
+		c.Master[idx].WaitForLeader()
 		//add slave or delete slave
-		go m.ListenSlave()
+		go c.Master[idx].ListenSlave()
 		//listen user request, by wal
-		go m.ListenRequest()
+		go c.Master[idx].ListenRequest()
 	}
 }
 

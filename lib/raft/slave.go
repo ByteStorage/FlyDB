@@ -29,7 +29,7 @@ func (s *Slave) StartGrpcServer() {
 		}
 	}()
 	// graceful shutdown
-	sig := make(chan os.Signal)
+	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)
 
 	<-sig

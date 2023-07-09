@@ -71,7 +71,7 @@ func (it *Iterator) skipToNext() {
 		key := it.indexIter.Key()
 
 		// Check if the key has the desired prefix
-		if prefixLen <= len(key) && bytes.Compare(it.options.Prefix, key[:prefixLen]) == 0 {
+		if prefixLen <= len(key) && bytes.Equal(it.options.Prefix, key[:prefixLen]) {
 			break
 		}
 	}
