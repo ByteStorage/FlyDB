@@ -21,10 +21,7 @@ func (s *Service) IsGrpcServerRunning() bool {
 		return false
 	}
 	err = conn.Close()
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // StartServer starts a grpc server
@@ -32,7 +29,6 @@ func (s *Service) StartServer() {
 	listener, err := net.Listen("tcp", s.Addr)
 	if err != nil {
 		panic("tcp listen error: " + err.Error())
-		return
 	}
 	server := grpc.NewServer()
 	dbs.RegisterFlyDBServiceServer(server, s)
