@@ -7,6 +7,11 @@ import (
 	"sync"
 )
 
+// The region is responsible for maintaining the key range and the raftGroups it belongs to,
+// directly interacting with the underlying DB APIs,
+// and the actual groups where the data falls into the disk.
+// raftGroups contains the other raft node of the region, a region has at least three replicas.
+// region and replicas are a raft group, and the one region is the leader of the raft group.
 // region stores the data of a region.
 type region struct {
 	id         uint64                // region id
