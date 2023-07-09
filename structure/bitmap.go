@@ -29,16 +29,17 @@ func NewBitmap(options config.Options) (*BitmapStructure, error) {
 	return &BitmapStructure{db: db}, nil
 }
 
-func (b *BitmapStructure) SetBit(key []byte, off uint) error {
+func (b *BitmapStructure) SetBit(k string, off uint) error {
+	key := stringToBytesWithKey(k)
 	bit := bitset.New(1)
-	value, err := b.GetBits(key)
+	value, err := b.GetBits(k)
 	if err == _const.ErrKeyNotFound {
 		buf, _ := bitsetToByteArray(bit)
 		err := b.db.Put(key, buf)
 		if err != nil {
 			return err
 		}
-		value, err = b.GetBits(key)
+		value, err = b.GetBits(k)
 	} else if err != nil {
 		return err
 	}
@@ -50,16 +51,17 @@ func (b *BitmapStructure) SetBit(key []byte, off uint) error {
 	buf, err := bitsetToByteArray(bit)
 	return b.db.Put(key, buf)
 }
-func (b *BitmapStructure) SetBits(key []byte, off ...uint) error {
+func (b *BitmapStructure) SetBits(k string, off ...uint) error {
+	key := stringToBytesWithKey(k)
 	bit := bitset.New(1)
-	value, err := b.GetBits(key)
+	value, err := b.GetBits(k)
 	if err == _const.ErrKeyNotFound {
 		buf, _ := bitsetToByteArray(bit)
 		err := b.db.Put(key, buf)
 		if err != nil {
 			return err
 		}
-		value, err = b.GetBits(key)
+		value, err = b.GetBits(k)
 	} else if err != nil {
 		return err
 	}
@@ -74,7 +76,8 @@ func (b *BitmapStructure) SetBits(key []byte, off ...uint) error {
 	return b.db.Put(key, buf)
 }
 
-func (b *BitmapStructure) GetBits(key []byte) ([]byte, error) {
+func (b *BitmapStructure) GetBits(k string) ([]byte, error) {
+	key := stringToBytesWithKey(k)
 	value, err := b.db.Get(key)
 	if err != nil {
 		return nil, err
@@ -82,7 +85,8 @@ func (b *BitmapStructure) GetBits(key []byte) ([]byte, error) {
 	return value, nil
 }
 
-func (b *BitmapStructure) GetBit(key []byte, off uint) (bool, error) {
+func (b *BitmapStructure) GetBit(k string, off uint) (bool, error) {
+	key := stringToBytesWithKey(k)
 	value, err := b.db.Get(key)
 	if err != nil {
 		return false, err
@@ -96,7 +100,8 @@ func (b *BitmapStructure) GetBit(key []byte, off uint) (bool, error) {
 	return bit.Test(off), nil
 }
 
-func (b *BitmapStructure) DelBit(key []byte, off uint) error {
+func (b *BitmapStructure) DelBit(k string, off uint) error {
+	key := stringToBytesWithKey(k)
 	value, err := b.db.Get(key)
 	if err != nil {
 		return err
@@ -118,7 +123,8 @@ func (b *BitmapStructure) DelBit(key []byte, off uint) error {
 
 	return nil
 }
-func (b *BitmapStructure) DelBits(key []byte, off ...uint) error {
+func (b *BitmapStructure) DelBits(k string, off ...uint) error {
+	key := stringToBytesWithKey(k)
 	value, err := b.db.Get(key)
 	if err != nil {
 		return err
@@ -144,7 +150,8 @@ func (b *BitmapStructure) DelBits(key []byte, off ...uint) error {
 
 	return nil
 }
-func (b *BitmapStructure) BitCount(key []byte, start, end uint) (uint, error) {
+func (b *BitmapStructure) BitCount(k string, start, end uint) (uint, error) {
+	key := stringToBytesWithKey(k)
 	value, err := b.db.Get(key)
 	if err != nil {
 		return 0, err
@@ -166,12 +173,12 @@ func (b *BitmapStructure) BitCount(key []byte, start, end uint) (uint, error) {
 
 	return count, nil
 }
-func (b *BitmapStructure) BitOp(op BitOperation, destKey []byte, keys ...[]byte) error {
+func (b *BitmapStructure) BitOp(op BitOperation, destKey string, keys ...string) error {
 	if len(keys) == 0 {
 		return errors.New("no keys specified")
 	}
 
-	value, err := b.db.Get(keys[0])
+	value, err := b.db.Get(stringToBytesWithKey(keys[0]))
 	if err != nil {
 		return err
 	}
@@ -181,7 +188,7 @@ func (b *BitmapStructure) BitOp(op BitOperation, destKey []byte, keys ...[]byte)
 		return err
 	}
 	for i := 1; i < len(keys); i++ {
-		value, err := b.db.Get(keys[i])
+		value, err := b.db.Get(stringToBytesWithKey(keys[i]))
 		if err != nil {
 			return err
 		}
@@ -206,7 +213,7 @@ func (b *BitmapStructure) BitOp(op BitOperation, destKey []byte, keys ...[]byte)
 	if err != nil {
 		return err
 	}
-	err = b.db.Put(destKey, buf)
+	err = b.db.Put(stringToBytesWithKey(destKey), buf)
 	if err != nil {
 		return err
 	}

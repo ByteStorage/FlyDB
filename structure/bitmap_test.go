@@ -24,9 +24,9 @@ func TestBitmapStructure_SetBit(t *testing.T) {
 	// Setup the bitmap structure
 	bm := initBitmap()
 	bs := bitset.New(1)
-	err := bm.SetBit([]byte("1"), 7)
+	err := bm.SetBit("1", 7)
 	assert.NoError(t, err)
-	val, err := bm.GetBits([]byte("1"))
+	val, err := bm.GetBits("1")
 	err = bs.UnmarshalBinary(val)
 
 	assert.NoError(t, err)
@@ -37,9 +37,9 @@ func TestBitmapStructure_SetBits(t *testing.T) {
 	// Setup the bitmap structure
 	bm := initBitmap()
 	bs := bitset.New(1)
-	err := bm.SetBits([]byte("1"), 7, 4, 2, 9)
+	err := bm.SetBits("1", 7, 4, 2, 9)
 	assert.NoError(t, err)
-	val, err := bm.GetBits([]byte("1"))
+	val, err := bm.GetBits("1")
 	err = bs.UnmarshalBinary(val)
 
 	assert.NoError(t, err)
@@ -56,9 +56,9 @@ func TestBitmapStructure_GetBits(t *testing.T) {
 	// Setup the bitmap structure
 	bm := initBitmap()
 
-	err := bm.SetBit([]byte("1"), 2)
+	err := bm.SetBit("1", 2)
 	assert.NoError(t, err)
-	val, err := bm.GetBits([]byte("1"))
+	val, err := bm.GetBits("1")
 	assert.NoError(t, err)
 	bs := bitset.New(1)
 	err = bs.UnmarshalBinary(val)
@@ -66,8 +66,8 @@ func TestBitmapStructure_GetBits(t *testing.T) {
 	assert.True(t, bs.Test(2))
 
 	// add one other bit
-	err = bm.SetBit([]byte("1"), 7)
-	val, err = bm.GetBits([]byte("1"))
+	err = bm.SetBit("1", 7)
+	val, err = bm.GetBits("1")
 	assert.NoError(t, err)
 	err = bs.UnmarshalBinary(val)
 	assert.NoError(t, err)
@@ -79,46 +79,46 @@ func TestBitmapStructure_GetBit(t *testing.T) {
 	// Setup the bitmap structure
 	bm := initBitmap()
 
-	err := bm.SetBit([]byte("1"), 2)
+	err := bm.SetBit("1", 2)
 	assert.NoError(t, err)
-	val, err := bm.GetBit([]byte("1"), 2)
+	val, err := bm.GetBit("1", 2)
 	assert.NoError(t, err)
 	assert.True(t, val)
-	val, _ = bm.GetBit([]byte("1"), 1)
+	val, _ = bm.GetBit("1", 1)
 	assert.False(t, val)
 }
 
 func TestBitmapStructure_DelBit(t *testing.T) {
 	bm := initBitmap()
 
-	err := bm.SetBits([]byte("1"), 2, 3, 4, 5, 6)
+	err := bm.SetBits("1", 2, 3, 4, 5, 6)
 	assert.NoError(t, err)
-	val, _ := bm.GetBit([]byte("1"), 2)
+	val, _ := bm.GetBit("1", 2)
 	assert.True(t, val)
-	err = bm.DelBit([]byte("1"), 2)
+	err = bm.DelBit("1", 2)
 	assert.NoError(t, err)
-	val, err = bm.GetBit([]byte("1"), 2)
+	val, err = bm.GetBit("1", 2)
 	assert.NoError(t, err)
 	assert.False(t, val)
-	val, _ = bm.GetBit([]byte("1"), 4)
+	val, _ = bm.GetBit("1", 4)
 	assert.True(t, val)
 
 }
 func TestBitmapStructure_DelBits(t *testing.T) {
 	bm := initBitmap()
 
-	err := bm.SetBits([]byte("1"), 2, 3, 4, 5, 6)
+	err := bm.SetBits("1", 2, 3, 4, 5, 6)
 	assert.NoError(t, err)
-	err = bm.DelBits([]byte("1"), 4, 5)
+	err = bm.DelBits("1", 4, 5)
 	assert.NoError(t, err)
-	val, err := bm.GetBit([]byte("1"), 2)
+	val, err := bm.GetBit("1", 2)
 	assert.NoError(t, err)
 	assert.True(t, val)
-	val, _ = bm.GetBit([]byte("1"), 4)
+	val, _ = bm.GetBit("1", 4)
 	assert.False(t, val)
-	val, _ = bm.GetBit([]byte("1"), 5)
+	val, _ = bm.GetBit("1", 5)
 	assert.False(t, val)
-	val, _ = bm.GetBit([]byte("1"), 6)
+	val, _ = bm.GetBit("1", 6)
 	assert.True(t, val)
 
 }
@@ -126,20 +126,20 @@ func TestBitmapStructure_DelBits(t *testing.T) {
 func TestBitmapStructure_BitCount(t *testing.T) {
 	bm := initBitmap()
 
-	err := bm.SetBits([]byte("1"), 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15)
+	err := bm.SetBits("1", 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15)
 	assert.NoError(t, err)
-	count, err := bm.BitCount([]byte("1"), 3, 10)
+	count, err := bm.BitCount("1", 3, 10)
 	assert.NoError(t, err)
 	assert.Equal(t, uint(5), count)
 	// check over the end
-	count, err = bm.BitCount([]byte("1"), 10, 100)
+	count, err = bm.BitCount("1", 10, 100)
 	assert.NoError(t, err)
 	assert.Equal(t, uint(6), count)
 }
 
 func TestBitmapStructure_BitOp(t *testing.T) {
 	type bitmapStruct struct {
-		key []byte
+		key string
 		arr []uint
 	}
 
@@ -153,13 +153,13 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 			name: "bitset OR operation",
 			op:   BitOrOperation,
 			input: []bitmapStruct{
-				{[]byte("1"), []uint{2, 3}},
-				{[]byte("2"), []uint{0, 6, 12, 17}},
-				{[]byte("3"), []uint{1, 4, 10, 11, 19}},
-				{[]byte("4"), []uint{10, 12, 14}},
+				{"1", []uint{2, 3}},
+				{"2", []uint{0, 6, 12, 17}},
+				{"3", []uint{1, 4, 10, 11, 19}},
+				{"4", []uint{10, 12, 14}},
 			},
 			expected: bitmapStruct{
-				[]byte("5"),
+				"5",
 				[]uint{0, 1, 2, 3, 4, 6, 10, 11, 12, 14, 17, 19},
 			},
 		},
@@ -167,13 +167,13 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 			name: "bitset AND operation",
 			op:   BitAndOperation,
 			input: []bitmapStruct{
-				{[]byte("1"), []uint{2, 3, 6}},
-				{[]byte("2"), []uint{0, 6, 12, 17}},
-				{[]byte("3"), []uint{1, 4, 10, 11, 6, 19}},
-				{[]byte("4"), []uint{10, 12, 14, 6}},
+				{"1", []uint{2, 3, 6}},
+				{"2", []uint{0, 6, 12, 17}},
+				{"3", []uint{1, 4, 10, 11, 6, 19}},
+				{"4", []uint{10, 12, 14, 6}},
 			},
 			expected: bitmapStruct{
-				[]byte("5"),
+				"5",
 				[]uint{6},
 			},
 		},
@@ -181,13 +181,13 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 			name: "bitset NOT operation",
 			op:   BitNotOperation,
 			input: []bitmapStruct{
-				{[]byte("1"), []uint{0, 1, 2, 3, 12}},
-				{[]byte("2"), []uint{0, 6, 12, 17}},
-				{[]byte("3"), []uint{1, 4, 10, 11, 19}},
-				{[]byte("4"), []uint{10, 12, 14}},
+				{"1", []uint{0, 1, 2, 3, 12}},
+				{"2", []uint{0, 6, 12, 17}},
+				{"3", []uint{1, 4, 10, 11, 19}},
+				{"4", []uint{10, 12, 14}},
 			},
 			expected: bitmapStruct{
-				[]byte("5"),
+				"5",
 				[]uint{2, 3},
 			},
 		},
@@ -195,13 +195,13 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 			name: "bitset XOR operation",
 			op:   BitXorOperation,
 			input: []bitmapStruct{
-				{[]byte("1"), []uint{2, 3}},
-				{[]byte("2"), []uint{0, 2, 6, 12, 17}},
-				{[]byte("3"), []uint{1, 4, 10, 11, 19}},
-				{[]byte("4"), []uint{3, 10, 12, 14}},
+				{"1", []uint{2, 3}},
+				{"2", []uint{0, 2, 6, 12, 17}},
+				{"3", []uint{1, 4, 10, 11, 19}},
+				{"4", []uint{3, 10, 12, 14}},
 			},
 			expected: bitmapStruct{
-				[]byte("5"),
+				"5",
 				[]uint{0, 1, 4, 6, 11, 14, 17, 19},
 			},
 		},
@@ -209,7 +209,7 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 
 	for _, test := range tests {
 		bm := initBitmap()
-		var keys [][]byte
+		var keys []string
 		for _, b := range test.input {
 			err = bm.SetBits(b.key, b.arr...)
 			assert.NoError(t, err)
@@ -217,7 +217,7 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 		}
 		err := bm.BitOp(test.op, test.expected.key, keys...)
 		assert.NoError(t, err)
-		bits, err := bm.getBits(test.expected.key)
+		bits, err := bm.getBits([]byte(test.expected.key))
 
 		actualBit := bitset.New(1)
 		err = actualBit.UnmarshalBinary(bits)
