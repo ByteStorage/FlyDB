@@ -26,6 +26,9 @@ type MetadataManager interface {
 }
 
 // meta stores the metadata of the cluster.
+// meta will manage all stores and regions in the cluster.
+// meta has at least three nodes in the cluster.
+// meta nodes will create a raft group to manage the metadata of the cluster.
 type meta struct {
 	clusterConfig *config.Config            // cluster config, including cluster id, cluster name, etc.
 	heartbeat     map[string]time.Time      // stores heartbeat, to check whether a store is alive.
