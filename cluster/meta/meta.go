@@ -5,6 +5,7 @@ import (
 	"github.com/ByteStorage/FlyDB/cluster/store"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/dirtree"
+	"github.com/hashicorp/raft"
 	"sync"
 	"time"
 )
@@ -37,4 +38,5 @@ type meta struct {
 	regions       map[uint64]*region.Region // regions, to store the regions in the cluster.
 	mu            sync.RWMutex              // mutex, to protect the metadata.
 	scheduler     *Scheduler                // scheduler, to schedule the cluster.
+	raft          *raft.Raft                // raft, to store the raft group.
 }
