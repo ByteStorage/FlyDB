@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"github.com/ByteStorage/FlyDB/cluster/region"
 	"github.com/hashicorp/raft"
 	"sync"
@@ -35,6 +36,39 @@ type Store interface {
 	Merge(regionA *region.Region, regionB *region.Region) error
 	// GetSize gets the total size of the store.
 	GetSize() int64
+}
+
+func (s *store) GetRegionByKey(key []byte) (*region.Region, error) {
+	panic("implement me")
+}
+
+func (s *store) GetRegionByID(id uint64) (*region.Region, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if _, ok := s.regionList[id]; !ok {
+		return nil, errors.New("the specified region does not exist")
+	}
+	return s.regionList[id], nil
+}
+
+func (s *store) AddRegion(region *region.Region) error {
+	panic("implement me")
+}
+
+func (s *store) RemoveRegion(id uint64) error {
+	panic("implement me")
+}
+
+func (s *store) Split(region *region.Region, splitKey []byte) error {
+	panic("implement me")
+}
+
+func (s *store) Merge(regionA *region.Region, regionB *region.Region) error {
+	panic("implement me")
+}
+
+func (s *store) GetSize() int64 {
+	panic("implement me")
 }
 
 // newRaftNode creates a new raft node for the store.
