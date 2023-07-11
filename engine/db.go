@@ -547,10 +547,10 @@ func (db *DB) loadIndexFromDataFiles() error {
 }
 
 // Clean the DB data directory after the test is complete
-func (db *DB) Clean() {
+func (db *DB) Clean(path string) {
 	if db != nil {
 		_ = db.Close()
-		err := os.RemoveAll(db.options.DirPath)
+		err := os.RemoveAll(path)
 		if err != nil {
 			panic(err)
 		}

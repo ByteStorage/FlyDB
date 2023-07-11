@@ -12,17 +12,17 @@ import (
 
 var listErr error
 
-func initList() *ListStructure {
+func initList() (*ListStructure, string) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "TestListStructure")
 	opts.DirPath = dir
 	list, _ := NewListStructure(opts)
-	return list
+	return list, dir
 }
 
 func TestListStructure_LPush(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LPush function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -34,8 +34,8 @@ func TestListStructure_LPush(t *testing.T) {
 }
 
 func TestListStructure_LPushs(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LPushs function when the key exists
 	listErr = list.LPushs(randkv.GetTestKey(1), randkv.RandomValue(100), randkv.RandomValue(100))
@@ -47,8 +47,8 @@ func TestListStructure_LPushs(t *testing.T) {
 }
 
 func TestListStructure_RPush(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test RPush function when the key exists
 	listErr = list.RPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -60,8 +60,8 @@ func TestListStructure_RPush(t *testing.T) {
 }
 
 func TestListStructure_RPushs(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test RPushs function when the key exists
 	listErr = list.RPushs(randkv.GetTestKey(1), randkv.RandomValue(100), randkv.RandomValue(100))
@@ -73,8 +73,8 @@ func TestListStructure_RPushs(t *testing.T) {
 }
 
 func TestListStructure_LPop(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LPop function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -97,8 +97,8 @@ func TestListStructure_LPop(t *testing.T) {
 }
 
 func TestListStructure_RPop(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test RPop function when the key exists
 	listErr = list.RPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -121,8 +121,8 @@ func TestListStructure_RPop(t *testing.T) {
 }
 
 func TestListStructure_LRange(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LRange function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -145,8 +145,8 @@ func TestListStructure_LRange(t *testing.T) {
 }
 
 func TestListStructure_LLen(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LLen function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -161,8 +161,8 @@ func TestListStructure_LLen(t *testing.T) {
 }
 
 func TestListStructure_LRem(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LRem function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -176,8 +176,8 @@ func TestListStructure_LRem(t *testing.T) {
 }
 
 func TestListStructure_LSet(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LSet function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -199,8 +199,8 @@ func TestListStructure_LSet(t *testing.T) {
 }
 
 func TestListStructure_LTrim(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LTrim function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -222,8 +222,8 @@ func TestListStructure_LTrim(t *testing.T) {
 }
 
 func TestListStructure_LIndex(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test LIndex function when the key exists
 	listErr = list.LPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -246,8 +246,8 @@ func TestListStructure_LIndex(t *testing.T) {
 }
 
 func TestListStructure_RPOPLPUSH(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Test RPOPLPUSH function when the source list exists
 	listErr = list.RPush(randkv.GetTestKey(1), randkv.RandomValue(100))
@@ -269,8 +269,8 @@ func TestListStructure_RPOPLPUSH(t *testing.T) {
 }
 
 func TestListStructure_Integration(t *testing.T) {
-	list := initList()
-	defer list.db.Clean()
+	list, path := initList()
+	defer list.db.Clean(path)
 
 	// Create a key and use LPush to add some values
 	key := randkv.GetTestKey(1)
