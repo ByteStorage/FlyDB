@@ -5,38 +5,26 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine/grpc/service"
 	"github.com/ByteStorage/FlyDB/structure"
+	"os"
 )
 
-var str *structure.StringStructure
+var s *service.Service
 
 func StartServer() {
-	var err error
 	options := config.DefaultOptions
-	str, err = structure.NewStringStructure(options)
+	str, err := structure.NewStringStructure(options)
 	if err != nil {
 		fmt.Println("flydb start error: ", err)
 		return
 	}
-	s := service.NewService(config.DefaultAddr, str)
+	s = service.NewService(config.DefaultAddr, str)
 	s.StartServer()
 }
 
-func StopServer() {
-	if str == nil {
-		fmt.Println("flydb stop error: ", "flydb not running")
-		return
-	}
-	err := str.Stop()
-	if err != nil {
-		fmt.Println("flydb stop error: ", err)
-		return
-	}
-}
-
 func CleanServer() {
-	if str == nil {
-		fmt.Println("flydb clean error: ", "flydb not running")
+	err := os.Remove(config.DefaultOptions.DirPath)
+	if err != nil {
+		fmt.Println("flydb clean error: ", err)
 		return
 	}
-	str.Clean()
 }
