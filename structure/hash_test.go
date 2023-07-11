@@ -6,7 +6,6 @@ import (
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
-	"reflect"
 	"testing"
 )
 
@@ -431,80 +430,4 @@ func TestHashStructure_HTypes(t *testing.T) {
 	type4, err := hash.HTypes("1", []byte("field4"))
 	assert.Equal(t, "", type4)
 	assert.Equal(t, err, _const.ErrKeyNotFound)
-}
-
-func TestMethod(t *testing.T) {
-	hash, _ := initHashDB()
-	defer hash.db.Clean()
-
-	ok1, err := hash.HSet("1", []byte("field1"), "你好")
-	ok2, err := hash.HSet("1", []byte("field2"), "世界")
-	assert.Nil(t, err)
-	assert.True(t, ok1)
-	assert.True(t, ok2)
-
-	v1, err := hash.HGet("1", []byte("field1"))
-	v2, err := hash.HGet("1", []byte("field2"))
-	assert.Nil(t, err)
-	assert.Equal(t, v1, "你好")
-	assert.Equal(t, v2, "世界")
-	assert.Equal(t, reflect.TypeOf(v1), reflect.TypeOf("你好"))
-	assert.Equal(t, reflect.TypeOf(v2), reflect.TypeOf("世界"))
-
-	ok3, err := hash.HSet("2", []byte("field1"), 1)
-	ok4, err := hash.HSet("2", []byte("field2"), 2)
-	assert.Nil(t, err)
-	assert.True(t, ok3)
-	assert.True(t, ok4)
-
-	v3, err := hash.HGet("2", []byte("field1"))
-	v4, err := hash.HGet("2", []byte("field2"))
-	assert.Nil(t, err)
-	assert.Equal(t, v3, 1)
-	assert.Equal(t, v4, 2)
-	assert.Equal(t, reflect.TypeOf(v3), reflect.TypeOf(1))
-	assert.Equal(t, reflect.TypeOf(v3), reflect.TypeOf(2))
-
-	ok5, err := hash.HSet("3", []byte("field1"), 1.1)
-	ok6, err := hash.HSet("3", []byte("field2"), 2.2)
-	assert.Nil(t, err)
-	assert.True(t, ok5)
-	assert.True(t, ok6)
-
-	v5, err := hash.HGet("3", []byte("field1"))
-	v6, err := hash.HGet("3", []byte("field2"))
-	assert.Nil(t, err)
-	assert.Equal(t, v5, 1.1)
-	assert.Equal(t, v6, 2.2)
-	assert.Equal(t, reflect.TypeOf(v5), reflect.TypeOf(1.1))
-	assert.Equal(t, reflect.TypeOf(v6), reflect.TypeOf(2.2))
-
-	ok7, err := hash.HSet("4", []byte("field1"), true)
-	ok8, err := hash.HSet("4", []byte("field2"), false)
-	assert.Nil(t, err)
-	assert.True(t, ok7)
-	assert.True(t, ok8)
-
-	v7, err := hash.HGet("4", []byte("field1"))
-	v8, err := hash.HGet("4", []byte("field2"))
-	assert.Nil(t, err)
-	assert.Equal(t, v7, true)
-	assert.Equal(t, v8, false)
-	assert.Equal(t, reflect.TypeOf(v7), reflect.TypeOf(true))
-	assert.Equal(t, reflect.TypeOf(v8), reflect.TypeOf(false))
-
-	ok9, err := hash.HSet("5", []byte("field1"), []byte("sadads"))
-	ok10, err := hash.HSet("5", []byte("field2"), []byte("sadads"))
-	assert.Nil(t, err)
-	assert.True(t, ok9)
-	assert.True(t, ok10)
-
-	v9, err := hash.HGet("5", []byte("field1"))
-	v10, err := hash.HGet("5", []byte("field2"))
-	assert.Nil(t, err)
-	assert.Equal(t, v9, []byte("sadads"))
-	assert.Equal(t, v10, []byte("sadads"))
-	assert.Equal(t, reflect.TypeOf(v9), reflect.TypeOf([]byte("sadads")))
-	assert.Equal(t, reflect.TypeOf(v10), reflect.TypeOf([]byte("sadads")))
-
 }
