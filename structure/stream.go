@@ -1,6 +1,8 @@
 package structure
 
 import (
+	"encoding/json"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	"time"
 )
@@ -40,4 +42,30 @@ type Streams struct {
 type StreamStructure struct {
 	db      *engine.DB
 	streams *Streams
+}
+
+// StreamStructure represents a stream structure
+func NewStreamStructure(options config.Options) (*StreamStructure, error) {
+	db, err := engine.NewDB(options)
+	if err != nil {
+		return nil, err
+	}
+	return &StreamStructure{db: db}, nil
+}
+
+func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
+	// Encode the streams
+	data, err := json.Marshal(ss)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (s *StreamStructure) decodeStreams(ss []byte, ss2 *Streams) error {
+	// Decode the streams
+	if err := json.Unmarshal(ss, ss2); err != nil {
+		return err
+	}
+	return nil
 }
