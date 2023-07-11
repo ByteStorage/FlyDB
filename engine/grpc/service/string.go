@@ -56,6 +56,13 @@ func (s *Service) StartServer() {
 	signal.Notify(s.sig, syscall.SIGINT, syscall.SIGKILL)
 
 	<-s.sig
+	err = s.db.Stop()
+	if err != nil {
+		fmt.Println("flydb stop error: ", err)
+		return
+	}
+	fmt.Println("flydb stop success on ", s.Addr)
+
 }
 
 // StopServer stops a grpc server
