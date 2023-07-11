@@ -508,3 +508,8 @@ func TestMethod(t *testing.T) {
 	assert.Equal(t, reflect.TypeOf(v10), reflect.TypeOf([]byte("sadads")))
 
 }
+
+func TestM(t *testing.T) {
+	db, _ := initHashDB()
+	db.db.Put()
+}
