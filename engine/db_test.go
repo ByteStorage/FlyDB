@@ -9,15 +9,27 @@ import (
 	"os"
 	"sync"
 	"testing"
-	"time"
 )
+
+// Destroy the DB data directory after the test is complete
+func destroyDB(db *DB) {
+	if db != nil {
+		if db.activeFile != nil {
+			_ = db.Close()
+		}
+		err := os.RemoveAll(db.options.DirPath)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
 
 func TestNewFlyDB(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb")
 	opts.DirPath = dir
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 }
@@ -28,7 +40,7 @@ func TestDB_Put(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -70,7 +82,6 @@ func TestDB_Put(t *testing.T) {
 
 	// Restart the database
 	db2, err := NewDB(opts)
-	defer db2.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db2)
 	val4 := randkv.RandomValue(128)
@@ -87,7 +98,7 @@ func TestDB_ConcurrentPut(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -166,7 +177,6 @@ func TestDB_ConcurrentPut(t *testing.T) {
 
 	// Restart the database
 	db2, err := NewDB(opts)
-	defer db2.Clean()
 
 	val1, err := db2.Get(randkv.GetTestKey(1))
 	assert.Nil(t, err)
@@ -204,7 +214,7 @@ func TestDB_Get(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -253,7 +263,6 @@ func TestDB_Get(t *testing.T) {
 
 	// Restart the database
 	db2, err := NewDB(opts)
-	defer db2.Clean()
 	val6, err := db2.Get(randkv.GetTestKey(11))
 	assert.Nil(t, err)
 	assert.NotNil(t, val6)
@@ -275,7 +284,7 @@ func TestDB_Delete(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -313,8 +322,6 @@ func TestDB_Delete(t *testing.T) {
 
 	// Restart the database
 	db2, err := NewDB(opts)
-	time.Sleep(time.Millisecond * 100)
-	defer db2.Clean()
 	_, err = db2.Get(randkv.GetTestKey(11))
 	assert.Equal(t, _const.ErrKeyNotFound, err)
 
@@ -329,7 +336,7 @@ func TestDB_GetListKeys(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -363,7 +370,7 @@ func TestDB_Fold(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
@@ -406,7 +413,7 @@ func TestDB_Sync(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
-	defer db.Clean()
+	defer destroyDB(db)
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 
