@@ -14,7 +14,7 @@ const (
 	// ZSet is a zset data structure
 	ZSet
 	// bitmap is a bitmap data structure
-	Bitmap
+	Bitmap DataStructure = iota + 1
 	// Stream is a stream data structure
 	Stream
 	// Expire is a expire data structure
