@@ -2,6 +2,7 @@ package structure
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	"time"
@@ -51,6 +52,72 @@ func NewStreamStructure(options config.Options) (*StreamStructure, error) {
 		return nil, err
 	}
 	return &StreamStructure{db: db}, nil
+}
+
+var (
+	// ErrInvalidArgs is returned when the arguments are invalid
+	ErrInvalidArgs = errors.New("id or fields cannot be empty")
+	// ErrExistID is returned when the message ID already exists
+	ErrExistID = errors.New("message ID already exists")
+)
+
+func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (bool, error) {
+	// Check if the arguments are valid
+	if len(id) == 0 || len(fields) == 0 || fields == nil {
+		return false, ErrInvalidArgs
+	}
+
+	// init stream if not exist
+	if s.streams == nil {
+		// Create a new stream
+		s.streams = &Streams{
+			Name:        name,
+			Messages:    []*StreamMessage{},
+			Groups:      make(map[string]*StreamGroup),
+			LastMessage: time.Time{},
+		}
+	} else {
+		// Check if the stream name is the same
+		if s.streams.Name != name {
+			s.streams = &Streams{
+				Name:        name,
+				Messages:    []*StreamMessage{},
+				Groups:      make(map[string]*StreamGroup),
+				LastMessage: time.Time{},
+			}
+		}
+	}
+
+	// Check if the message ID already exists
+	_, err := s.db.Get([]byte(id))
+	if err == nil {
+		return false, ErrExistID
+	}
+
+	// Create a new message
+	message := &StreamMessage{
+		Id:     id,
+		Fields: fields,
+	}
+
+	// Append the message to the stream
+	s.streams.Messages = append(s.streams.Messages, message)
+
+	// Set the last message time
+	s.streams.LastMessage = time.Now()
+
+	// Encode the streams
+	encodedStreams, err := s.encodeStreams(s.streams)
+	if err != nil {
+		return false, err
+	}
+
+	// Set the stream
+	if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
