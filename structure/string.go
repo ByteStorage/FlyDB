@@ -12,13 +12,9 @@ import (
 
 // StringStructure is a structure that stores string data
 type StringStructure struct {
-	db *engine.DB
+	db        *engine.DB
+	valueType string
 }
-
-var (
-	// ErrWrongNumberOfArguments is returned when the number of arguments is wrong
-	ErrWrongNumberOfArguments = errors.New("wrong number of arguments")
-)
 
 // NewStringStructure returns a new StringStructure
 // It will return a nil StringStructure if the database cannot be opened
@@ -32,12 +28,28 @@ func NewStringStructure(options config.Options) (*StringStructure, error) {
 	return &StringStructure{db: db}, nil
 }
 
+// stringToBytesWithKey converts a string to a byte slice
+func stringToBytesWithKey(key string) []byte {
+	return []byte(key)
+}
+
 // Set sets the value of a key
 // If the key does not exist, it will be created
 // If the key exists, it will be overwritten
 // If the key is expired, it will be deleted
 // If the key is not expired, it will be updated
-func (s *StringStructure) Set(key, value []byte, ttl time.Duration) error {
+// func (s *StringStructure) Set(key, value []byte, ttl time.Duration) error {
+func (s *StringStructure) Set(k string, v interface{}, ttl time.Duration) error {
+	key := stringToBytesWithKey(k)
+	value, err, valueType := interfaceToBytes(v)
+
+	if err != nil {
+		return err
+	}
+
+	// Set the value type
+	s.valueType = valueType
+
 	if value == nil {
 		return nil
 	}
@@ -57,15 +69,28 @@ func (s *StringStructure) Set(key, value []byte, ttl time.Duration) error {
 // If the key exists, it will return the value
 // If the key is expired, it will be deleted and return nil
 // If the key is not expired, it will be updated and return the value
-func (s *StringStructure) Get(key []byte) ([]byte, error) {
+func (s *StringStructure) Get(k string) (interface{}, error) {
+	key := stringToBytesWithKey(k)
+
 	// Get the value
 	value, err := s.db.Get(key)
 	if err != nil {
 		return nil, err
 	}
 
-	//Decode the value
-	return decodeStringValue(value)
+	interValue, err := decodeStringValue(value)
+	if err != nil {
+		return nil, err
+	}
+
+	valueType := s.valueType
+
+	valueToInterface, err := byteToInterface(interValue, valueType)
+	if err != nil {
+		return nil, err
+	}
+
+	return valueToInterface, nil
 }
 
 // Del deletes the value of a key
@@ -73,7 +98,8 @@ func (s *StringStructure) Get(key []byte) ([]byte, error) {
 // If the key exists, it will be deleted
 // If the key is expired, it will be deleted and return nil
 // If the key is not expired, it will be updated and return nil
-func (s *StringStructure) Del(key []byte) error {
+func (s *StringStructure) Del(k string) error {
+	key := stringToBytesWithKey(k)
 	// Delete the value
 	return s.db.Delete(key)
 }
@@ -83,7 +109,8 @@ func (s *StringStructure) Del(key []byte) error {
 // If the key exists, it will return "string"
 // If the key is expired, it will be deleted and return ""
 // If the key is not expired, it will be updated and return "string"
-func (s *StringStructure) Type(key []byte) (string, error) {
+func (s *StringStructure) Type(k string) (string, error) {
+	key := stringToBytesWithKey(k)
 	// Get the value
 	value, err := s.db.Get(key)
 	if err != nil {
@@ -105,7 +132,8 @@ func (s *StringStructure) Type(key []byte) (string, error) {
 // If the key exists, it will return the length of the value
 // If the key is expired, it will be deleted and return 0
 // If the key is not expired, it will be updated and return the length of the value
-func (s *StringStructure) StrLen(key []byte) (int, error) {
+func (s *StringStructure) StrLen(k string) (int, error) {
+	key := stringToBytesWithKey(k)
 	// Get the value
 	value, err := s.db.Get(key)
 	if err != nil {
@@ -123,7 +151,7 @@ func (s *StringStructure) StrLen(key []byte) (int, error) {
 }
 
 // GetSet sets the value of a key and returns its old value
-func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, error) {
+func (s *StringStructure) GetSet(key string, value interface{}, ttl time.Duration) (interface{}, error) {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -141,46 +169,53 @@ func (s *StringStructure) GetSet(key, value []byte, ttl time.Duration) ([]byte, 
 }
 
 // Append appends a value to the value of a key
-func (s *StringStructure) Append(key, value []byte, ttl time.Duration) error {
+func (s *StringStructure) Append(key string, v interface{}, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
 		return err
 	}
 
+	value, err, _ := interfaceToBytes(v)
+	if err != nil {
+		return err
+	}
+
+	// Convert the old value to a byte slice
+	oldValueType := oldValue.([]byte)
+
 	// Append the value
-	newValue := append(oldValue, value...)
+	newValue := append(oldValueType, value...)
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
 }
 
 // Incr increments the integer value of a key by 1
-func (s *StringStructure) Incr(key []byte, ttl time.Duration) error {
+func (s *StringStructure) Incr(key string, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
 		return err
 	}
 
-	// Convert the old value to an integer
-	oldIntValue, err := strconv.Atoi(string(oldValue))
+	intValue, err := convertToInt(oldValue)
 	if err != nil {
 		return err
 	}
 
 	// Increment the integer value
-	newIntValue := oldIntValue + 1
+	newIntValue := intValue + 1
 
 	// Convert the new integer value to a byte slice
-	newValue := []byte(strconv.Itoa(newIntValue))
+	newValue := strconv.Itoa(newIntValue)
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
 }
 
 // IncrBy increments the integer value of a key by the given amount
-func (s *StringStructure) IncrBy(key []byte, amount int, ttl time.Duration) error {
+func (s *StringStructure) IncrBy(key string, amount int, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -188,47 +223,44 @@ func (s *StringStructure) IncrBy(key []byte, amount int, ttl time.Duration) erro
 	}
 
 	// Convert the old value to an integer
-	oldIntValue, err := strconv.Atoi(string(oldValue))
+	intValue, err := convertToInt(oldValue)
 	if err != nil {
 		return err
 	}
 
-	// Increment the integer value
-	newIntValue := oldIntValue + amount
+	newIntValue := intValue + amount
 
-	// Convert the new integer value to a byte slice
-	newValue := []byte(strconv.Itoa(newIntValue))
+	newValue := strconv.Itoa(newIntValue)
 
-	// Set the value
 	return s.Set(key, newValue, ttl)
 }
 
 // IncrByFloat increments the float value of a key by the given amount
-func (s *StringStructure) IncrByFloat(key []byte, amount float64, ttl time.Duration) error {
+func (s *StringStructure) IncrByFloat(key string, amount float64, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
 		return err
 	}
 
-	// Convert the old value to a float
-	oldFloatValue, err := strconv.ParseFloat(string(oldValue), 64)
+	// Convert the old value to a byte slice
+	floatValue, err := convertToFloat(oldValue)
 	if err != nil {
 		return err
 	}
 
 	// Increment the float value
-	newFloatValue := oldFloatValue + amount
+	newFloatValue := floatValue + amount
 
 	// Convert the new float value to a byte slice
-	newValue := []byte(strconv.FormatFloat(newFloatValue, 'f', -1, 64))
+	newValue := strconv.FormatFloat(newFloatValue, 'f', -1, 64)
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
 }
 
 // Decr decrements the integer value of a key by 1
-func (s *StringStructure) Decr(key []byte, ttl time.Duration) error {
+func (s *StringStructure) Decr(key string, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -236,23 +268,22 @@ func (s *StringStructure) Decr(key []byte, ttl time.Duration) error {
 	}
 
 	// Convert the old value to an integer
-	oldIntValue, err := strconv.Atoi(string(oldValue))
+	intValue, err := convertToInt(oldValue)
 	if err != nil {
 		return err
 	}
 
 	// Decrement the integer value
-	newIntValue := oldIntValue - 1
+	newIntValue := intValue - 1
 
-	// Convert the new integer value to a byte slice
-	newValue := []byte(strconv.Itoa(newIntValue))
+	newValue := strconv.Itoa(newIntValue)
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
 }
 
 // DecrBy decrements the integer value of a key by the given amount
-func (s *StringStructure) DecrBy(key []byte, amount int, ttl time.Duration) error {
+func (s *StringStructure) DecrBy(key string, amount int, ttl time.Duration) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -260,23 +291,22 @@ func (s *StringStructure) DecrBy(key []byte, amount int, ttl time.Duration) erro
 	}
 
 	// Convert the old value to an integer
-	oldIntValue, err := strconv.Atoi(string(oldValue))
+	intValue, err := convertToInt(oldValue)
 	if err != nil {
 		return err
 	}
 
 	// Decrement the integer value
-	newIntValue := oldIntValue - amount
+	newIntValue := intValue - amount
 
-	// Convert the new integer value to a byte slice
-	newValue := []byte(strconv.Itoa(newIntValue))
+	newValue := strconv.Itoa(newIntValue)
 
 	// Set the value
 	return s.Set(key, newValue, ttl)
 }
 
 // Exists checks if a key exists
-func (s *StringStructure) Exists(key []byte) (bool, error) {
+func (s *StringStructure) Exists(key string) (bool, error) {
 	// Get the value
 	_, err := s.Get(key)
 	if err != nil {
@@ -290,19 +320,27 @@ func (s *StringStructure) Exists(key []byte) (bool, error) {
 }
 
 // Expire sets the expiration time of a key
-func (s *StringStructure) Expire(key []byte, ttl time.Duration) error {
+func (s *StringStructure) Expire(key string, ttl time.Duration) error {
 	// Get the value
-	value, err := s.Get(key)
+	oldValue, err := s.Get(key)
 	if err != nil {
 		return err
 	}
 
+	// Convert the old value to an integer
+	intValue, err := convertToInt(oldValue)
+	if err != nil {
+		return err
+	}
+
+	newValue := strconv.Itoa(intValue)
+
 	// Set the value
-	return s.Set(key, value, ttl)
+	return s.Set(key, newValue, ttl)
 }
 
 // Persist removes the expiration time of a key
-func (s *StringStructure) Persist(key []byte) error {
+func (s *StringStructure) Persist(key string) error {
 	// Get the value
 	value, err := s.Get(key)
 	if err != nil {

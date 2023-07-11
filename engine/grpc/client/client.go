@@ -24,14 +24,33 @@ func newGrpcClient(addr string) (dbs.FlyDBServiceClient, error) {
 }
 
 // Put puts a key-value pair into the db by client api
-func (c *Client) Put(key []byte, value []byte) error {
+func (c *Client) Put(key string, value interface{}) error {
 	client, err := newGrpcClient(c.Addr)
 	if err != nil {
-		return err
+		return errors.New("new grpc client error: " + err.Error())
 	}
-	put, err := client.Put(context.Background(), &dbs.PutRequest{Key: key, Value: value})
+	req := &dbs.SetRequest{Key: key}
+	switch v := value.(type) {
+	case string:
+		req.Value = &dbs.SetRequest_StringValue{StringValue: v}
+	case int32:
+		req.Value = &dbs.SetRequest_Int32Value{Int32Value: v}
+	case int64:
+		req.Value = &dbs.SetRequest_Int64Value{Int64Value: v}
+	case float32:
+		req.Value = &dbs.SetRequest_Float32Value{Float32Value: v}
+	case float64:
+		req.Value = &dbs.SetRequest_Float64Value{Float64Value: v}
+	case bool:
+		req.Value = &dbs.SetRequest_BoolValue{BoolValue: v}
+	case []byte:
+		req.Value = &dbs.SetRequest_BytesValue{BytesValue: v}
+	default:
+		return errors.New("unknown value type")
+	}
+	put, err := client.Put(context.Background(), req)
 	if err != nil {
-		return err
+		return errors.New("client put failed: " + err.Error())
 	}
 	if !put.Ok {
 		return errors.New("put failed")
@@ -40,7 +59,7 @@ func (c *Client) Put(key []byte, value []byte) error {
 }
 
 // Get gets a value by key from the db by client api
-func (c *Client) Get(key []byte) ([]byte, error) {
+func (c *Client) Get(key string) (interface{}, error) {
 	client, err := newGrpcClient(c.Addr)
 	if err != nil {
 		return nil, err
@@ -49,11 +68,28 @@ func (c *Client) Get(key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return get.Value, nil
+	switch get.Value.(type) {
+	case *dbs.GetResponse_StringValue:
+		return get.Value.(*dbs.GetResponse_StringValue).StringValue, nil
+	case *dbs.GetResponse_Int32Value:
+		return get.Value.(*dbs.GetResponse_Int32Value).Int32Value, nil
+	case *dbs.GetResponse_Int64Value:
+		return get.Value.(*dbs.GetResponse_Int64Value).Int64Value, nil
+	case *dbs.GetResponse_Float32Value:
+		return get.Value.(*dbs.GetResponse_Float32Value).Float32Value, nil
+	case *dbs.GetResponse_Float64Value:
+		return get.Value.(*dbs.GetResponse_Float64Value).Float64Value, nil
+	case *dbs.GetResponse_BoolValue:
+		return get.Value.(*dbs.GetResponse_BoolValue).BoolValue, nil
+	case *dbs.GetResponse_BytesValue:
+		return get.Value.(*dbs.GetResponse_BytesValue).BytesValue, nil
+	default:
+		return nil, errors.New("get failed")
+	}
 }
 
 // Del deletes a key-value pair from the db by client api
-func (c *Client) Del(key []byte) error {
+func (c *Client) Del(key string) error {
 	client, err := newGrpcClient(c.Addr)
 	if err != nil {
 		return err
@@ -66,21 +102,4 @@ func (c *Client) Del(key []byte) error {
 		return errors.New("del failed")
 	}
 	return nil
-}
-
-// Keys gets all keys from the db by client api
-func (c *Client) Keys() ([][]byte, error) {
-	client, err := newGrpcClient(c.Addr)
-	if err != nil {
-		return nil, err
-	}
-	keys, err := client.Keys(context.Background(), &dbs.KeysRequest{})
-	if err != nil {
-		return nil, err
-	}
-	result := make([][]byte, len(keys.Keys))
-	for i, key := range keys.Keys {
-		result[i] = key
-	}
-	return result, nil
 }
