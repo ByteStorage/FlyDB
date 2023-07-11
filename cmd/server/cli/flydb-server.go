@@ -8,7 +8,7 @@ import (
 
 func main() {
 	args := os.Args
-	if len(args) >= 2 {
+	if len(args) > 2 {
 		fmt.Println("Usage: flydb-server [start|clean|stop]")
 		return
 	}

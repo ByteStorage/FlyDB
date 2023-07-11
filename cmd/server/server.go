@@ -7,21 +7,36 @@ import (
 	"github.com/ByteStorage/FlyDB/structure"
 )
 
+var str *structure.StringStructure
+
 func StartServer() {
+	var err error
 	options := config.DefaultOptions
-	db, err := structure.NewStringStructure(options)
+	str, err = structure.NewStringStructure(options)
 	if err != nil {
 		fmt.Println("flydb start error: ", err)
 		return
 	}
-	s := service.NewService(config.DefaultAddr, db)
+	s := service.NewService(config.DefaultAddr, str)
 	s.StartServer()
 }
 
 func StopServer() {
-	panic("implement me")
+	if str == nil {
+		fmt.Println("flydb stop error: ", "flydb not running")
+		return
+	}
+	err := str.Stop()
+	if err != nil {
+		fmt.Println("flydb stop error: ", err)
+		return
+	}
 }
 
 func CleanServer() {
-	panic("implement me")
+	if str == nil {
+		fmt.Println("flydb clean error: ", "flydb not running")
+		return
+	}
+	str.Clean()
 }
