@@ -85,7 +85,10 @@ func (s *store) newRaftNode() error {
 	snapshots := newSnapshot()
 
 	// create the log store and stable store
-	logStore := newRaftLog()
+	logStore, err := newRaftLog()
+	if err != nil {
+		return err
+	}
 	stableStore := newStableLog()
 
 	// create a new finite state machine
