@@ -3,11 +3,13 @@ module github.com/ByteStorage/FlyDB
 go 1.18
 
 require (
+	github.com/bits-and-blooms/bitset v1.8.0
 	github.com/desertbit/grumble v1.1.3
 	github.com/fatih/color v1.13.0
 	github.com/google/btree v1.1.2
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702
+	github.com/kelindar/bitmap v1.5.1
 	github.com/klauspost/reedsolomon v1.11.7
 	github.com/plar/go-adaptive-radix-tree v1.0.5
 	github.com/stretchr/testify v1.8.2
@@ -33,7 +35,8 @@ require (
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
-	github.com/klauspost/cpuid/v2 v2.1.1 // indirect
+	github.com/kelindar/simd v1.1.2 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
