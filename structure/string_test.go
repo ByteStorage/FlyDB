@@ -333,9 +333,3 @@ func TestStringStructure_Persist(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, v2, "1")
 }
-
-func TestCI(t *testing.T) {
-	str, _ := initdb()
-	str.db.Put()
-
-}
