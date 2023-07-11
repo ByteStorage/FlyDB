@@ -12,16 +12,16 @@ import (
 
 var listErr error
 
-func initList() *ListStructure {
+func initList() (*ListStructure, *config.Options) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "TestListStructure")
 	opts.DirPath = dir
 	list, _ := NewListStructure(opts)
-	return list
+	return list, &opts
 }
 
 func TestListStructure_LPush(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LPush function when the key exists
@@ -34,7 +34,7 @@ func TestListStructure_LPush(t *testing.T) {
 }
 
 func TestListStructure_LPushs(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LPushs function when the key exists
@@ -47,7 +47,7 @@ func TestListStructure_LPushs(t *testing.T) {
 }
 
 func TestListStructure_RPush(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test RPush function when the key exists
@@ -60,7 +60,7 @@ func TestListStructure_RPush(t *testing.T) {
 }
 
 func TestListStructure_RPushs(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test RPushs function when the key exists
@@ -73,7 +73,7 @@ func TestListStructure_RPushs(t *testing.T) {
 }
 
 func TestListStructure_LPop(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LPop function when the key exists
@@ -97,7 +97,7 @@ func TestListStructure_LPop(t *testing.T) {
 }
 
 func TestListStructure_RPop(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test RPop function when the key exists
@@ -121,7 +121,7 @@ func TestListStructure_RPop(t *testing.T) {
 }
 
 func TestListStructure_LRange(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LRange function when the key exists
@@ -145,7 +145,7 @@ func TestListStructure_LRange(t *testing.T) {
 }
 
 func TestListStructure_LLen(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LLen function when the key exists
@@ -161,7 +161,7 @@ func TestListStructure_LLen(t *testing.T) {
 }
 
 func TestListStructure_LRem(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LRem function when the key exists
@@ -176,7 +176,7 @@ func TestListStructure_LRem(t *testing.T) {
 }
 
 func TestListStructure_LSet(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LSet function when the key exists
@@ -199,7 +199,7 @@ func TestListStructure_LSet(t *testing.T) {
 }
 
 func TestListStructure_LTrim(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LTrim function when the key exists
@@ -222,7 +222,7 @@ func TestListStructure_LTrim(t *testing.T) {
 }
 
 func TestListStructure_LIndex(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LIndex function when the key exists
@@ -246,7 +246,7 @@ func TestListStructure_LIndex(t *testing.T) {
 }
 
 func TestListStructure_RPOPLPUSH(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test RPOPLPUSH function when the source list exists
@@ -269,7 +269,7 @@ func TestListStructure_RPOPLPUSH(t *testing.T) {
 }
 
 func TestListStructure_Integration(t *testing.T) {
-	list := initList()
+	list, _ := initList()
 	defer list.db.Clean()
 
 	// Create a key and use LPush to add some values
