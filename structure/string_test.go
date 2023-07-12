@@ -335,7 +335,7 @@ func TestStringStructure_Persist(t *testing.T) {
 }
 
 func TestStringStructure_MGet(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err := str.Set("key1", "value1", 0)
@@ -355,7 +355,7 @@ func TestStringStructure_MGet(t *testing.T) {
 }
 
 func TestStringStructure_MSet(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err := str.MSet("key1", "value1", "key2", "value2", "key3", "value3")
@@ -375,7 +375,7 @@ func TestStringStructure_MSet(t *testing.T) {
 }
 
 func TestStringStructure_MSetNX(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	// Test case: All keys and values are new, should return true
