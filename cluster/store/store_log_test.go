@@ -10,14 +10,18 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	foo := func(conf config.Options) (raft.LogStore, error) {
+	foo := func(conf config.Config) (raft.LogStore, error) {
 		return &datastore.InMemStore{}, nil
 	}
-	conf := config.Options{}
+	opts := config.DefaultOptions
+	conf := config.Config{}
+	conf.LogDataStorageSize = 100 * 100 * 32
+	conf.LogDataStoragePath = opts.DirPath
 	err := Register("memory", foo)
 	assert.NoError(t, err)
 	// get the datastore and check
-	ds, err := getDataStore("memory", conf)
+	conf.LogDataStorage = "memory"
+	ds, err := getDataStore(conf)
 	assert.NoError(t, err)
 	assert.IsType(t, &datastore.InMemStore{}, ds)
 }
@@ -26,29 +30,36 @@ func TestInit(t *testing.T) {
 	// initialize the dbs
 	_ = Init()
 	// in memory DB
-	conf := config.DefaultOptions
-	ds, err := getDataStore("memory", conf)
+	opts := config.DefaultOptions
+	conf := config.Config{}
+	conf.LogDataStorageSize = 100 * 100 * 32
+	conf.LogDataStoragePath = opts.DirPath
+	conf.LogDataStorage = "memory"
+	ds, err := getDataStore(conf)
 	assert.NoError(t, err)
 	assert.IsType(t, &datastore.InMemStore{}, ds)
 	// FlyDB
 	tf, err := testTempFile()
 	assert.NoError(t, err)
-	conf.DirPath = tf
-	ds, err = getDataStore("flydb", conf)
+	conf.LogDataStoragePath = tf
+	conf.LogDataStorage = "flydb"
+	ds, err = getDataStore(conf)
 	assert.NoError(t, err)
 	assert.IsType(t, &datastore.FlyDbStore{}, ds)
 	// RockDB
 	tf, err = testTempDir()
 	assert.NoError(t, err)
-	conf.DirPath = tf
-	ds, err = getDataStore("rocksdb", conf)
+	conf.LogDataStoragePath = tf
+	conf.LogDataStorage = "rocksdb"
+	ds, err = getDataStore(conf)
 	assert.NoError(t, err)
 	assert.IsType(t, &datastore.RocksDbStore{}, ds)
 	// BoltDB
 	tf, err = testTempFile()
 	assert.NoError(t, err)
-	conf.DirPath = tf
-	ds, err = getDataStore("boltdb", conf)
+	conf.LogDataStorage = "boltdb"
+	conf.LogDataStoragePath = tf
+	ds, err = getDataStore(conf)
 	assert.NoError(t, err)
 	assert.IsType(t, &datastore.BoltDbStore{}, ds)
 

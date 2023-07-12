@@ -19,7 +19,7 @@ type InMemStore struct {
 
 // NewLogInMemStorage is a function that creates a new in-memory store
 // It returns a raft.LogStore and an error
-func NewLogInMemStorage(conf config.Options) (raft.LogStore, error) {
+func NewLogInMemStorage(conf config.Config) (raft.LogStore, error) {
 	a := &InMemStore{
 		logs: make(map[uint64]*raft.Log),
 	}

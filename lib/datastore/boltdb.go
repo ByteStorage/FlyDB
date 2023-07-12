@@ -26,8 +26,8 @@ type BoltDbStore struct {
 
 // NewLogBoltDbStorage is a function that creates a new BoltDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
-func NewLogBoltDbStorage(conf config.Options) (raft.LogStore, error) {
-	filename := conf.DirPath
+func NewLogBoltDbStorage(conf config.Config) (raft.LogStore, error) {
+	filename := conf.LogDataStoragePath
 	dbOpts := &bolt.Options{
 		ReadOnly: false, // Open the database in read-write mode
 	}

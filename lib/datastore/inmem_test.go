@@ -8,7 +8,7 @@ import (
 )
 
 func testMemoryDatastore() raft.LogStore {
-	ds, _ := NewLogInMemStorage(config.Options{})
+	ds, _ := NewLogInMemStorage(config.Config{})
 	return ds
 }
 func createRaftLog(idx uint64, data string) *raft.Log {

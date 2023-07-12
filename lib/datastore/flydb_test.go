@@ -17,9 +17,9 @@ func testFlyDbDatastore() (raft.LogStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	opts := config.DefaultOptions
-	opts.DataFileSize = 64 * 1024 * 1024
-	opts.DirPath = tmpFile.Name()
+	opts := config.Config{}
+	opts.LogDataStorageSize = 64 * 1024 * 1024
+	opts.LogDataStoragePath = tmpFile.Name()
 	// Successfully creates and returns a store
 	return NewLogFlyDbStorage(opts)
 }

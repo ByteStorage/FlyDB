@@ -21,7 +21,7 @@ func testRocksDbDatastore() (raft.LogStore, error) {
 
 	// Successfully creates and returns a store
 
-	return NewLogRocksDbStorage(config.Options{DirPath: tmpDir})
+	return NewLogRocksDbStorage(config.Config{LogDataStoragePath: tmpDir})
 }
 
 func TestRocksDbStore_DeleteRange(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 
 // DataStoreFactory is a function type that creates a new instance of a raft.LogStore.
 // It takes a configuration map as input and returns the created LogStore or an error if the creation fails.
-type DataStoreFactory func(conf config.Options) (raft.LogStore, error)
+type DataStoreFactory func(conf config.Config) (raft.LogStore, error)
 
 // datastoreFactories is a map that associates a string key (name) with a DataStoreFactory.
 // It will be used to store and retrieve different DataStoreFactory implementations.
@@ -37,11 +37,11 @@ func Init() error {
 // Then, it retrieves the "memory" DataStoreFactory from the datastoreFactories map using the "memory" string key.
 // Finally, it creates a new LogStore using the retrieved factory and an empty configuration map.
 // The created LogStore and an error (if any) are returned.
-func newRaftLog() (raft.LogStore, error) {
+func newRaftLog(conf config.Config) (raft.LogStore, error) {
 	_ = Init()
 
 	// Get the "memory" DataStoreFactory from the map
-	return getDataStore("memory", config.Options{})
+	return getDataStore(conf)
 }
 
 // Register is a function that registers a DataStoreFactory implementation with a given name.
@@ -72,12 +72,12 @@ func Register(name string, factory DataStoreFactory) error {
 // Otherwise, it retrieves the corresponding DataStoreFactory from the map.
 // Finally, it creates a new LogStore using the factory and the configuration map and returns it
 // along with an error (if any).
-func getDataStore(datastore string, conf config.Options) (raft.LogStore, error) {
+func getDataStore(datastore config.Config) (raft.LogStore, error) {
 	// Get the DataStoreFactory for the requested datastore
-	dsFactory, ok := datastoreFactories[datastore]
+	dsFactory, ok := datastoreFactories[datastore.LogDataStorage]
 	if !ok {
 		return nil, fmt.Errorf("datastore not valid")
 	}
 	// Create a new LogStore using the DataStoreFactory and the configuration map
-	return dsFactory(conf)
+	return dsFactory(datastore)
 }

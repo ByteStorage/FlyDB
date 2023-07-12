@@ -17,8 +17,8 @@ type RocksDbStore struct {
 
 // NewLogRocksDbStorage is a function that creates a new RocksDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
-func NewLogRocksDbStorage(conf config.Options) (raft.LogStore, error) {
-	filename := conf.DirPath
+func NewLogRocksDbStorage(conf config.Config) (raft.LogStore, error) {
+	filename := conf.LogDataStoragePath
 	options := gorocksdb.NewDefaultOptions()
 	options.SetCreateIfMissing(true)
 	db, err := gorocksdb.OpenDb(options, filename)

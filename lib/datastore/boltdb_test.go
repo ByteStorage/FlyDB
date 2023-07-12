@@ -20,7 +20,7 @@ func testBoltDatastore() (raft.LogStore, error) {
 
 	// Successfully creates and returns a store
 
-	return NewLogBoltDbStorage(config.Options{DirPath: tmpFile.Name()})
+	return NewLogBoltDbStorage(config.Config{LogDataStoragePath: tmpFile.Name()})
 }
 
 func TestBoltDbStore_DeleteRange(t *testing.T) {

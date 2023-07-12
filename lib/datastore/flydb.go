@@ -20,8 +20,11 @@ type FlyDbStore struct {
 
 // NewLogFlyDbStorage is a function that creates a new FlyDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
-func NewLogFlyDbStorage(conf config.Options) (raft.LogStore, error) {
-	conn, err := engine.NewDB(conf)
+func NewLogFlyDbStorage(conf config.Config) (raft.LogStore, error) {
+	opts := config.DefaultOptions
+	opts.DirPath = conf.LogDataStoragePath
+	opts.DataFileSize = conf.LogDataStorageSize
+	conn, err := engine.NewDB(opts)
 	if err != nil {
 		return nil, err
 	}
