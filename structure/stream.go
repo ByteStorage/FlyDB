@@ -59,6 +59,10 @@ var (
 	ErrInvalidArgs = errors.New("id or fields cannot be empty")
 	// ErrExistID is returned when the message ID already exists
 	ErrExistID = errors.New("message ID already exists")
+	// ErrInvalidCount is returned when the count is invalid
+	ErrInvalidCount = errors.New("invalid count")
+	// ErrInvalidStream is returned when the stream is invalid
+	ErrAmountOfData = errors.New("The number of queries exceeds the amount of data in the stream")
 )
 
 func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (bool, error) {
@@ -118,6 +122,42 @@ func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (
 	}
 
 	return true, nil
+}
+
+func (s *StreamStructure) XRead(name string, count int) ([]StreamMessage, error) {
+	if count <= 0 {
+		return nil, ErrInvalidCount
+	}
+
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return nil, err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return nil, err
+	}
+
+	// Get the messages
+	messages := s.streams.Messages
+
+	// Create a new slice of StreamMessage
+	var result []StreamMessage
+
+	// Get the messages
+	if len(messages) >= count {
+		messages = messages[:count]
+		// Convert []*StreamMessage to []StreamMessage
+		for _, msg := range messages {
+			result = append(result, *msg)
+		}
+	} else {
+		return nil, ErrAmountOfData
+	}
+
+	return result, nil
 }
 
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
