@@ -446,3 +446,12 @@ func decodeStringValue(value []byte) ([]byte, error) {
 	// Return the original value value
 	return value[bufIndex:], nil
 }
+
+func (s *StringStructure) Stop() error {
+	err := s.db.Close()
+	return err
+}
+
+func (s *StringStructure) Clean() {
+	s.db.Clean()
+}

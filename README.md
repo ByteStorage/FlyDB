@@ -168,6 +168,8 @@ V1.0.5: Short-term support version v1.0.5 supports data structures of type Strin
 
 V1.0.6: Short-term support version v1.0.6 supports data structures of Hash type. Some codes are optimized.
 
+V1.0.7: Short-term support version v1.0.7 supports data structures of BitMap type. Some codes are optimized.
+
 ## 👀 Contributor
 
 <a href="https://github.com/ByteStorage/FlyDB/graphs/contributors">
@@ -184,3 +186,10 @@ If you have any ideas or suggestions for FlyDB, please feel free to submit 'issu
 ## 📋 Licence
 
 FlyDB is released under the Apache license. For details, see LICENSE file.
+
+## Thanks To JetBrains
+
+> Thanks to `JetBrains` for the free open source license.  
+
+<img src="./assets/thanks-jetbrains.png" alt="FlyDB-logo" style="display: block; margin: 0 auto; width: 30%;" />
+
