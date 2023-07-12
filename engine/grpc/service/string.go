@@ -132,3 +132,55 @@ func (s *Service) Del(ctx context.Context, req *dbs.DelRequest) (*dbs.DelRespons
 	}
 	return &dbs.DelResponse{Ok: true}, nil
 }
+
+func (s *Service) Type(ctx context.Context, req *dbs.TypeRequest) (*dbs.TypeResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) StrLen(ctx context.Context, req *dbs.StrLenRequest) (*dbs.StrLenResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) GetSet(ctx context.Context, req *dbs.GetSetRequest) (*dbs.GetSetResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) Append(ctx context.Context, req *dbs.AppendRequest) (*dbs.AppendResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) Incr(ctx context.Context, req *dbs.IncrRequest) (*dbs.IncrResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) IncrBy(ctx context.Context, req *dbs.IncrByRequest) (*dbs.IncrByResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) IncrByFloat(ctx context.Context, req *dbs.IncrByFloatRequest) (*dbs.IncrByFloatResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) Decr(ctx context.Context, req *dbs.DecrRequest) (*dbs.DecrResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) DecrBy(ctx context.Context, req *dbs.DecrByRequest) (*dbs.DecrByResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) Exists(ctx context.Context, req *dbs.ExistsRequest) (*dbs.ExistsResponse, error) {
+	panic("implement me")
+}
+
+func (s *Service) Expire(ctx context.Context, req *dbs.ExpireRequest) (*dbs.ExpireResponse, error) {
+	err := s.db.Expire(req.Key, time.Duration(req.Expire))
+	if err != nil {
+		return &dbs.ExpireResponse{}, err
+	}
+	return &dbs.ExpireResponse{Ok: true}, nil
+}
+
+func (s *Service) Persist(ctx context.Context, req *dbs.PersistRequest) (*dbs.PersistResponse, error) {
+	panic("implement me")
+}
