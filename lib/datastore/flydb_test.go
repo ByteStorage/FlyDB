@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func testFlyDbDatastore() (raft.LogStore, error) {
+func testFlyDbDatastore() (DataStore, error) {
 	tmpFile, err := os.CreateTemp("", "test_flydb_storage")
 	if err != nil {
 		return nil, err
@@ -163,5 +163,227 @@ func TestFlyDbStore_StoreLogs(t *testing.T) {
 	// check for errors
 	err = r.GetLog(4, &log5)
 	assert.True(t, err != nil)
+
+}
+
+func TestFlyDbStore_Set(t *testing.T) {
+	ds, err := testFlyDbDatastore()
+	assert.NoError(t, err)
+	type kv struct {
+		key string
+		val string
+	}
+	type test struct {
+		input       []kv
+		expectError bool
+	}
+	tests := []test{
+		{
+			input: []kv{
+				{key: "1", val: "2"},
+				{key: "foo", val: "bar"},
+				{key: "hello", val: "world"},
+			},
+			expectError: false,
+		},
+		{
+			input: []kv{
+				{key: "", val: "bar"},
+			},
+			expectError: true,
+		},
+	}
+	for _, tc := range tests {
+		// set all inputs
+		for _, v := range tc.input {
+			err := ds.Set(stringToBytes(v.key), stringToBytes(v.val))
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		}
+		// recall all inputs
+		for _, v := range tc.input {
+			val, err := ds.Get(stringToBytes(v.key))
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, v.val, string(val))
+			}
+		}
+
+	}
+
+}
+func TestFlyDbStore_Get(t *testing.T) {
+	type kv struct {
+		key string
+		val string
+	}
+	type test struct {
+		name        string
+		input       []kv
+		query       []kv
+		expectError bool
+	}
+	tests := []test{
+		{
+			name: "set three",
+			input: []kv{
+				{key: "1", val: "2"},
+				{key: "foo", val: "bar"},
+				{key: "hello", val: "world"},
+			},
+			query: []kv{
+				{key: "1", val: "2"},
+				{key: "foo", val: "bar"},
+				{key: "hello", val: "world"},
+			},
+			expectError: false,
+		},
+		{
+			name: "non existence",
+			input: []kv{
+				{key: "4", val: "bar"},
+			},
+			query: []kv{
+				{key: "1", val: ""},
+				{key: "2", val: ""},
+			},
+			expectError: true,
+		},
+	}
+	for _, tc := range tests {
+		ds, err := testFlyDbDatastore()
+		assert.NoError(t, err)
+		// set all inputs
+		for _, v := range tc.input {
+			_ = ds.Set(stringToBytes(v.key), stringToBytes(v.val))
+
+		}
+		// recall all inputs
+		for _, v := range tc.query {
+			val, err := ds.Get(stringToBytes(v.key))
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, v.val, string(val))
+			}
+		}
+
+	}
+
+}
+func TestFlyDbStore_SetUint64(t *testing.T) {
+	ds, err := testFlyDbDatastore()
+	assert.NoError(t, err)
+	type kv struct {
+		key string
+		val uint64
+	}
+	type test struct {
+		input       []kv
+		expectError bool
+	}
+	tests := []test{
+		{
+			input: []kv{
+				{key: "1", val: 2343},
+				{key: "foo", val: 23},
+				{key: "hello", val: 5645},
+			},
+			expectError: false,
+		},
+		{
+			input: []kv{
+				{key: "", val: 654},
+			},
+			expectError: true,
+		},
+	}
+	for _, tc := range tests {
+		// set all inputs
+		for _, v := range tc.input {
+			err := ds.Set(stringToBytes(v.key), uint64ToBytes(v.val))
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		}
+		// recall all inputs
+		for _, v := range tc.input {
+			val, err := ds.Get(stringToBytes(v.key))
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, v.val, bytesToUint64(val))
+			}
+		}
+	}
+
+}
+func TestFlyDbStore_GetUint64(t *testing.T) {
+	type kv struct {
+		key string
+		val uint64
+	}
+	type test struct {
+		name        string
+		input       []kv
+		query       []kv
+		expectError bool
+	}
+	tests := []test{
+		{
+			name: "set three",
+			input: []kv{
+				{key: "1", val: 11},
+				{key: "foo", val: 55},
+				{key: "hello", val: 336},
+			},
+			query: []kv{
+				{key: "1", val: 11},
+				{key: "foo", val: 55},
+				{key: "hello", val: 336},
+			},
+			expectError: false,
+		},
+		{
+			name: "non existence",
+			input: []kv{
+				{key: "4", val: 2},
+			},
+			query: []kv{
+				{key: "1", val: 2},
+				{key: "2", val: 4},
+			},
+			expectError: true,
+		},
+	}
+	for _, tc := range tests {
+		ds, err := testFlyDbDatastore()
+		assert.NoError(t, err)
+		// set all inputs
+		for _, v := range tc.input {
+			_ = ds.Set(stringToBytes(v.key), uint64ToBytes(v.val))
+
+		}
+		// recall all inputs
+		for _, v := range tc.query {
+			val, err := ds.Get(stringToBytes(v.key))
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, v.val, bytesToUint64(val))
+			}
+		}
+
+	}
 
 }
