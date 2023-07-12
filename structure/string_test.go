@@ -12,16 +12,16 @@ import (
 
 var err error
 
-func initdb() *StringStructure {
+func initdb() (*StringStructure, *config.Options) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "TestStringStructure_Get")
 	opts.DirPath = dir
 	str, _ := NewStringStructure(opts)
-	return str
+	return str, &opts
 }
 
 func TestStringStructure_Get(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", randkv.RandomValue(100), 0)
@@ -44,7 +44,7 @@ func TestStringStructure_Get(t *testing.T) {
 }
 
 func TestStringStructure_Del(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", randkv.RandomValue(100), 0)
@@ -58,7 +58,7 @@ func TestStringStructure_Del(t *testing.T) {
 }
 
 func TestStringStructure_Type(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", randkv.RandomValue(100), 0)
@@ -72,7 +72,7 @@ func TestStringStructure_Type(t *testing.T) {
 }
 
 func TestStringStructure_StrLen(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", randkv.RandomValue(100), 0)
@@ -84,7 +84,7 @@ func TestStringStructure_StrLen(t *testing.T) {
 }
 
 func TestStringStructure_GetSet(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", randkv.RandomValue(100), 0)
@@ -98,7 +98,7 @@ func TestStringStructure_GetSet(t *testing.T) {
 }
 
 func TestStringStructure_Append(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", randkv.RandomValue(10), 0)
@@ -109,7 +109,7 @@ func TestStringStructure_Append(t *testing.T) {
 }
 
 func TestStringStructure_Incr(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", "1", 0)
@@ -142,7 +142,7 @@ func TestStringStructure_Incr(t *testing.T) {
 }
 
 func TestStringStructure_IncrBy(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", 1, 0)
@@ -179,7 +179,7 @@ func TestStringStructure_IncrBy(t *testing.T) {
 }
 
 func TestStringStructure_IncrByFloat(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", "1", 0)
@@ -213,7 +213,7 @@ func TestStringStructure_IncrByFloat(t *testing.T) {
 }
 
 func TestStringStructure_Decr(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", "1", 0)
@@ -246,7 +246,7 @@ func TestStringStructure_Decr(t *testing.T) {
 }
 
 func TestStringStructure_DecrBy(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", 1, 0)
@@ -280,7 +280,7 @@ func TestStringStructure_DecrBy(t *testing.T) {
 }
 
 func TestStringStructure_Exists(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", []byte("1"), 0)
@@ -296,7 +296,7 @@ func TestStringStructure_Exists(t *testing.T) {
 }
 
 func TestStringStructure_Expire(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", []byte("1"), 0)
@@ -315,7 +315,7 @@ func TestStringStructure_Expire(t *testing.T) {
 }
 
 func TestStringStructure_Persist(t *testing.T) {
-	str := initdb()
+	str, _ := initdb()
 	defer str.db.Clean()
 
 	err = str.Set("1", []byte("1"), 0)

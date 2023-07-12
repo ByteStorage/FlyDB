@@ -10,17 +10,17 @@ import (
 	"testing"
 )
 
-func initHashDB() *HashStructure {
+func initHashDB() (*HashStructure, *config.Options) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "TestHashStructure")
 	opts.DirPath = dir
 	hash, _ := NewHashStructure(opts)
-	return hash
+	return hash, &opts
 }
 
 func TestHashStructure_HGet(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
 	assert.Nil(t, err)
@@ -47,9 +47,36 @@ func TestHashStructure_HGet(t *testing.T) {
 
 }
 
+func TestHashStructure_HMGet(t *testing.T) {
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
+
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	v1 := randkv.RandomValue(10)
+	ok2, err := hash.HSet("1", []byte("field1"), v1)
+	assert.Nil(t, err)
+	assert.False(t, ok2)
+
+	v2 := randkv.RandomValue(10)
+	ok3, err := hash.HSet("1", []byte("field2"), v2)
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	mulVal, err := hash.HMGet("1", []byte("field1"), []byte("field2"))
+	assert.Equal(t, v1, mulVal[0])
+	assert.Equal(t, v2, mulVal[1])
+
+	_, err = hash.HGet("1", []byte("field3"))
+	assert.Equal(t, err, _const.ErrKeyNotFound)
+
+}
+
 func TestHashStructure_HDel(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok, err := hash.HDel("1", []byte("field1"))
 	assert.Nil(t, err)
@@ -78,8 +105,8 @@ func TestHashStructure_HDel(t *testing.T) {
 }
 
 func TestHashStructure_HExists(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
 	assert.Nil(t, err)
@@ -96,8 +123,8 @@ func TestHashStructure_HExists(t *testing.T) {
 }
 
 func TestHashStructure_HLen(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
 	assert.Nil(t, err)
@@ -117,8 +144,8 @@ func TestHashStructure_HLen(t *testing.T) {
 }
 
 func TestHashStructure_HUpdate(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
 	assert.Nil(t, err)
@@ -150,8 +177,8 @@ func TestHashStructure_HUpdate(t *testing.T) {
 }
 
 func TestHashStructure_HIncrBy(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"))
 	assert.Nil(t, err)
@@ -184,8 +211,8 @@ func TestHashStructure_HIncrBy(t *testing.T) {
 }
 
 func TestHashStructure_HIncrByFloat(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"))
 	assert.Nil(t, err)
@@ -218,8 +245,8 @@ func TestHashStructure_HIncrByFloat(t *testing.T) {
 }
 
 func TestHashStructure_HDecrBy(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"))
 	assert.Nil(t, err)
@@ -252,8 +279,8 @@ func TestHashStructure_HDecrBy(t *testing.T) {
 }
 
 func TestHashStructure_HStrLen(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), []byte("1000"))
 	assert.Nil(t, err)
@@ -286,8 +313,8 @@ func TestHashStructure_HStrLen(t *testing.T) {
 }
 
 func TestHashStructure_HMove(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), []byte("111-1000"))
 	assert.Nil(t, err)
@@ -344,8 +371,8 @@ func TestHashStructure_HMove(t *testing.T) {
 }
 
 func TestHashStructure_HSetNX(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSetNX("1", []byte("field1"), []byte("1000"))
 	assert.Nil(t, err)
@@ -374,8 +401,8 @@ func TestHashStructure_HSetNX(t *testing.T) {
 }
 
 func TestHashStructure_HTypes(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), []byte("1000"))
 	assert.Nil(t, err)
@@ -407,8 +434,8 @@ func TestHashStructure_HTypes(t *testing.T) {
 }
 
 func TestMethod(t *testing.T) {
-	hash := initHashDB()
-	defer hash.db.Close()
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
 
 	ok1, err := hash.HSet("1", []byte("field1"), "你好")
 	ok2, err := hash.HSet("1", []byte("field2"), "世界")

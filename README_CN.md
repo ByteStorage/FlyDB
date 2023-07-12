@@ -185,3 +185,7 @@ V1.0.6: 短期支持版本v1.0.6支持Hash类型的数据结构。并对部分�
 ## 📋 Licence
 
 FlyDB在Apache许可下发布。请参见LICENSE文件。
+
+## 感谢 JetBrains 免费的开源授权
+
+<img src="./assets/thanks-jetbrains.png" alt="FlyDB-logo" style="display: block; margin: 0 auto; width: 30%;" />
