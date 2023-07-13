@@ -3,14 +3,13 @@ package store
 import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/datastore"
-	"github.com/hashicorp/raft"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
 
 func TestRegister(t *testing.T) {
-	foo := func(conf config.Config) (raft.LogStore, error) {
+	foo := func(conf config.Config) (datastore.DataStore, error) {
 		return &datastore.InMemStore{}, nil
 	}
 	opts := config.DefaultOptions
