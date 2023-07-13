@@ -306,12 +306,26 @@ func TestStringStructure_Expire(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v1, "1")
+	assert.Equal(t, v1, []byte("1"))
 
 	time.Sleep(2 * time.Second)
 	v2, err := str.Get("1")
 	assert.Equal(t, err, ErrKeyExpired)
 	assert.Equal(t, v2, nil)
+
+	err = str.Set("2", "你好", 0)
+	assert.Nil(t, err)
+
+	err = str.Expire("2", 1*time.Second)
+	assert.Nil(t, err)
+	v3, err := str.Get("2")
+	assert.Nil(t, err)
+	assert.Equal(t, v3, "你好")
+
+	time.Sleep(2 * time.Second)
+	v4, err := str.Get("2")
+	assert.Equal(t, err, ErrKeyExpired)
+	assert.Equal(t, v4, nil)
 }
 
 func TestStringStructure_Persist(t *testing.T) {
@@ -325,11 +339,11 @@ func TestStringStructure_Persist(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v1, "1")
+	assert.Equal(t, v1, []byte("1"))
 
 	err = str.Persist("1")
 	assert.Nil(t, err)
 	v2, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v2, "1")
+	assert.Equal(t, v2, []byte("1"))
 }
