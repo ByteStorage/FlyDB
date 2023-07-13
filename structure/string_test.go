@@ -339,11 +339,11 @@ func TestStringStructure_Persist(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v1, "1")
+	assert.Equal(t, v1, []byte("1"))
 
 	err = str.Persist("1")
 	assert.Nil(t, err)
 	v2, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v2, "1")
+	assert.Equal(t, v2, []byte("1"))
 }
