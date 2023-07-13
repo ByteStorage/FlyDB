@@ -8,7 +8,6 @@ import (
 	data2 "github.com/ByteStorage/FlyDB/engine/data"
 	"github.com/ByteStorage/FlyDB/engine/index"
 	"github.com/ByteStorage/FlyDB/lib/const"
-	s "github.com/ByteStorage/FlyDB/lib/proto/dbs"
 	"go.uber.org/zap"
 	"io"
 	"os"
@@ -46,8 +45,6 @@ import (
 // FlyDB provides a powerful and efficient storage solution for applications
 // that prioritize speed and responsiveness.
 type DB struct {
-	// gRPC dbs
-	s.FlyDBServiceServer
 	options    config.Options
 	lock       *sync.RWMutex
 	fileIds    []int                      // File id, which can only be used when the index is loaded

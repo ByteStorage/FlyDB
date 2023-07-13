@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 	"errors"
-	"github.com/ByteStorage/FlyDB/lib/proto/dbs"
+	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -14,12 +14,12 @@ type Client struct {
 }
 
 // newGrpcClient returns a grpc client
-func newGrpcClient(addr string) (dbs.FlyDBServiceClient, error) {
+func newGrpcClient(addr string) (gstring.GStringServiceClient, error) {
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	client := dbs.NewFlyDBServiceClient(conn)
+	client := gstring.NewGStringServiceClient(conn)
 	return client, nil
 }
 
@@ -29,22 +29,22 @@ func (c *Client) Put(key string, value interface{}) error {
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
-	req := &dbs.SetRequest{Key: key}
+	req := &gstring.SetRequest{Key: key}
 	switch v := value.(type) {
 	case string:
-		req.Value = &dbs.SetRequest_StringValue{StringValue: v}
+		req.Value = &gstring.SetRequest_StringValue{StringValue: v}
 	case int32:
-		req.Value = &dbs.SetRequest_Int32Value{Int32Value: v}
+		req.Value = &gstring.SetRequest_Int32Value{Int32Value: v}
 	case int64:
-		req.Value = &dbs.SetRequest_Int64Value{Int64Value: v}
+		req.Value = &gstring.SetRequest_Int64Value{Int64Value: v}
 	case float32:
-		req.Value = &dbs.SetRequest_Float32Value{Float32Value: v}
+		req.Value = &gstring.SetRequest_Float32Value{Float32Value: v}
 	case float64:
-		req.Value = &dbs.SetRequest_Float64Value{Float64Value: v}
+		req.Value = &gstring.SetRequest_Float64Value{Float64Value: v}
 	case bool:
-		req.Value = &dbs.SetRequest_BoolValue{BoolValue: v}
+		req.Value = &gstring.SetRequest_BoolValue{BoolValue: v}
 	case []byte:
-		req.Value = &dbs.SetRequest_BytesValue{BytesValue: v}
+		req.Value = &gstring.SetRequest_BytesValue{BytesValue: v}
 	default:
 		return errors.New("unknown value type")
 	}
@@ -64,25 +64,25 @@ func (c *Client) Get(key string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	get, err := client.Get(context.Background(), &dbs.GetRequest{Key: key})
+	get, err := client.Get(context.Background(), &gstring.GetRequest{Key: key})
 	if err != nil {
 		return nil, err
 	}
 	switch get.Value.(type) {
-	case *dbs.GetResponse_StringValue:
-		return get.Value.(*dbs.GetResponse_StringValue).StringValue, nil
-	case *dbs.GetResponse_Int32Value:
-		return get.Value.(*dbs.GetResponse_Int32Value).Int32Value, nil
-	case *dbs.GetResponse_Int64Value:
-		return get.Value.(*dbs.GetResponse_Int64Value).Int64Value, nil
-	case *dbs.GetResponse_Float32Value:
-		return get.Value.(*dbs.GetResponse_Float32Value).Float32Value, nil
-	case *dbs.GetResponse_Float64Value:
-		return get.Value.(*dbs.GetResponse_Float64Value).Float64Value, nil
-	case *dbs.GetResponse_BoolValue:
-		return get.Value.(*dbs.GetResponse_BoolValue).BoolValue, nil
-	case *dbs.GetResponse_BytesValue:
-		return get.Value.(*dbs.GetResponse_BytesValue).BytesValue, nil
+	case *gstring.GetResponse_StringValue:
+		return get.Value.(*gstring.GetResponse_StringValue).StringValue, nil
+	case *gstring.GetResponse_Int32Value:
+		return get.Value.(*gstring.GetResponse_Int32Value).Int32Value, nil
+	case *gstring.GetResponse_Int64Value:
+		return get.Value.(*gstring.GetResponse_Int64Value).Int64Value, nil
+	case *gstring.GetResponse_Float32Value:
+		return get.Value.(*gstring.GetResponse_Float32Value).Float32Value, nil
+	case *gstring.GetResponse_Float64Value:
+		return get.Value.(*gstring.GetResponse_Float64Value).Float64Value, nil
+	case *gstring.GetResponse_BoolValue:
+		return get.Value.(*gstring.GetResponse_BoolValue).BoolValue, nil
+	case *gstring.GetResponse_BytesValue:
+		return get.Value.(*gstring.GetResponse_BytesValue).BytesValue, nil
 	default:
 		return nil, errors.New("get failed")
 	}
@@ -94,7 +94,7 @@ func (c *Client) Del(key string) error {
 	if err != nil {
 		return err
 	}
-	del, err := client.Del(context.Background(), &dbs.DelRequest{Key: key})
+	del, err := client.Del(context.Background(), &gstring.DelRequest{Key: key})
 	if err != nil {
 		return err
 	}
