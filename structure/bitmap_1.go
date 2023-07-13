@@ -29,7 +29,7 @@ func NewBitmapStructure(options config.Options) (*BitmapStructure, error) {
 // SetBit Set the bit at the specified offset in the bitmap to the specified value
 // If the key does not exist, it will be created
 // If the bitmap length is not sufficient, it will be extended
-func (b *BitmapStructure) SetBit(key []byte, offset uint, value bool) error {
+func (b *BitmapStructure) SetBit(key string, offset uint, value bool) error {
 	// Get bitmap
 	bitmap, length, err := b.getBitmapFromDB(key, true)
 
@@ -57,7 +57,7 @@ func (b *BitmapStructure) SetBit(key []byte, offset uint, value bool) error {
 // SetBits Set the bit at the specified offset in the bitmap to the specified value
 // If the key does not exist, it will be created
 // If the bitmap length is not sufficient, it will be extended
-func (b *BitmapStructure) SetBits(key []byte, args ...interface{}) error {
+func (b *BitmapStructure) SetBits(key string, args ...interface{}) error {
 	// Validate arguments
 	if len(args) == 0 || len(args)%2 != 0 {
 		return ErrInvalidArgs
@@ -101,7 +101,7 @@ func (b *BitmapStructure) SetBits(key []byte, args ...interface{}) error {
 
 // GetBit Get the value of the bit at the specified offset in the bitmap
 // If the key does not exist, it returns an error
-func (b *BitmapStructure) GetBit(key []byte, offset uint) (bool, error) {
+func (b *BitmapStructure) GetBit(key string, offset uint) (bool, error) {
 	bitmap, length, err := b.getBitmapFromDB(key, false)
 	if err != nil {
 		return false, err
@@ -117,7 +117,7 @@ func (b *BitmapStructure) GetBit(key []byte, offset uint) (bool, error) {
 
 // GetBits Get the values of a group of bits at the specified offsets in the bitmap
 // If the key does not exist, it returns an error
-func (b *BitmapStructure) GetBits(key []byte, offsets ...uint) ([]bool, error) {
+func (b *BitmapStructure) GetBits(key string, offsets ...uint) ([]bool, error) {
 	if len(offsets) == 0 {
 		return nil, ErrInvalidArgs
 	}
@@ -143,7 +143,7 @@ func (b *BitmapStructure) GetBits(key []byte, offsets ...uint) ([]bool, error) {
 
 // BitCount Count the number of bits set to 1 in the specified range of the bitmap
 // If the key does not exist, it returns an error
-func (b *BitmapStructure) BitCount(key []byte, start uint, end uint) (int, error) {
+func (b *BitmapStructure) BitCount(key string, start uint, end uint) (int, error) {
 	bitmap, length, err := b.getBitmapFromDB(key, false)
 	if err != nil {
 		return 0, err
@@ -165,7 +165,7 @@ func (b *BitmapStructure) BitCount(key []byte, start uint, end uint) (int, error
 
 // BitOp count the number of bits set to 1 in the specified range of the bitmap
 // If the key does not exist, it returns an error
-func (b *BitmapStructure) BitOp(operation []byte, destkey []byte, keys ...[]byte) error {
+func (b *BitmapStructure) BitOp(operation []byte, destkey string, keys ...string) error {
 	// Check the validity of the parameters
 	if string(operation) != "AND" && string(operation) != "OR" && string(operation) != "XOR" && string(operation) != "NOT" {
 		return ErrInvalidArgs
@@ -253,7 +253,7 @@ func (b *BitmapStructure) BitOp(operation []byte, destkey []byte, keys ...[]byte
 // BitDel delete the bit at the specified offset in the bitmap
 // If the key does not exist, it returns an error
 // There is room for optimization
-func (b *BitmapStructure) BitDel(key []byte, offset uint) error {
+func (b *BitmapStructure) BitDel(key string, offset uint) error {
 
 	bitmap, length, err := b.getBitmapFromDB(key, false)
 	if err != nil {
@@ -276,7 +276,7 @@ func (b *BitmapStructure) BitDel(key []byte, offset uint) error {
 // BitDels delete a group of bits at the specified offsets in the bitmap
 // If the key does not exist, it returns an error
 // There is room for optimization
-func (b *BitmapStructure) BitDels(key []byte, offsets ...uint) error {
+func (b *BitmapStructure) BitDels(key string, offsets ...uint) error {
 	// Check the parameters
 	if len(offsets) == 0 {
 		return ErrInvalidValue
@@ -340,10 +340,10 @@ func (b *BitmapStructure) getBit(bitmap []byte, offset uint) bool {
 }
 
 // getBitmapFromDB retrieves data from the database. When isKeyCanNotExist is true, it returns an empty slice if the key doesn't exist instead of an error.
-func (b *BitmapStructure) getBitmapFromDB(key []byte, isKeyCanNotExist bool) ([]byte, uint, error) {
+func (b *BitmapStructure) getBitmapFromDB(key string, isKeyCanNotExist bool) ([]byte, uint, error) {
 	if isKeyCanNotExist {
 		// Get data corresponding to the key from the database
-		dbData, err := b.db.Get(key)
+		dbData, err := b.db.Get([]byte(key))
 		// Since the key might not exist, we need to handle ErrKeyNotFound separately as it is a valid case
 		if err != nil && err != _const.ErrKeyNotFound {
 			return nil, 0, err
@@ -361,7 +361,7 @@ func (b *BitmapStructure) getBitmapFromDB(key []byte, isKeyCanNotExist bool) ([]
 		return bitmapArr, length, nil
 	} else {
 		// Get data corresponding to the key from the database
-		dbData, err := b.db.Get(key)
+		dbData, err := b.db.Get([]byte(key))
 		if err != nil {
 			return nil, 0, err
 		}
@@ -375,14 +375,14 @@ func (b *BitmapStructure) getBitmapFromDB(key []byte, isKeyCanNotExist bool) ([]
 }
 
 // setBitmapToDB stores the data into the database.
-func (b *BitmapStructure) setBitmapToDB(key []byte, bm []byte, length uint) error {
+func (b *BitmapStructure) setBitmapToDB(key string, bm []byte, length uint) error {
 	// Serialize into a binary array
 	encValue, err := b.encodeBitmap(bm, length)
 	if err != nil {
 		return err
 	}
 	// Store in the database
-	return b.db.Put(key, encValue)
+	return b.db.Put([]byte(key), encValue)
 }
 
 // encodeBitmap encodes the value
