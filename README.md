@@ -170,6 +170,8 @@ V1.0.6: Short-term support version v1.0.6 supports data structures of Hash type.
 
 V1.0.7: Short-term support version v1.0.7 supports data structures of BitMap type. Some codes are optimized.
 
+V1.0.8: Short-term support version v1.0.8 Support for a new in-memory index, SkipList. Some codes are optimized.
+
 ## 👀 Contributor
 
 <a href="https://github.com/ByteStorage/FlyDB/graphs/contributors">
