@@ -11,16 +11,16 @@ import (
 
 var bitmapErr error
 
-func initBitmap() *BitmapStructure {
+func initBitMap() *BitMapStructure {
 	opts := config.DefaultOptions
-	dir, _ := os.MkdirTemp("", "TestBitmapStructure")
+	dir, _ := os.MkdirTemp("", "TestBitMapStructure")
 	opts.DirPath = dir
-	bitmap, _ := NewBitmapStructure(opts)
+	bitmap, _ := NewBitMapStructure(opts)
 	return bitmap
 }
 
-func TestBitmapStructure_SetBit(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_SetBit(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test SetBit function
@@ -28,8 +28,8 @@ func TestBitmapStructure_SetBit(t *testing.T) {
 	assert.Nil(t, bitmapErr)
 }
 
-func TestBitmapStructure_SetBits(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_SetBits(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test SetBits function
@@ -37,8 +37,8 @@ func TestBitmapStructure_SetBits(t *testing.T) {
 	assert.Nil(t, bitmapErr)
 }
 
-func TestBitmapStructure_GetBit(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_GetBit(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test GetBit function
@@ -49,8 +49,8 @@ func TestBitmapStructure_GetBit(t *testing.T) {
 	assert.Equal(t, true, value)
 }
 
-func TestBitmapStructure_GetBits(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_GetBits(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test GetBits function
@@ -61,8 +61,8 @@ func TestBitmapStructure_GetBits(t *testing.T) {
 	assert.Equal(t, []bool{true, false}, values)
 }
 
-func TestBitmapStructure_BitCount(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_BitCount(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test BitCount function
@@ -73,8 +73,8 @@ func TestBitmapStructure_BitCount(t *testing.T) {
 	assert.Equal(t, 2, count)
 }
 
-func TestBitmapStructure_BitOp(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_BitOp(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test BitOp function
@@ -89,8 +89,8 @@ func TestBitmapStructure_BitOp(t *testing.T) {
 	assert.Equal(t, []bool{false, false}, values)
 }
 
-func TestBitmapStructure_BitDel(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_BitDel(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test BitDel function
@@ -103,8 +103,8 @@ func TestBitmapStructure_BitDel(t *testing.T) {
 	assert.Equal(t, []bool{true, true}, values)
 }
 
-func TestBitmapStructure_BitDels(t *testing.T) {
-	bitmap := initBitmap()
+func TestBitMapStructure_BitDels(t *testing.T) {
+	bitmap := initBitMap()
 	defer bitmap.db.Clean()
 
 	// Test BitDels function
@@ -117,11 +117,11 @@ func TestBitmapStructure_BitDels(t *testing.T) {
 	assert.Equal(t, []bool{true}, values)
 }
 
-func TestBitmapStructure_Integration(t *testing.T) {
+func TestBitMapStructure_Integration(t *testing.T) {
 	opts := config.DefaultOptions
-	dir, _ := os.MkdirTemp("", "TestBitmapStructure")
+	dir, _ := os.MkdirTemp("", "TestBitMapStructure")
 	opts.DirPath = dir
-	bitmap, _ := NewBitmapStructure(opts)
+	bitmap, _ := NewBitMapStructure(opts)
 	defer bitmap.db.Clean()
 
 	key := []byte("testKey")
