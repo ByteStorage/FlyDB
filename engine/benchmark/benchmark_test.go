@@ -31,7 +31,7 @@ func GetValue() []byte {
 	for i := 0; i < 512; i++ {
 		str.WriteByte(alphabet[rand.Int()%36])
 	}
-	return []byte(str.String())
+	return str.Bytes()
 }
 
 func init() {

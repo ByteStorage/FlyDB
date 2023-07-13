@@ -5,6 +5,7 @@ import (
 	"github.com/ByteStorage/FlyDB/cluster/store"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/dirtree"
+	"github.com/hashicorp/raft"
 	"sync"
 	"time"
 )
@@ -26,6 +27,9 @@ type MetadataManager interface {
 }
 
 // meta stores the metadata of the cluster.
+// meta will manage all stores and regions in the cluster.
+// meta has at least three nodes in the cluster.
+// meta nodes will create a raft group to manage the metadata of the cluster.
 type meta struct {
 	clusterConfig *config.Config            // cluster config, including cluster id, cluster name, etc.
 	heartbeat     map[string]time.Time      // stores heartbeat, to check whether a store is alive.
@@ -34,4 +38,5 @@ type meta struct {
 	regions       map[uint64]*region.Region // regions, to store the regions in the cluster.
 	mu            sync.RWMutex              // mutex, to protect the metadata.
 	scheduler     *Scheduler                // scheduler, to schedule the cluster.
+	raft          *raft.Raft                // raft, to store the raft group.
 }

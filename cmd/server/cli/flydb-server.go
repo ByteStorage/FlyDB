@@ -8,8 +8,8 @@ import (
 
 func main() {
 	args := os.Args
-	if len(args) >= 2 {
-		fmt.Println("Usage: flydb-server [start|clean|stop]")
+	if len(args) > 2 {
+		fmt.Println("Usage: flydb-server [start|clean]")
 		return
 	}
 	if len(args) == 1 {
@@ -20,8 +20,6 @@ func main() {
 	switch args[1] {
 	case "start":
 		server.StartServer()
-	case "stop":
-		server.StopServer()
 	case "clean":
 		server.CleanServer()
 	}

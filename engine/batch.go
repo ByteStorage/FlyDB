@@ -177,4 +177,3 @@ func parseLogRecordKeyAndSeq(key []byte) ([]byte, uint64) {
 
 	return realKey, seqNo
 }
-

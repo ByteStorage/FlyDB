@@ -36,6 +36,9 @@ func New() (*Wal, error) {
 		return &Wal{}, err
 	}
 	index, err := log.LastIndex()
+	if err != nil {
+		return &Wal{}, err
+	}
 	if index == 0 {
 		err := log.Write(1, []byte("--------------------"))
 		if err != nil {

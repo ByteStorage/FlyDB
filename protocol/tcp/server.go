@@ -19,7 +19,7 @@ type Config struct {
 func ListenAndServeBySignal(cfg *Config, handler tcpIF.Handler) error {
 	closeChan := make(chan struct{})
 	// listen system-level signal
-	signalChan := make(chan os.Signal)
+	signalChan := make(chan os.Signal, 1)
 	// syscall.SIGHUP: terminal closed
 	// syscall.SIGINT: ctrl + c
 	// syscall.SIGTERM: kill

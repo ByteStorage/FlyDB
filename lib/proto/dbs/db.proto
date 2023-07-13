@@ -7,6 +7,18 @@ service FlyDBService {
   rpc Get(GetRequest) returns (GetResponse) {}
   rpc Put(SetRequest) returns (SetResponse) {}
   rpc Del(DelRequest) returns (DelResponse) {}
+  rpc Type(TypeRequest) returns (TypeResponse) {}
+  rpc StrLen(StrLenRequest) returns (StrLenResponse) {}
+  rpc GetSet(GetSetRequest) returns (GetSetResponse) {}
+  rpc Append(AppendRequest) returns (AppendResponse) {}
+  rpc Incr(IncrRequest) returns (IncrResponse) {}
+  rpc IncrBy(IncrByRequest) returns (IncrByResponse) {}
+  rpc IncrByFloat(IncrByFloatRequest) returns (IncrByFloatResponse) {}
+  rpc Decr(DecrRequest) returns (DecrResponse) {}
+  rpc DecrBy(DecrByRequest) returns (DecrByResponse) {}
+  rpc Exists(ExistsRequest) returns (ExistsResponse) {}
+  rpc Expire(ExpireRequest) returns (ExpireResponse) {}
+  rpc Persist(PersistRequest) returns (PersistResponse) {}
 }
 
 message GetRequest {
@@ -48,5 +60,130 @@ message DelRequest {
 }
 
 message DelResponse {
+  bool ok = 1;
+}
+
+message TypeRequest {
+  string key = 1;
+}
+
+message TypeResponse {
+  string type = 1;
+}
+
+message StrLenRequest {
+  string key = 1;
+}
+
+message StrLenResponse {
+  int32 length = 1;
+}
+
+message GetSetRequest {
+  string key = 1;
+  oneof value {
+    string StringValue = 2;
+    int32 Int32Value = 3;
+    int64 Int64Value = 4;
+    float Float32Value = 5;
+    double Float64Value = 6;
+    bool BoolValue = 7;
+    bytes BytesValue = 8;
+  };
+  int64 expire = 9;
+}
+
+message GetSetResponse {
+  oneof value {
+    string StringValue = 1;
+    int32 Int32Value = 2;
+    int64 Int64Value = 3;
+    float Float32Value = 4;
+    double Float64Value = 5;
+    bool BoolValue = 6;
+    bytes BytesValue = 7;
+  }
+}
+
+message AppendRequest {
+  string key = 1;
+  string value = 2;
+  int64 expire = 3;
+}
+
+message AppendResponse {
+  bool ok = 1;
+}
+
+message IncrRequest {
+  string key = 1;
+  int64 expire = 2;
+}
+
+message IncrResponse {
+  bool ok = 1;
+}
+
+message IncrByRequest {
+  string key = 1;
+  int32 amount = 2;
+  int64 expire = 3;
+}
+
+message IncrByResponse {
+  bool ok = 1;
+}
+
+message IncrByFloatRequest {
+  string key = 1;
+  double amount = 2;
+  int64 expire = 3;
+}
+
+message IncrByFloatResponse {
+  bool ok = 1;
+}
+
+message DecrRequest {
+  string key = 1;
+  int64 expire = 2;
+}
+
+message DecrResponse {
+  bool ok = 1;
+}
+
+message DecrByRequest {
+  string key = 1;
+  int32 amount = 2;
+  int64 expire = 3;
+}
+
+message DecrByResponse {
+  bool ok = 1;
+}
+
+message ExistsRequest {
+  string key = 1;
+}
+
+message ExistsResponse {
+  bool exists = 1;
+}
+
+message ExpireRequest {
+  string key = 1;
+  int64 expire = 2;
+}
+
+message ExpireResponse {
+  bool ok = 1;
+}
+
+message PersistRequest {
+  string key = 1;
+}
+
+message PersistResponse {
   bool ok = 1;
 }
