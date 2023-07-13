@@ -169,6 +169,8 @@ V1.0.5: 短期支持版本v1.0.5支持String、List类型的数据结构。并�
 
 V1.0.6: 短期支持版本v1.0.6支持Hash类型的数据结构。并对部分代码进行了优化。
 
+V1.0.7: 短期支持版本v1.0.7支持BitMap类型的数据结构。并对部分代码进行了优化。
+
 ## 👀 贡献者列表
 
 <a href="https://github.com/ByteStorage/FlyDB/graphs/contributors">
@@ -185,3 +187,7 @@ V1.0.6: 短期支持版本v1.0.6支持Hash类型的数据结构。并对部分�
 ## 📋 Licence
 
 FlyDB在Apache许可下发布。请参见LICENSE文件。
+
+## 感谢 JetBrains 免费的开源授权
+
+<img src="./assets/thanks-jetbrains.png" alt="FlyDB-logo" style="display: block; margin: 0 auto; width: 30%;" />
