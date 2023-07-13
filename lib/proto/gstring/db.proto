@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package dbs;
-option go_package = 	"flydb/lib/proto/dbs";
+package gstring;
+option go_package = 	"flydb/lib/proto/gstring";
 
-service FlyDBService {
+service GStringService {
   rpc Get(GetRequest) returns (GetResponse) {}
   rpc Put(SetRequest) returns (SetResponse) {}
   rpc Del(DelRequest) returns (DelResponse) {}
