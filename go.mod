@@ -3,6 +3,7 @@ module github.com/ByteStorage/FlyDB
 go 1.18
 
 require (
+	github.com/chen3feng/stl4go v0.1.1
 	github.com/bits-and-blooms/bitset v1.8.0
 	github.com/boltdb/bolt v1.3.1
 	github.com/desertbit/grumble v1.1.3
