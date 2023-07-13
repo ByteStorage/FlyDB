@@ -54,6 +54,8 @@ func (sl *SkipList) Delete(key []byte) bool {
 
 // Size Gets the number of key-value pairs in the SkipList index
 func (sl *SkipList) Size() int {
+	sl.lock.RLock()
+	defer sl.lock.RUnlock()
 	return sl.list.Len()
 }
 
