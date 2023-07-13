@@ -3,6 +3,7 @@ package datastore
 import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"github.com/hashicorp/raft"
 	"math"
@@ -14,13 +15,14 @@ import (
 type FlyDbStore struct {
 	mux        sync.RWMutex
 	conn       *engine.DB
+	stableConn *engine.DB
 	firstIndex uint64
 	lastIndex  uint64
 }
 
 // NewLogFlyDbStorage is a function that creates a new FlyDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
-func NewLogFlyDbStorage(conf config.Config) (raft.LogStore, error) {
+func NewLogFlyDbStorage(conf config.Config) (DataStore, error) {
 	opts := config.DefaultOptions
 	opts.DirPath = conf.LogDataStoragePath
 	opts.DataFileSize = conf.LogDataStorageSize
@@ -87,7 +89,6 @@ func (fds *FlyDbStore) StoreLogs(logs []*raft.Log) error {
 			fds.firstIndex = log.Index
 		}
 	}
-
 	return nil
 }
 
@@ -102,8 +103,55 @@ func (fds *FlyDbStore) DeleteRange(min, max uint64) error {
 	if fds.lastIndex >= min && fds.lastIndex <= max {
 		fds.lastIndex = fds.max()
 	}
-
 	return nil
+}
+
+// Set is used to store key/value pair
+func (fds *FlyDbStore) Set(key []byte, val []byte) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	err := fds.conn.Put(key, val)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Get retrieves the value associated with `key`; returns []byte if key exists
+func (fds *FlyDbStore) Get(key []byte) ([]byte, error) {
+	if len(key) == 0 {
+		return nil, _const.ErrKeyIsEmpty
+	}
+	val, err := fds.conn.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	return val, nil
+}
+
+// SetUint64 is used to set Uint64 value for `key`
+func (fds *FlyDbStore) SetUint64(key []byte, val uint64) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	err := fds.conn.Put(key, uint64ToBytes(val))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetUint64 is used to retrieve the Uint64 value of `key`
+func (fds *FlyDbStore) GetUint64(key []byte) (uint64, error) {
+	if len(key) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+	val, err := fds.conn.Get(key)
+	if err != nil {
+		return 0, err
+	}
+	return bytesToUint64(val), nil
 }
 
 // min is a helper method on FlyDbStore that returns the smallest index in the log
