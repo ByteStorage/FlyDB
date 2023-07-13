@@ -1,30 +1,32 @@
 package store
 
 import (
+	"errors"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/hashicorp/raft"
-	"io"
+	"os"
+	"path"
 )
 
-// snapshot implements raft.SnapshotStore interface
-type snapshot struct {
-	//implement me
+func newSnapshotStore(conf config.Config) (raft.SnapshotStore, error) {
+	snStore, err := getSnapShotStore(conf)
+	if err != nil {
+		return nil, err
+	}
+	return snStore, nil
 }
 
-func newSnapshot() raft.SnapshotStore {
-	return &snapshot{}
-}
+func getSnapShotStore(conf config.Config) (raft.SnapshotStore, error) {
+	snapshotStoreDir := path.Join(conf.SnapshotStoragePath, "snapshot")
 
-func (s snapshot) Create(version raft.SnapshotVersion, index, term uint64, configuration raft.Configuration, configurationIndex uint64, trans raft.Transport) (raft.SnapshotSink, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s snapshot) List() ([]*raft.SnapshotMeta, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s snapshot) Open(id string) (*raft.SnapshotMeta, io.ReadCloser, error) {
-	//TODO implement me
-	panic("implement me")
+	switch conf.SnapshotStorage {
+	case "memory":
+		return raft.NewInmemSnapshotStore(), nil
+	case "discard":
+		return raft.NewDiscardSnapshotStore(), nil
+	case "file":
+		return raft.NewFileSnapshotStore(snapshotStoreDir, 5, os.Stderr) //todo get the retain param from config
+	default:
+		return nil, errors.New("the datastore does not exist")
+	}
 }
