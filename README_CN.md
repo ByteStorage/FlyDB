@@ -169,6 +169,8 @@ V1.0.5: 短期支持版本v1.0.5支持String、List类型的数据结构。并�
 
 V1.0.6: 短期支持版本v1.0.6支持Hash类型的数据结构。并对部分代码进行了优化。
 
+V1.0.7: 短期支持版本v1.0.7支持BitMap类型的数据结构。并对部分代码进行了优化。
+
 ## 👀 贡献者列表
 
 <a href="https://github.com/ByteStorage/FlyDB/graphs/contributors">

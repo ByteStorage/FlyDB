@@ -103,3 +103,7 @@ func (c *Client) Del(key string) error {
 	}
 	return nil
 }
+
+func (c *Client) Type(key string) (string, error) {
+	panic("implement me")
+}
