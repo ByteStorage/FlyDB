@@ -327,16 +327,8 @@ func (s *StringStructure) Expire(key string, ttl time.Duration) error {
 		return err
 	}
 
-	// Convert the old value to an integer
-	intValue, err := convertToInt(oldValue)
-	if err != nil {
-		return err
-	}
-
-	newValue := strconv.Itoa(intValue)
-
 	// Set the value
-	return s.Set(key, newValue, ttl)
+	return s.Set(key, oldValue, ttl)
 }
 
 // Persist removes the expiration time of a key
@@ -445,4 +437,13 @@ func decodeStringValue(value []byte) ([]byte, error) {
 
 	// Return the original value value
 	return value[bufIndex:], nil
+}
+
+func (s *StringStructure) Stop() error {
+	err := s.db.Close()
+	return err
+}
+
+func (s *StringStructure) Clean() {
+	s.db.Clean()
 }
