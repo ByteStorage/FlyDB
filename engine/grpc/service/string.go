@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"google.golang.org/grpc"
@@ -138,15 +139,86 @@ func (s *Service) Type(ctx context.Context, req *gstring.TypeRequest) (*gstring.
 }
 
 func (s *Service) StrLen(ctx context.Context, req *gstring.StrLenRequest) (*gstring.StrLenResponse, error) {
-	panic("implement me")
+	value, err := s.dbs.Get(req.Key)
+	if err != nil {
+		return nil, err
+	}
+	resp := &gstring.StrLenResponse{}
+	switch v := value.(type) {
+	case string:
+		resp.Length = int32(len(v))
+	case []byte:
+		resp.Length = int32(len(v))
+	default:
+		resp.Length = 0
+	}
+	return resp, nil
 }
 
 func (s *Service) GetSet(ctx context.Context, req *gstring.GetSetRequest) (*gstring.GetSetResponse, error) {
-	panic("implement me")
+	previousValue, err := s.dbs.Get(req.Key)
+	if err != nil {
+		return nil, err
+	}
+	switch req.Value.(type) {
+	case *gstring.GetSetRequest_StringValue:
+		err = s.dbs.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Int32Value:
+		err = s.dbs.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Int64Value:
+		err = s.dbs.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Float32Value:
+		err = s.dbs.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Float64Value:
+		err = s.dbs.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
+	case *gstring.GetSetRequest_BoolValue:
+		err = s.dbs.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
+	case *gstring.GetSetRequest_BytesValue:
+		err = s.dbs.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
+	default:
+		err = fmt.Errorf("unknown value type")
+	}
+	if err != nil {
+		return nil, err
+	}
+	resp := &gstring.GetSetResponse{}
+	switch v := previousValue.(type) {
+	case string:
+		resp.Value = &gstring.GetSetResponse_StringValue{StringValue: v}
+	case int32:
+		resp.Value = &gstring.GetSetResponse_Int32Value{Int32Value: v}
+	case int64:
+		resp.Value = &gstring.GetSetResponse_Int64Value{Int64Value: v}
+	case float32:
+		resp.Value = &gstring.GetSetResponse_Float32Value{Float32Value: v}
+	case float64:
+		resp.Value = &gstring.GetSetResponse_Float64Value{Float64Value: v}
+	case bool:
+		resp.Value = &gstring.GetSetResponse_BoolValue{BoolValue: v}
+	case []byte:
+		resp.Value = &gstring.GetSetResponse_BytesValue{BytesValue: v}
+	}
+	return resp, nil
 }
 
 func (s *Service) Append(ctx context.Context, req *gstring.AppendRequest) (*gstring.AppendResponse, error) {
-	panic("implement me")
+	value, err := s.dbs.Get(req.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	switch v := value.(type) {
+	case string:
+		newValue := v + req.Value
+		err := s.dbs.Set(req.Key, newValue, time.Duration(req.Expire))
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, errors.New("append operation not supported for the given key")
+	}
+
+	return &gstring.AppendResponse{Ok: true}, nil
 }
 
 func (s *Service) Incr(ctx context.Context, req *gstring.IncrRequest) (*gstring.IncrResponse, error) {
@@ -170,11 +242,15 @@ func (s *Service) DecrBy(ctx context.Context, req *gstring.DecrByRequest) (*gstr
 }
 
 func (s *Service) Exists(ctx context.Context, req *gstring.ExistsRequest) (*gstring.ExistsResponse, error) {
-	panic("implement me")
+	exists, err := s.dbs.Exists(req.Key)
+	if err != nil {
+		return nil, err
+	}
+	return &gstring.ExistsResponse{Exists: exists}, nil
 }
 
 func (s *Service) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstring.ExpireResponse, error) {
-	err := s.dbs.Expire(req.Key, time.Duration(req.Expire))
+	err := s.dbs.Expire(req.Key, time.Duration(req.Expire)*time.Second)
 	if err != nil {
 		return &gstring.ExpireResponse{}, err
 	}
@@ -182,5 +258,38 @@ func (s *Service) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstr
 }
 
 func (s *Service) Persist(ctx context.Context, req *gstring.PersistRequest) (*gstring.PersistResponse, error) {
-	panic("implement me")
+	err := s.dbs.Persist(req.Key)
+	if err != nil {
+		return nil, err
+	}
+	return &gstring.PersistResponse{Ok: true}, nil
+}
+
+func (s *Service) MGet(ctx context.Context, req *gstring.MGetRequest) (*gstring.MGetResponse, error) {
+	values, err := s.dbs.MGet(req.Keys...)
+	if err != nil {
+		return &gstring.MGetResponse{}, err
+	}
+	resp := &gstring.MGetResponse{}
+
+	for _, value := range values {
+		switch v := value.(type) {
+		case string:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_StringValue{StringValue: v}})
+		case int32:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Int32Value{Int32Value: v}})
+		case int64:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Int64Value{Int64Value: v}})
+		case float32:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Float32Value{Float32Value: v}})
+		case float64:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Float64Value{Float64Value: v}})
+		case bool:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_BoolValue{BoolValue: v}})
+		case []byte:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_BytesValue{BytesValue: v}})
+		}
+	}
+
+	return resp, nil
 }

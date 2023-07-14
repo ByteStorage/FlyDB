@@ -59,3 +59,85 @@ func stringDeleteKey(c *grumble.Context) error {
 	fmt.Println("delete key success")
 	return nil
 }
+
+func stringStrLen(c *grumble.Context) error {
+	key := c.Args.String("key")
+	strLen, err := newClient().StrLen(key)
+	if err != nil {
+		return nil
+	}
+	fmt.Println(strLen)
+	return nil
+}
+
+// GetSet sets the value of a key and returns its old value
+func stringGetSet(c *grumble.Context) error {
+	key := c.Args.String("key")
+	value := c.Args.String("value")
+	if key == "" || value == "" {
+		fmt.Println("key or value is empty")
+		return nil
+	}
+	oleValue, err := newClient().GetSet(key, value)
+	if err != nil {
+		return err
+	}
+	fmt.Println(oleValue)
+	return nil
+}
+
+func stringExists(c *grumble.Context) error {
+	key := c.Args.String("key")
+	exists, err := newClient().Exists(key)
+	if err != nil {
+		return err
+	}
+	if exists {
+		fmt.Println("key is exist", key)
+	}
+	return nil
+}
+
+func stringExpire(c *grumble.Context) error {
+	key := c.Args.String("key")
+	ttl := c.Args.Int64("ttl")
+	err := newClient().Expire(key, ttl)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func stringAppend(c *grumble.Context) error {
+	key := c.Args.String("key")
+	value := c.Args.String("value")
+	err := newClient().Append(key, value)
+	if err != nil {
+		fmt.Println("Append failed")
+		return err
+	}
+	fmt.Println("Append is successful")
+	return nil
+}
+
+func stringPersist(c *grumble.Context) error {
+	key := c.Args.String("key")
+	err := newClient().Persist(key)
+	if err != nil {
+		fmt.Println("key is not Persist")
+		return err
+	}
+	fmt.Println("key is Persist")
+	return nil
+}
+
+func stringMGet(c *grumble.Context) error {
+	keys := c.Args.StringList("key")
+	values, err := newClient().MGet(keys)
+	if err != nil {
+		fmt.Println("get data error: ", err)
+		return err
+	}
+	fmt.Println(values)
+	return nil
+}
