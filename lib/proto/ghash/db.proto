@@ -12,23 +12,15 @@ service GHashService {
 
 message GHashSetRequest {
   string key = 1;
-  oneof field {
-    string StringField = 2;
-    int32 Int32Field = 3;
-    int64 Int64Field = 4;
-    float Float32Field = 5;
-    double Float64Field = 6;
-    bool BoolField = 7;
-    bytes BytesField = 8;
-  };
+  string field = 2;
   oneof value {
-    string StringValue = 9;
-    int32 Int32Value = 10;
-    int64 Int64Value = 11;
-    float Float32Value = 12;
-    double Float64Value = 13;
-    bool BoolValue = 14;
-    bytes BytesValue = 15;
+    string StringValue = 3;
+    int32 Int32Value = 4;
+    int64 Int64Value = 5;
+    float Float32Value = 6;
+    double Float64Value = 7;
+    bool BoolValue = 8;
+    bytes BytesValue = 9;
   };
 }
 
@@ -38,15 +30,7 @@ message GHashSetResponse {
 
 message GHashGetRequest {
   string key = 1;
-  oneof field {
-    string StringField = 2;
-    int32 Int32Field = 3;
-    int64 Int64Field = 4;
-    float Float32Field = 5;
-    double Float64Field = 6;
-    bool BoolField = 7;
-    bytes BytesField = 8;
-  };
+  string field = 2;
 }
 
 message GHashGetResponse {
@@ -63,15 +47,7 @@ message GHashGetResponse {
 
 message GHashDelRequest {
   string key = 1;
-  oneof field {
-    string StringField = 2;
-    int32 Int32Field = 3;
-    int64 Int64Field = 4;
-    float Float32Field = 5;
-    double Float64Field = 6;
-    bool BoolField = 7;
-    bytes BytesField = 8;
-  };
+  string field = 2;
 }
 
 message GHashDelResponse {
