@@ -25,6 +25,16 @@ type GHashServiceClient interface {
 	HSet(ctx context.Context, in *GHashSetRequest, opts ...grpc.CallOption) (*GHashSetResponse, error)
 	HGet(ctx context.Context, in *GHashGetRequest, opts ...grpc.CallOption) (*GHashGetResponse, error)
 	HDel(ctx context.Context, in *GHashDelRequest, opts ...grpc.CallOption) (*GHashDelResponse, error)
+	HExists(ctx context.Context, in *GHashExistsRequest, opts ...grpc.CallOption) (*GHashExistsResponse, error)
+	HLen(ctx context.Context, in *GHashLenRequest, opts ...grpc.CallOption) (*GHashLenResponse, error)
+	HUpdate(ctx context.Context, in *GHashUpdateRequest, opts ...grpc.CallOption) (*GHashUpdateResponse, error)
+	HIncrBy(ctx context.Context, in *GHashIncrByRequest, opts ...grpc.CallOption) (*GHashIncrByResponse, error)
+	HIncrByFloat(ctx context.Context, in *GHashIncrByFloatRequest, opts ...grpc.CallOption) (*GHashIncrByFloatResponse, error)
+	HDecrBy(ctx context.Context, in *GHashDecrByRequest, opts ...grpc.CallOption) (*GHashDecrByResponse, error)
+	HStrLen(ctx context.Context, in *GHashStrLenRequest, opts ...grpc.CallOption) (*GHashStrLenResponse, error)
+	HMove(ctx context.Context, in *GHashMoveRequest, opts ...grpc.CallOption) (*GHashMoveResponse, error)
+	HSetNX(ctx context.Context, in *GHashSetNXRequest, opts ...grpc.CallOption) (*GHashSetNXResponse, error)
+	HType(ctx context.Context, in *GHashTypeRequest, opts ...grpc.CallOption) (*GHashTypeResponse, error)
 }
 
 type gHashServiceClient struct {
@@ -62,6 +72,96 @@ func (c *gHashServiceClient) HDel(ctx context.Context, in *GHashDelRequest, opts
 	return out, nil
 }
 
+func (c *gHashServiceClient) HExists(ctx context.Context, in *GHashExistsRequest, opts ...grpc.CallOption) (*GHashExistsResponse, error) {
+	out := new(GHashExistsResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HExists", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HLen(ctx context.Context, in *GHashLenRequest, opts ...grpc.CallOption) (*GHashLenResponse, error) {
+	out := new(GHashLenResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HLen", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HUpdate(ctx context.Context, in *GHashUpdateRequest, opts ...grpc.CallOption) (*GHashUpdateResponse, error) {
+	out := new(GHashUpdateResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HIncrBy(ctx context.Context, in *GHashIncrByRequest, opts ...grpc.CallOption) (*GHashIncrByResponse, error) {
+	out := new(GHashIncrByResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HIncrBy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HIncrByFloat(ctx context.Context, in *GHashIncrByFloatRequest, opts ...grpc.CallOption) (*GHashIncrByFloatResponse, error) {
+	out := new(GHashIncrByFloatResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HIncrByFloat", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HDecrBy(ctx context.Context, in *GHashDecrByRequest, opts ...grpc.CallOption) (*GHashDecrByResponse, error) {
+	out := new(GHashDecrByResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HDecrBy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HStrLen(ctx context.Context, in *GHashStrLenRequest, opts ...grpc.CallOption) (*GHashStrLenResponse, error) {
+	out := new(GHashStrLenResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HStrLen", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HMove(ctx context.Context, in *GHashMoveRequest, opts ...grpc.CallOption) (*GHashMoveResponse, error) {
+	out := new(GHashMoveResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HMove", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HSetNX(ctx context.Context, in *GHashSetNXRequest, opts ...grpc.CallOption) (*GHashSetNXResponse, error) {
+	out := new(GHashSetNXResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HSetNX", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HType(ctx context.Context, in *GHashTypeRequest, opts ...grpc.CallOption) (*GHashTypeResponse, error) {
+	out := new(GHashTypeResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HType", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GHashServiceServer is the server API for GHashService service.
 // All implementations must embed UnimplementedGHashServiceServer
 // for forward compatibility
@@ -69,6 +169,16 @@ type GHashServiceServer interface {
 	HSet(context.Context, *GHashSetRequest) (*GHashSetResponse, error)
 	HGet(context.Context, *GHashGetRequest) (*GHashGetResponse, error)
 	HDel(context.Context, *GHashDelRequest) (*GHashDelResponse, error)
+	HExists(context.Context, *GHashExistsRequest) (*GHashExistsResponse, error)
+	HLen(context.Context, *GHashLenRequest) (*GHashLenResponse, error)
+	HUpdate(context.Context, *GHashUpdateRequest) (*GHashUpdateResponse, error)
+	HIncrBy(context.Context, *GHashIncrByRequest) (*GHashIncrByResponse, error)
+	HIncrByFloat(context.Context, *GHashIncrByFloatRequest) (*GHashIncrByFloatResponse, error)
+	HDecrBy(context.Context, *GHashDecrByRequest) (*GHashDecrByResponse, error)
+	HStrLen(context.Context, *GHashStrLenRequest) (*GHashStrLenResponse, error)
+	HMove(context.Context, *GHashMoveRequest) (*GHashMoveResponse, error)
+	HSetNX(context.Context, *GHashSetNXRequest) (*GHashSetNXResponse, error)
+	HType(context.Context, *GHashTypeRequest) (*GHashTypeResponse, error)
 	mustEmbedUnimplementedGHashServiceServer()
 }
 
@@ -84,6 +194,36 @@ func (UnimplementedGHashServiceServer) HGet(context.Context, *GHashGetRequest) (
 }
 func (UnimplementedGHashServiceServer) HDel(context.Context, *GHashDelRequest) (*GHashDelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HDel not implemented")
+}
+func (UnimplementedGHashServiceServer) HExists(context.Context, *GHashExistsRequest) (*GHashExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HExists not implemented")
+}
+func (UnimplementedGHashServiceServer) HLen(context.Context, *GHashLenRequest) (*GHashLenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HLen not implemented")
+}
+func (UnimplementedGHashServiceServer) HUpdate(context.Context, *GHashUpdateRequest) (*GHashUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HUpdate not implemented")
+}
+func (UnimplementedGHashServiceServer) HIncrBy(context.Context, *GHashIncrByRequest) (*GHashIncrByResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HIncrBy not implemented")
+}
+func (UnimplementedGHashServiceServer) HIncrByFloat(context.Context, *GHashIncrByFloatRequest) (*GHashIncrByFloatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HIncrByFloat not implemented")
+}
+func (UnimplementedGHashServiceServer) HDecrBy(context.Context, *GHashDecrByRequest) (*GHashDecrByResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HDecrBy not implemented")
+}
+func (UnimplementedGHashServiceServer) HStrLen(context.Context, *GHashStrLenRequest) (*GHashStrLenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HStrLen not implemented")
+}
+func (UnimplementedGHashServiceServer) HMove(context.Context, *GHashMoveRequest) (*GHashMoveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HMove not implemented")
+}
+func (UnimplementedGHashServiceServer) HSetNX(context.Context, *GHashSetNXRequest) (*GHashSetNXResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HSetNX not implemented")
+}
+func (UnimplementedGHashServiceServer) HType(context.Context, *GHashTypeRequest) (*GHashTypeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HType not implemented")
 }
 func (UnimplementedGHashServiceServer) mustEmbedUnimplementedGHashServiceServer() {}
 
@@ -152,6 +292,186 @@ func _GHashService_HDel_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GHashService_HExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashExistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HExists",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HExists(ctx, req.(*GHashExistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HLen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashLenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HLen(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HLen",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HLen(ctx, req.(*GHashLenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashUpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HUpdate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HUpdate(ctx, req.(*GHashUpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HIncrBy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashIncrByRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HIncrBy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HIncrBy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HIncrBy(ctx, req.(*GHashIncrByRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HIncrByFloat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashIncrByFloatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HIncrByFloat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HIncrByFloat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HIncrByFloat(ctx, req.(*GHashIncrByFloatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HDecrBy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashDecrByRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HDecrBy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HDecrBy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HDecrBy(ctx, req.(*GHashDecrByRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HStrLen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashStrLenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HStrLen(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HStrLen",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HStrLen(ctx, req.(*GHashStrLenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HMove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashMoveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HMove(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HMove",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HMove(ctx, req.(*GHashMoveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HSetNX_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashSetNXRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HSetNX(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HSetNX",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HSetNX(ctx, req.(*GHashSetNXRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HType",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HType(ctx, req.(*GHashTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GHashService_ServiceDesc is the grpc.ServiceDesc for GHashService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +490,46 @@ var GHashService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HDel",
 			Handler:    _GHashService_HDel_Handler,
+		},
+		{
+			MethodName: "HExists",
+			Handler:    _GHashService_HExists_Handler,
+		},
+		{
+			MethodName: "HLen",
+			Handler:    _GHashService_HLen_Handler,
+		},
+		{
+			MethodName: "HUpdate",
+			Handler:    _GHashService_HUpdate_Handler,
+		},
+		{
+			MethodName: "HIncrBy",
+			Handler:    _GHashService_HIncrBy_Handler,
+		},
+		{
+			MethodName: "HIncrByFloat",
+			Handler:    _GHashService_HIncrByFloat_Handler,
+		},
+		{
+			MethodName: "HDecrBy",
+			Handler:    _GHashService_HDecrBy_Handler,
+		},
+		{
+			MethodName: "HStrLen",
+			Handler:    _GHashService_HStrLen_Handler,
+		},
+		{
+			MethodName: "HMove",
+			Handler:    _GHashService_HMove_Handler,
+		},
+		{
+			MethodName: "HSetNX",
+			Handler:    _GHashService_HSetNX_Handler,
+		},
+		{
+			MethodName: "HType",
+			Handler:    _GHashService_HType_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
