@@ -955,6 +955,15 @@ func (hs *HashStructure) findHashMeta(k string, dataType DataStructure) (*HashMe
 	return hashMeta, nil
 }
 
+func (hs *HashStructure) Stop() error {
+	err := hs.db.Close()
+	return err
+}
+
+func (hs *HashStructure) Clean() {
+	hs.db.Clean()
+}
+
 type HashField struct {
 	field   []byte
 	key     []byte

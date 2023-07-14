@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package ghash;
+
+option go_package = 	".;ghash";
+
+service GHashService {
+  rpc HSet(GHashSetRequest) returns (GHashSetResponse) {}
+  rpc HGet(GHashGetRequest) returns (GHashGetResponse) {}
+  rpc HDel(GHashDelRequest) returns (GHashDelResponse) {}
+}
+
+message GHashSetRequest {
+  string key = 1;
+  string field = 2;
+  oneof value {
+    string StringValue = 3;
+    int32 Int32Value = 4;
+    int64 Int64Value = 5;
+    float Float32Value = 6;
+    double Float64Value = 7;
+    bool BoolValue = 8;
+    bytes BytesValue = 9;
+  };
+}
+
+message GHashSetResponse {
+  bool ok = 1;
+}
+
+message GHashGetRequest {
+  string key = 1;
+  string field = 2;
+}
+
+message GHashGetResponse {
+  oneof value {
+    string StringValue = 1;
+    int32 Int32Value = 2;
+    int64 Int64Value = 3;
+    float Float32Value = 4;
+    double Float64Value = 5;
+    bool BoolValue = 6;
+    bytes BytesValue = 7;
+  };
+}
+
+message GHashDelRequest {
+  string key = 1;
+  string field = 2;
+}
+
+message GHashDelResponse {
+  bool ok = 1;
+}

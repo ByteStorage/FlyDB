@@ -56,7 +56,7 @@ func (s *Service) StartServer() {
 	signal.Notify(s.sig, syscall.SIGINT, syscall.SIGKILL)
 
 	<-s.sig
-	err = s.db.Stop()
+	err = s.dbs.Stop()
 	if err != nil {
 		fmt.Println("flydb stop error: ", err)
 		return
@@ -76,19 +76,19 @@ func (s *Service) Put(ctx context.Context, req *gstring.SetRequest) (*gstring.Se
 	var err error
 	switch req.Value.(type) {
 	case *gstring.SetRequest_StringValue:
-		err = s.db.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
 	case *gstring.SetRequest_Int32Value:
-		err = s.db.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
 	case *gstring.SetRequest_Int64Value:
-		err = s.db.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
 	case *gstring.SetRequest_Float32Value:
-		err = s.db.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
 	case *gstring.SetRequest_Float64Value:
-		err = s.db.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
 	case *gstring.SetRequest_BoolValue:
-		err = s.db.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
 	case *gstring.SetRequest_BytesValue:
-		err = s.db.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
 	default:
 		err = fmt.Errorf("unknown value type")
 	}
@@ -100,7 +100,7 @@ func (s *Service) Put(ctx context.Context, req *gstring.SetRequest) (*gstring.Se
 
 // Get is a grpc s for get
 func (s *Service) Get(ctx context.Context, req *gstring.GetRequest) (*gstring.GetResponse, error) {
-	value, err := s.db.Get(req.Key)
+	value, err := s.dbs.Get(req.Key)
 	if err != nil {
 		return &gstring.GetResponse{}, err
 	}
@@ -126,7 +126,7 @@ func (s *Service) Get(ctx context.Context, req *gstring.GetRequest) (*gstring.Ge
 
 // Del is a grpc s for del
 func (s *Service) Del(ctx context.Context, req *gstring.DelRequest) (*gstring.DelResponse, error) {
-	err := s.db.Del(req.Key)
+	err := s.dbs.Del(req.Key)
 	if err != nil {
 		return &gstring.DelResponse{}, err
 	}
@@ -174,7 +174,7 @@ func (s *Service) Exists(ctx context.Context, req *gstring.ExistsRequest) (*gstr
 }
 
 func (s *Service) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstring.ExpireResponse, error) {
-	err := s.db.Expire(req.Key, time.Duration(req.Expire))
+	err := s.dbs.Expire(req.Key, time.Duration(req.Expire))
 	if err != nil {
 		return &gstring.ExpireResponse{}, err
 	}
