@@ -31,4 +31,35 @@ func register(app *grumble.App) {
 		},
 	})
 
+	app.AddCommand(&grumble.Command{
+		Name: "HSet",
+		Help: "put data in hash-structure",
+		Run:  hashHSetData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HGet",
+		Help: "get data from hash-structure",
+		Run:  hashHGetData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HDel",
+		Help: "delete key in hash-structure",
+		Run:  hashHDelKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+		},
+	})
+
 }
