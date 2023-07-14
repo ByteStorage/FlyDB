@@ -12,13 +12,20 @@ var s *service.Service
 
 func StartServer() {
 	options := config.DefaultOptions
-	str, err := structure.NewStringStructure(options)
+	//str, err := structure.NewStringStructure(options)
+	//if err != nil {
+	//	fmt.Println("flydb start error: ", err)
+	//	return
+	//}
+	//s = service.NewService(config.DefaultAddr, str)
+	//s.StartServer()
+	hash, err := structure.NewHashStructure(options)
 	if err != nil {
 		fmt.Println("flydb start error: ", err)
 		return
 	}
-	s = service.NewService(config.DefaultAddr, str)
-	s.StartServer()
+	s = service.NewHashService(config.DefaultAddr, hash)
+	s.StartHashServer()
 }
 
 func CleanServer() {
