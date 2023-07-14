@@ -8,6 +8,16 @@ service GHashService {
   rpc HSet(GHashSetRequest) returns (GHashSetResponse) {}
   rpc HGet(GHashGetRequest) returns (GHashGetResponse) {}
   rpc HDel(GHashDelRequest) returns (GHashDelResponse) {}
+  rpc HExists(GHashExistsRequest) returns (GHashExistsResponse) {}
+  rpc HLen(GHashLenRequest) returns (GHashLenResponse) {}
+  rpc HUpdate(GHashUpdateRequest) returns (GHashUpdateResponse) {}
+  rpc HIncrBy(GHashIncrByRequest) returns (GHashIncrByResponse) {}
+  rpc HIncrByFloat(GHashIncrByFloatRequest) returns (GHashIncrByFloatResponse) {}
+  rpc HDecrBy(GHashDecrByRequest) returns (GHashDecrByResponse) {}
+  rpc HStrLen(GHashStrLenRequest) returns (GHashStrLenResponse) {}
+  rpc HMove(GHashMoveRequest) returns (GHashMoveResponse) {}
+  rpc HSetNX(GHashSetNXRequest) returns (GHashSetNXResponse) {}
+  rpc HType(GHashTypeRequest) returns (GHashTypeResponse) {}
 }
 
 message GHashSetRequest {
@@ -52,4 +62,115 @@ message GHashDelRequest {
 
 message GHashDelResponse {
   bool ok = 1;
+}
+
+message GHashExistsRequest {
+  string key = 1;
+  string field = 2;
+}
+
+message GHashExistsResponse {
+  bool ok = 1;
+}
+
+message GHashLenRequest {
+  string key = 1;
+}
+
+message GHashLenResponse {
+  int64 length = 1;
+}
+
+message GHashUpdateRequest {
+  string key = 1;
+  string field = 2;
+  oneof value {
+    string StringValue = 3;
+    int32 Int32Value = 4;
+    int64 Int64Value = 5;
+    float Float32Value = 6;
+    double Float64Value = 7;
+    bool BoolValue = 8;
+    bytes BytesValue = 9;
+  };
+}
+
+message GHashUpdateResponse {
+  bool ok = 1;
+}
+
+message GHashIncrByRequest {
+  string key = 1;
+  string field = 2;
+  int64 value = 3;
+}
+
+message GHashIncrByResponse {
+  int64 value = 1;
+}
+
+message GHashIncrByFloatRequest {
+  string key = 1;
+  string field = 2;
+  double value = 3;
+}
+
+message GHashIncrByFloatResponse {
+  double value = 1;
+}
+
+message GHashDecrByRequest {
+  string key = 1;
+  string field = 2;
+  int64 value = 3;
+}
+
+message GHashDecrByResponse {
+  int64 value = 1;
+}
+
+message GHashStrLenRequest {
+  string key = 1;
+  string field = 2;
+}
+
+message GHashStrLenResponse {
+  int64 length = 1;
+}
+
+message GHashMoveRequest {
+  string key = 1;
+  string field = 2;
+  string dest = 3;
+}
+
+message GHashMoveResponse {
+  bool ok = 1;
+}
+
+message GHashSetNXRequest {
+  string key = 1;
+  string field = 2;
+  oneof value {
+    string StringValue = 3;
+    int32 Int32Value = 4;
+    int64 Int64Value = 5;
+    float Float32Value = 6;
+    double Float64Value = 7;
+    bool BoolValue = 8;
+    bytes BytesValue = 9;
+  };
+}
+
+message GHashSetNXResponse {
+  bool ok = 1;
+}
+
+message GHashTypeRequest {
+  string key = 1;
+  string field = 2;
+}
+
+message GHashTypeResponse {
+  string type = 1;
 }

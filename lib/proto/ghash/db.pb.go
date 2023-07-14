@@ -542,6 +542,1274 @@ func (x *GHashDelResponse) GetOk() bool {
 	return false
 }
 
+type GHashExistsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+}
+
+func (x *GHashExistsRequest) Reset() {
+	*x = GHashExistsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashExistsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashExistsRequest) ProtoMessage() {}
+
+func (x *GHashExistsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashExistsRequest.ProtoReflect.Descriptor instead.
+func (*GHashExistsRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GHashExistsRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashExistsRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+type GHashExistsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *GHashExistsResponse) Reset() {
+	*x = GHashExistsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashExistsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashExistsResponse) ProtoMessage() {}
+
+func (x *GHashExistsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashExistsResponse.ProtoReflect.Descriptor instead.
+func (*GHashExistsResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GHashExistsResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type GHashLenRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+}
+
+func (x *GHashLenRequest) Reset() {
+	*x = GHashLenRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashLenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashLenRequest) ProtoMessage() {}
+
+func (x *GHashLenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashLenRequest.ProtoReflect.Descriptor instead.
+func (*GHashLenRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GHashLenRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+type GHashLenResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Length int64 `protobuf:"varint,1,opt,name=length,proto3" json:"length,omitempty"`
+}
+
+func (x *GHashLenResponse) Reset() {
+	*x = GHashLenResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashLenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashLenResponse) ProtoMessage() {}
+
+func (x *GHashLenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashLenResponse.ProtoReflect.Descriptor instead.
+func (*GHashLenResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GHashLenResponse) GetLength() int64 {
+	if x != nil {
+		return x.Length
+	}
+	return 0
+}
+
+type GHashUpdateRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	// Types that are assignable to Value:
+	//
+	//	*GHashUpdateRequest_StringValue
+	//	*GHashUpdateRequest_Int32Value
+	//	*GHashUpdateRequest_Int64Value
+	//	*GHashUpdateRequest_Float32Value
+	//	*GHashUpdateRequest_Float64Value
+	//	*GHashUpdateRequest_BoolValue
+	//	*GHashUpdateRequest_BytesValue
+	Value isGHashUpdateRequest_Value `protobuf_oneof:"value"`
+}
+
+func (x *GHashUpdateRequest) Reset() {
+	*x = GHashUpdateRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashUpdateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashUpdateRequest) ProtoMessage() {}
+
+func (x *GHashUpdateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashUpdateRequest.ProtoReflect.Descriptor instead.
+func (*GHashUpdateRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GHashUpdateRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashUpdateRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (m *GHashUpdateRequest) GetValue() isGHashUpdateRequest_Value {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (x *GHashUpdateRequest) GetStringValue() string {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_StringValue); ok {
+		return x.StringValue
+	}
+	return ""
+}
+
+func (x *GHashUpdateRequest) GetInt32Value() int32 {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_Int32Value); ok {
+		return x.Int32Value
+	}
+	return 0
+}
+
+func (x *GHashUpdateRequest) GetInt64Value() int64 {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_Int64Value); ok {
+		return x.Int64Value
+	}
+	return 0
+}
+
+func (x *GHashUpdateRequest) GetFloat32Value() float32 {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_Float32Value); ok {
+		return x.Float32Value
+	}
+	return 0
+}
+
+func (x *GHashUpdateRequest) GetFloat64Value() float64 {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_Float64Value); ok {
+		return x.Float64Value
+	}
+	return 0
+}
+
+func (x *GHashUpdateRequest) GetBoolValue() bool {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_BoolValue); ok {
+		return x.BoolValue
+	}
+	return false
+}
+
+func (x *GHashUpdateRequest) GetBytesValue() []byte {
+	if x, ok := x.GetValue().(*GHashUpdateRequest_BytesValue); ok {
+		return x.BytesValue
+	}
+	return nil
+}
+
+type isGHashUpdateRequest_Value interface {
+	isGHashUpdateRequest_Value()
+}
+
+type GHashUpdateRequest_StringValue struct {
+	StringValue string `protobuf:"bytes,3,opt,name=StringValue,proto3,oneof"`
+}
+
+type GHashUpdateRequest_Int32Value struct {
+	Int32Value int32 `protobuf:"varint,4,opt,name=Int32Value,proto3,oneof"`
+}
+
+type GHashUpdateRequest_Int64Value struct {
+	Int64Value int64 `protobuf:"varint,5,opt,name=Int64Value,proto3,oneof"`
+}
+
+type GHashUpdateRequest_Float32Value struct {
+	Float32Value float32 `protobuf:"fixed32,6,opt,name=Float32Value,proto3,oneof"`
+}
+
+type GHashUpdateRequest_Float64Value struct {
+	Float64Value float64 `protobuf:"fixed64,7,opt,name=Float64Value,proto3,oneof"`
+}
+
+type GHashUpdateRequest_BoolValue struct {
+	BoolValue bool `protobuf:"varint,8,opt,name=BoolValue,proto3,oneof"`
+}
+
+type GHashUpdateRequest_BytesValue struct {
+	BytesValue []byte `protobuf:"bytes,9,opt,name=BytesValue,proto3,oneof"`
+}
+
+func (*GHashUpdateRequest_StringValue) isGHashUpdateRequest_Value() {}
+
+func (*GHashUpdateRequest_Int32Value) isGHashUpdateRequest_Value() {}
+
+func (*GHashUpdateRequest_Int64Value) isGHashUpdateRequest_Value() {}
+
+func (*GHashUpdateRequest_Float32Value) isGHashUpdateRequest_Value() {}
+
+func (*GHashUpdateRequest_Float64Value) isGHashUpdateRequest_Value() {}
+
+func (*GHashUpdateRequest_BoolValue) isGHashUpdateRequest_Value() {}
+
+func (*GHashUpdateRequest_BytesValue) isGHashUpdateRequest_Value() {}
+
+type GHashUpdateResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *GHashUpdateResponse) Reset() {
+	*x = GHashUpdateResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashUpdateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashUpdateResponse) ProtoMessage() {}
+
+func (x *GHashUpdateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashUpdateResponse.ProtoReflect.Descriptor instead.
+func (*GHashUpdateResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GHashUpdateResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type GHashIncrByRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	Value int64  `protobuf:"varint,3,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *GHashIncrByRequest) Reset() {
+	*x = GHashIncrByRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashIncrByRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashIncrByRequest) ProtoMessage() {}
+
+func (x *GHashIncrByRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashIncrByRequest.ProtoReflect.Descriptor instead.
+func (*GHashIncrByRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GHashIncrByRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashIncrByRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *GHashIncrByRequest) GetValue() int64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+type GHashIncrByResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Value int64 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *GHashIncrByResponse) Reset() {
+	*x = GHashIncrByResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashIncrByResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashIncrByResponse) ProtoMessage() {}
+
+func (x *GHashIncrByResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashIncrByResponse.ProtoReflect.Descriptor instead.
+func (*GHashIncrByResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GHashIncrByResponse) GetValue() int64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+type GHashIncrByFloatRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string  `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string  `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	Value float64 `protobuf:"fixed64,3,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *GHashIncrByFloatRequest) Reset() {
+	*x = GHashIncrByFloatRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashIncrByFloatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashIncrByFloatRequest) ProtoMessage() {}
+
+func (x *GHashIncrByFloatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashIncrByFloatRequest.ProtoReflect.Descriptor instead.
+func (*GHashIncrByFloatRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GHashIncrByFloatRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashIncrByFloatRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *GHashIncrByFloatRequest) GetValue() float64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+type GHashIncrByFloatResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Value float64 `protobuf:"fixed64,1,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *GHashIncrByFloatResponse) Reset() {
+	*x = GHashIncrByFloatResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashIncrByFloatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashIncrByFloatResponse) ProtoMessage() {}
+
+func (x *GHashIncrByFloatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashIncrByFloatResponse.ProtoReflect.Descriptor instead.
+func (*GHashIncrByFloatResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GHashIncrByFloatResponse) GetValue() float64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+type GHashDecrByRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	Value int64  `protobuf:"varint,3,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *GHashDecrByRequest) Reset() {
+	*x = GHashDecrByRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashDecrByRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashDecrByRequest) ProtoMessage() {}
+
+func (x *GHashDecrByRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashDecrByRequest.ProtoReflect.Descriptor instead.
+func (*GHashDecrByRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GHashDecrByRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashDecrByRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *GHashDecrByRequest) GetValue() int64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+type GHashDecrByResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Value int64 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *GHashDecrByResponse) Reset() {
+	*x = GHashDecrByResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashDecrByResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashDecrByResponse) ProtoMessage() {}
+
+func (x *GHashDecrByResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashDecrByResponse.ProtoReflect.Descriptor instead.
+func (*GHashDecrByResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GHashDecrByResponse) GetValue() int64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+type GHashStrLenRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+}
+
+func (x *GHashStrLenRequest) Reset() {
+	*x = GHashStrLenRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashStrLenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashStrLenRequest) ProtoMessage() {}
+
+func (x *GHashStrLenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashStrLenRequest.ProtoReflect.Descriptor instead.
+func (*GHashStrLenRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GHashStrLenRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashStrLenRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+type GHashStrLenResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Length int64 `protobuf:"varint,1,opt,name=length,proto3" json:"length,omitempty"`
+}
+
+func (x *GHashStrLenResponse) Reset() {
+	*x = GHashStrLenResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashStrLenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashStrLenResponse) ProtoMessage() {}
+
+func (x *GHashStrLenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashStrLenResponse.ProtoReflect.Descriptor instead.
+func (*GHashStrLenResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GHashStrLenResponse) GetLength() int64 {
+	if x != nil {
+		return x.Length
+	}
+	return 0
+}
+
+type GHashMoveRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	Dest  string `protobuf:"bytes,3,opt,name=dest,proto3" json:"dest,omitempty"`
+}
+
+func (x *GHashMoveRequest) Reset() {
+	*x = GHashMoveRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashMoveRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashMoveRequest) ProtoMessage() {}
+
+func (x *GHashMoveRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashMoveRequest.ProtoReflect.Descriptor instead.
+func (*GHashMoveRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GHashMoveRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashMoveRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *GHashMoveRequest) GetDest() string {
+	if x != nil {
+		return x.Dest
+	}
+	return ""
+}
+
+type GHashMoveResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *GHashMoveResponse) Reset() {
+	*x = GHashMoveResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashMoveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashMoveResponse) ProtoMessage() {}
+
+func (x *GHashMoveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashMoveResponse.ProtoReflect.Descriptor instead.
+func (*GHashMoveResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GHashMoveResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type GHashSetNXRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+	// Types that are assignable to Value:
+	//
+	//	*GHashSetNXRequest_StringValue
+	//	*GHashSetNXRequest_Int32Value
+	//	*GHashSetNXRequest_Int64Value
+	//	*GHashSetNXRequest_Float32Value
+	//	*GHashSetNXRequest_Float64Value
+	//	*GHashSetNXRequest_BoolValue
+	//	*GHashSetNXRequest_BytesValue
+	Value isGHashSetNXRequest_Value `protobuf_oneof:"value"`
+}
+
+func (x *GHashSetNXRequest) Reset() {
+	*x = GHashSetNXRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashSetNXRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashSetNXRequest) ProtoMessage() {}
+
+func (x *GHashSetNXRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashSetNXRequest.ProtoReflect.Descriptor instead.
+func (*GHashSetNXRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GHashSetNXRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashSetNXRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (m *GHashSetNXRequest) GetValue() isGHashSetNXRequest_Value {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (x *GHashSetNXRequest) GetStringValue() string {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_StringValue); ok {
+		return x.StringValue
+	}
+	return ""
+}
+
+func (x *GHashSetNXRequest) GetInt32Value() int32 {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_Int32Value); ok {
+		return x.Int32Value
+	}
+	return 0
+}
+
+func (x *GHashSetNXRequest) GetInt64Value() int64 {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_Int64Value); ok {
+		return x.Int64Value
+	}
+	return 0
+}
+
+func (x *GHashSetNXRequest) GetFloat32Value() float32 {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_Float32Value); ok {
+		return x.Float32Value
+	}
+	return 0
+}
+
+func (x *GHashSetNXRequest) GetFloat64Value() float64 {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_Float64Value); ok {
+		return x.Float64Value
+	}
+	return 0
+}
+
+func (x *GHashSetNXRequest) GetBoolValue() bool {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_BoolValue); ok {
+		return x.BoolValue
+	}
+	return false
+}
+
+func (x *GHashSetNXRequest) GetBytesValue() []byte {
+	if x, ok := x.GetValue().(*GHashSetNXRequest_BytesValue); ok {
+		return x.BytesValue
+	}
+	return nil
+}
+
+type isGHashSetNXRequest_Value interface {
+	isGHashSetNXRequest_Value()
+}
+
+type GHashSetNXRequest_StringValue struct {
+	StringValue string `protobuf:"bytes,3,opt,name=StringValue,proto3,oneof"`
+}
+
+type GHashSetNXRequest_Int32Value struct {
+	Int32Value int32 `protobuf:"varint,4,opt,name=Int32Value,proto3,oneof"`
+}
+
+type GHashSetNXRequest_Int64Value struct {
+	Int64Value int64 `protobuf:"varint,5,opt,name=Int64Value,proto3,oneof"`
+}
+
+type GHashSetNXRequest_Float32Value struct {
+	Float32Value float32 `protobuf:"fixed32,6,opt,name=Float32Value,proto3,oneof"`
+}
+
+type GHashSetNXRequest_Float64Value struct {
+	Float64Value float64 `protobuf:"fixed64,7,opt,name=Float64Value,proto3,oneof"`
+}
+
+type GHashSetNXRequest_BoolValue struct {
+	BoolValue bool `protobuf:"varint,8,opt,name=BoolValue,proto3,oneof"`
+}
+
+type GHashSetNXRequest_BytesValue struct {
+	BytesValue []byte `protobuf:"bytes,9,opt,name=BytesValue,proto3,oneof"`
+}
+
+func (*GHashSetNXRequest_StringValue) isGHashSetNXRequest_Value() {}
+
+func (*GHashSetNXRequest_Int32Value) isGHashSetNXRequest_Value() {}
+
+func (*GHashSetNXRequest_Int64Value) isGHashSetNXRequest_Value() {}
+
+func (*GHashSetNXRequest_Float32Value) isGHashSetNXRequest_Value() {}
+
+func (*GHashSetNXRequest_Float64Value) isGHashSetNXRequest_Value() {}
+
+func (*GHashSetNXRequest_BoolValue) isGHashSetNXRequest_Value() {}
+
+func (*GHashSetNXRequest_BytesValue) isGHashSetNXRequest_Value() {}
+
+type GHashSetNXResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *GHashSetNXResponse) Reset() {
+	*x = GHashSetNXResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashSetNXResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashSetNXResponse) ProtoMessage() {}
+
+func (x *GHashSetNXResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashSetNXResponse.ProtoReflect.Descriptor instead.
+func (*GHashSetNXResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *GHashSetNXResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type GHashTypeRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Key   string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Field string `protobuf:"bytes,2,opt,name=field,proto3" json:"field,omitempty"`
+}
+
+func (x *GHashTypeRequest) Reset() {
+	*x = GHashTypeRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashTypeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashTypeRequest) ProtoMessage() {}
+
+func (x *GHashTypeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashTypeRequest.ProtoReflect.Descriptor instead.
+func (*GHashTypeRequest) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *GHashTypeRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *GHashTypeRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+type GHashTypeResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+}
+
+func (x *GHashTypeResponse) Reset() {
+	*x = GHashTypeResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_db_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GHashTypeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GHashTypeResponse) ProtoMessage() {}
+
+func (x *GHashTypeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_db_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GHashTypeResponse.ProtoReflect.Descriptor instead.
+func (*GHashTypeResponse) Descriptor() ([]byte, []int) {
+	return file_db_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GHashTypeResponse) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
 var File_db_proto protoreflect.FileDescriptor
 
 var file_db_proto_rawDesc = []byte{
@@ -594,21 +1862,164 @@ var file_db_proto_rawDesc = []byte{
 	0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x22, 0x22, 0x0a, 0x10, 0x47, 0x48,
 	0x61, 0x73, 0x68, 0x44, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e,
-	0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x32, 0xbf,
-	0x01, 0x0a, 0x0c, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
-	0x39, 0x0a, 0x04, 0x48, 0x53, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e,
-	0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x17, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x39, 0x0a, 0x04, 0x48, 0x47,
-	0x65, 0x74, 0x12, 0x16, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68,
-	0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x67, 0x68, 0x61,
-	0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x47, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x39, 0x0a, 0x04, 0x48, 0x44, 0x65, 0x6c, 0x12, 0x16, 0x2e,
-	0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x44, 0x65, 0x6c, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48,
-	0x61, 0x73, 0x68, 0x44, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
-	0x42, 0x09, 0x5a, 0x07, 0x2e, 0x3b, 0x67, 0x68, 0x61, 0x73, 0x68, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x22, 0x3c,
+	0x0a, 0x12, 0x47, 0x48, 0x61, 0x73, 0x68, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x22, 0x25, 0x0a, 0x13,
+	0x47, 0x48, 0x61, 0x73, 0x68, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52,
+	0x02, 0x6f, 0x6b, 0x22, 0x23, 0x0a, 0x0f, 0x47, 0x48, 0x61, 0x73, 0x68, 0x4c, 0x65, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x22, 0x2a, 0x0a, 0x10, 0x47, 0x48, 0x61, 0x73,
+	0x68, 0x4c, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06,
+	0x6c, 0x65, 0x6e, 0x67, 0x74, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6c, 0x65,
+	0x6e, 0x67, 0x74, 0x68, 0x22, 0xbb, 0x02, 0x0a, 0x12, 0x47, 0x48, 0x61, 0x73, 0x68, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6b,
+	0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a,
+	0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69,
+	0x65, 0x6c, 0x64, 0x12, 0x22, 0x0a, 0x0b, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x56, 0x61, 0x6c,
+	0x75, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x0b, 0x53, 0x74, 0x72, 0x69,
+	0x6e, 0x67, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x20, 0x0a, 0x0a, 0x49, 0x6e, 0x74, 0x33, 0x32,
+	0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x48, 0x00, 0x52, 0x0a, 0x49,
+	0x6e, 0x74, 0x33, 0x32, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x20, 0x0a, 0x0a, 0x49, 0x6e, 0x74,
+	0x36, 0x34, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x48, 0x00, 0x52,
+	0x0a, 0x49, 0x6e, 0x74, 0x36, 0x34, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x24, 0x0a, 0x0c, 0x46,
+	0x6c, 0x6f, 0x61, 0x74, 0x33, 0x32, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28,
+	0x02, 0x48, 0x00, 0x52, 0x0c, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x33, 0x32, 0x56, 0x61, 0x6c, 0x75,
+	0x65, 0x12, 0x24, 0x0a, 0x0c, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x36, 0x34, 0x56, 0x61, 0x6c, 0x75,
+	0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x01, 0x48, 0x00, 0x52, 0x0c, 0x46, 0x6c, 0x6f, 0x61, 0x74,
+	0x36, 0x34, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x1e, 0x0a, 0x09, 0x42, 0x6f, 0x6f, 0x6c, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x08, 0x48, 0x00, 0x52, 0x09, 0x42, 0x6f,
+	0x6f, 0x6c, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x20, 0x0a, 0x0a, 0x42, 0x79, 0x74, 0x65, 0x73,
+	0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0c, 0x48, 0x00, 0x52, 0x0a, 0x42,
+	0x79, 0x74, 0x65, 0x73, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x42, 0x07, 0x0a, 0x05, 0x76, 0x61, 0x6c,
+	0x75, 0x65, 0x22, 0x25, 0x0a, 0x13, 0x47, 0x48, 0x61, 0x73, 0x68, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x22, 0x52, 0x0a, 0x12, 0x47, 0x48, 0x61,
+	0x73, 0x68, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65,
+	0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x2b, 0x0a,
+	0x13, 0x47, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x57, 0x0a, 0x17, 0x47, 0x48,
+	0x61, 0x73, 0x68, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x12, 0x14, 0x0a,
+	0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x22, 0x30, 0x0a, 0x18, 0x47, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x63, 0x72,
+	0x42, 0x79, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x52, 0x0a, 0x12, 0x47, 0x48, 0x61, 0x73, 0x68, 0x44, 0x65,
+	0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6b,
+	0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a,
+	0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69,
+	0x65, 0x6c, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x2b, 0x0a, 0x13, 0x47, 0x48, 0x61,
+	0x73, 0x68, 0x44, 0x65, 0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x3c, 0x0a, 0x12, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53,
+	0x74, 0x72, 0x4c, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03,
+	0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14,
+	0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66,
+	0x69, 0x65, 0x6c, 0x64, 0x22, 0x2d, 0x0a, 0x13, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x74, 0x72,
+	0x4c, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x6c,
+	0x65, 0x6e, 0x67, 0x74, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6c, 0x65, 0x6e,
+	0x67, 0x74, 0x68, 0x22, 0x4e, 0x0a, 0x10, 0x47, 0x48, 0x61, 0x73, 0x68, 0x4d, 0x6f, 0x76, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65,
+	0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x12,
+	0x12, 0x0a, 0x04, 0x64, 0x65, 0x73, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x64,
+	0x65, 0x73, 0x74, 0x22, 0x23, 0x0a, 0x11, 0x47, 0x48, 0x61, 0x73, 0x68, 0x4d, 0x6f, 0x76, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x22, 0xba, 0x02, 0x0a, 0x11, 0x47, 0x48, 0x61,
+	0x73, 0x68, 0x53, 0x65, 0x74, 0x4e, 0x58, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10,
+	0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79,
+	0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x12, 0x22, 0x0a, 0x0b, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
+	0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x0b, 0x53,
+	0x74, 0x72, 0x69, 0x6e, 0x67, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x20, 0x0a, 0x0a, 0x49, 0x6e,
+	0x74, 0x33, 0x32, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x48, 0x00,
+	0x52, 0x0a, 0x49, 0x6e, 0x74, 0x33, 0x32, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x20, 0x0a, 0x0a,
+	0x49, 0x6e, 0x74, 0x36, 0x34, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03,
+	0x48, 0x00, 0x52, 0x0a, 0x49, 0x6e, 0x74, 0x36, 0x34, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x24,
+	0x0a, 0x0c, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x33, 0x32, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x06,
+	0x20, 0x01, 0x28, 0x02, 0x48, 0x00, 0x52, 0x0c, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x33, 0x32, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x12, 0x24, 0x0a, 0x0c, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x36, 0x34, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x01, 0x48, 0x00, 0x52, 0x0c, 0x46, 0x6c,
+	0x6f, 0x61, 0x74, 0x36, 0x34, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x1e, 0x0a, 0x09, 0x42, 0x6f,
+	0x6f, 0x6c, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x08, 0x48, 0x00, 0x52,
+	0x09, 0x42, 0x6f, 0x6f, 0x6c, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x20, 0x0a, 0x0a, 0x42, 0x79,
+	0x74, 0x65, 0x73, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0c, 0x48, 0x00,
+	0x52, 0x0a, 0x42, 0x79, 0x74, 0x65, 0x73, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x42, 0x07, 0x0a, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x24, 0x0a, 0x12, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65,
+	0x74, 0x4e, 0x58, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f,
+	0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x22, 0x3a, 0x0a, 0x10, 0x47,
+	0x48, 0x61, 0x73, 0x68, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65,
+	0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x22, 0x27, 0x0a, 0x11, 0x47, 0x48, 0x61, 0x73, 0x68,
+	0x54, 0x79, 0x70, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04,
+	0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65,
+	0x32, 0xde, 0x06, 0x0a, 0x0c, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x12, 0x39, 0x0a, 0x04, 0x48, 0x53, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x67, 0x68, 0x61, 0x73,
+	0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x17, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53,
+	0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x39, 0x0a, 0x04,
+	0x48, 0x47, 0x65, 0x74, 0x12, 0x16, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61,
+	0x73, 0x68, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x67,
+	0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x47, 0x65, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x39, 0x0a, 0x04, 0x48, 0x44, 0x65, 0x6c, 0x12,
+	0x16, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x44, 0x65, 0x6c,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e,
+	0x47, 0x48, 0x61, 0x73, 0x68, 0x44, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x12, 0x42, 0x0a, 0x07, 0x48, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x12, 0x19, 0x2e,
+	0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x45, 0x78, 0x69, 0x73, 0x74,
+	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68,
+	0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x39, 0x0a, 0x04, 0x48, 0x4c, 0x65, 0x6e, 0x12, 0x16,
+	0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x4c, 0x65, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47,
+	0x48, 0x61, 0x73, 0x68, 0x4c, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x00, 0x12, 0x42, 0x0a, 0x07, 0x48, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x19, 0x2e, 0x67,
+	0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e,
+	0x47, 0x48, 0x61, 0x73, 0x68, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x42, 0x0a, 0x07, 0x48, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79,
+	0x12, 0x19, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e,
+	0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x67, 0x68,
+	0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x51, 0x0a, 0x0c, 0x48, 0x49, 0x6e,
+	0x63, 0x72, 0x42, 0x79, 0x46, 0x6c, 0x6f, 0x61, 0x74, 0x12, 0x1e, 0x2e, 0x67, 0x68, 0x61, 0x73,
+	0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79, 0x46, 0x6c, 0x6f,
+	0x61, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x67, 0x68, 0x61, 0x73,
+	0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x63, 0x72, 0x42, 0x79, 0x46, 0x6c, 0x6f,
+	0x61, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x42, 0x0a, 0x07,
+	0x48, 0x44, 0x65, 0x63, 0x72, 0x42, 0x79, 0x12, 0x19, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e,
+	0x47, 0x48, 0x61, 0x73, 0x68, 0x44, 0x65, 0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68,
+	0x44, 0x65, 0x63, 0x72, 0x42, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x12, 0x42, 0x0a, 0x07, 0x48, 0x53, 0x74, 0x72, 0x4c, 0x65, 0x6e, 0x12, 0x19, 0x2e, 0x67, 0x68,
+	0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x74, 0x72, 0x4c, 0x65, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47,
+	0x48, 0x61, 0x73, 0x68, 0x53, 0x74, 0x72, 0x4c, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x3c, 0x0a, 0x05, 0x48, 0x4d, 0x6f, 0x76, 0x65, 0x12, 0x17, 0x2e,
+	0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x4d, 0x6f, 0x76, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47,
+	0x48, 0x61, 0x73, 0x68, 0x4d, 0x6f, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x12, 0x3f, 0x0a, 0x06, 0x48, 0x53, 0x65, 0x74, 0x4e, 0x58, 0x12, 0x18, 0x2e, 0x67,
+	0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x74, 0x4e, 0x58, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47,
+	0x48, 0x61, 0x73, 0x68, 0x53, 0x65, 0x74, 0x4e, 0x58, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x12, 0x3c, 0x0a, 0x05, 0x48, 0x54, 0x79, 0x70, 0x65, 0x12, 0x17, 0x2e, 0x67,
+	0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48, 0x61, 0x73, 0x68, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x67, 0x68, 0x61, 0x73, 0x68, 0x2e, 0x47, 0x48,
+	0x61, 0x73, 0x68, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x00, 0x42, 0x09, 0x5a, 0x07, 0x2e, 0x3b, 0x67, 0x68, 0x61, 0x73, 0x68, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -623,27 +2034,67 @@ func file_db_proto_rawDescGZIP() []byte {
 	return file_db_proto_rawDescData
 }
 
-var file_db_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_db_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_db_proto_goTypes = []interface{}{
-	(*GHashSetRequest)(nil),  // 0: ghash.GHashSetRequest
-	(*GHashSetResponse)(nil), // 1: ghash.GHashSetResponse
-	(*GHashGetRequest)(nil),  // 2: ghash.GHashGetRequest
-	(*GHashGetResponse)(nil), // 3: ghash.GHashGetResponse
-	(*GHashDelRequest)(nil),  // 4: ghash.GHashDelRequest
-	(*GHashDelResponse)(nil), // 5: ghash.GHashDelResponse
+	(*GHashSetRequest)(nil),          // 0: ghash.GHashSetRequest
+	(*GHashSetResponse)(nil),         // 1: ghash.GHashSetResponse
+	(*GHashGetRequest)(nil),          // 2: ghash.GHashGetRequest
+	(*GHashGetResponse)(nil),         // 3: ghash.GHashGetResponse
+	(*GHashDelRequest)(nil),          // 4: ghash.GHashDelRequest
+	(*GHashDelResponse)(nil),         // 5: ghash.GHashDelResponse
+	(*GHashExistsRequest)(nil),       // 6: ghash.GHashExistsRequest
+	(*GHashExistsResponse)(nil),      // 7: ghash.GHashExistsResponse
+	(*GHashLenRequest)(nil),          // 8: ghash.GHashLenRequest
+	(*GHashLenResponse)(nil),         // 9: ghash.GHashLenResponse
+	(*GHashUpdateRequest)(nil),       // 10: ghash.GHashUpdateRequest
+	(*GHashUpdateResponse)(nil),      // 11: ghash.GHashUpdateResponse
+	(*GHashIncrByRequest)(nil),       // 12: ghash.GHashIncrByRequest
+	(*GHashIncrByResponse)(nil),      // 13: ghash.GHashIncrByResponse
+	(*GHashIncrByFloatRequest)(nil),  // 14: ghash.GHashIncrByFloatRequest
+	(*GHashIncrByFloatResponse)(nil), // 15: ghash.GHashIncrByFloatResponse
+	(*GHashDecrByRequest)(nil),       // 16: ghash.GHashDecrByRequest
+	(*GHashDecrByResponse)(nil),      // 17: ghash.GHashDecrByResponse
+	(*GHashStrLenRequest)(nil),       // 18: ghash.GHashStrLenRequest
+	(*GHashStrLenResponse)(nil),      // 19: ghash.GHashStrLenResponse
+	(*GHashMoveRequest)(nil),         // 20: ghash.GHashMoveRequest
+	(*GHashMoveResponse)(nil),        // 21: ghash.GHashMoveResponse
+	(*GHashSetNXRequest)(nil),        // 22: ghash.GHashSetNXRequest
+	(*GHashSetNXResponse)(nil),       // 23: ghash.GHashSetNXResponse
+	(*GHashTypeRequest)(nil),         // 24: ghash.GHashTypeRequest
+	(*GHashTypeResponse)(nil),        // 25: ghash.GHashTypeResponse
 }
 var file_db_proto_depIdxs = []int32{
-	0, // 0: ghash.GHashService.HSet:input_type -> ghash.GHashSetRequest
-	2, // 1: ghash.GHashService.HGet:input_type -> ghash.GHashGetRequest
-	4, // 2: ghash.GHashService.HDel:input_type -> ghash.GHashDelRequest
-	1, // 3: ghash.GHashService.HSet:output_type -> ghash.GHashSetResponse
-	3, // 4: ghash.GHashService.HGet:output_type -> ghash.GHashGetResponse
-	5, // 5: ghash.GHashService.HDel:output_type -> ghash.GHashDelResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: ghash.GHashService.HSet:input_type -> ghash.GHashSetRequest
+	2,  // 1: ghash.GHashService.HGet:input_type -> ghash.GHashGetRequest
+	4,  // 2: ghash.GHashService.HDel:input_type -> ghash.GHashDelRequest
+	6,  // 3: ghash.GHashService.HExists:input_type -> ghash.GHashExistsRequest
+	8,  // 4: ghash.GHashService.HLen:input_type -> ghash.GHashLenRequest
+	10, // 5: ghash.GHashService.HUpdate:input_type -> ghash.GHashUpdateRequest
+	12, // 6: ghash.GHashService.HIncrBy:input_type -> ghash.GHashIncrByRequest
+	14, // 7: ghash.GHashService.HIncrByFloat:input_type -> ghash.GHashIncrByFloatRequest
+	16, // 8: ghash.GHashService.HDecrBy:input_type -> ghash.GHashDecrByRequest
+	18, // 9: ghash.GHashService.HStrLen:input_type -> ghash.GHashStrLenRequest
+	20, // 10: ghash.GHashService.HMove:input_type -> ghash.GHashMoveRequest
+	22, // 11: ghash.GHashService.HSetNX:input_type -> ghash.GHashSetNXRequest
+	24, // 12: ghash.GHashService.HType:input_type -> ghash.GHashTypeRequest
+	1,  // 13: ghash.GHashService.HSet:output_type -> ghash.GHashSetResponse
+	3,  // 14: ghash.GHashService.HGet:output_type -> ghash.GHashGetResponse
+	5,  // 15: ghash.GHashService.HDel:output_type -> ghash.GHashDelResponse
+	7,  // 16: ghash.GHashService.HExists:output_type -> ghash.GHashExistsResponse
+	9,  // 17: ghash.GHashService.HLen:output_type -> ghash.GHashLenResponse
+	11, // 18: ghash.GHashService.HUpdate:output_type -> ghash.GHashUpdateResponse
+	13, // 19: ghash.GHashService.HIncrBy:output_type -> ghash.GHashIncrByResponse
+	15, // 20: ghash.GHashService.HIncrByFloat:output_type -> ghash.GHashIncrByFloatResponse
+	17, // 21: ghash.GHashService.HDecrBy:output_type -> ghash.GHashDecrByResponse
+	19, // 22: ghash.GHashService.HStrLen:output_type -> ghash.GHashStrLenResponse
+	21, // 23: ghash.GHashService.HMove:output_type -> ghash.GHashMoveResponse
+	23, // 24: ghash.GHashService.HSetNX:output_type -> ghash.GHashSetNXResponse
+	25, // 25: ghash.GHashService.HType:output_type -> ghash.GHashTypeResponse
+	13, // [13:26] is the sub-list for method output_type
+	0,  // [0:13] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_db_proto_init() }
@@ -724,6 +2175,246 @@ func file_db_proto_init() {
 				return nil
 			}
 		}
+		file_db_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashExistsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashExistsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashLenRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashLenResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashUpdateRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashUpdateResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashIncrByRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashIncrByResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashIncrByFloatRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashIncrByFloatResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashDecrByRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashDecrByResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashStrLenRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashStrLenResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashMoveRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashMoveResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashSetNXRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashSetNXResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashTypeRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_db_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GHashTypeResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_db_proto_msgTypes[0].OneofWrappers = []interface{}{
 		(*GHashSetRequest_StringValue)(nil),
@@ -743,13 +2434,31 @@ func file_db_proto_init() {
 		(*GHashGetResponse_BoolValue)(nil),
 		(*GHashGetResponse_BytesValue)(nil),
 	}
+	file_db_proto_msgTypes[10].OneofWrappers = []interface{}{
+		(*GHashUpdateRequest_StringValue)(nil),
+		(*GHashUpdateRequest_Int32Value)(nil),
+		(*GHashUpdateRequest_Int64Value)(nil),
+		(*GHashUpdateRequest_Float32Value)(nil),
+		(*GHashUpdateRequest_Float64Value)(nil),
+		(*GHashUpdateRequest_BoolValue)(nil),
+		(*GHashUpdateRequest_BytesValue)(nil),
+	}
+	file_db_proto_msgTypes[22].OneofWrappers = []interface{}{
+		(*GHashSetNXRequest_StringValue)(nil),
+		(*GHashSetNXRequest_Int32Value)(nil),
+		(*GHashSetNXRequest_Int64Value)(nil),
+		(*GHashSetNXRequest_Float32Value)(nil),
+		(*GHashSetNXRequest_Float64Value)(nil),
+		(*GHashSetNXRequest_BoolValue)(nil),
+		(*GHashSetNXRequest_BytesValue)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_db_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
