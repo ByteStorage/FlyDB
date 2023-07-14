@@ -327,16 +327,8 @@ func (s *StringStructure) Expire(key string, ttl time.Duration) error {
 		return err
 	}
 
-	// Convert the old value to an integer
-	intValue, err := convertToInt(oldValue)
-	if err != nil {
-		return err
-	}
-
-	newValue := strconv.Itoa(intValue)
-
 	// Set the value
-	return s.Set(key, newValue, ttl)
+	return s.Set(key, oldValue, ttl)
 }
 
 // Persist removes the expiration time of a key

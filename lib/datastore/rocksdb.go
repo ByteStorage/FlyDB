@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"github.com/ByteStorage/FlyDB/config"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"github.com/hashicorp/raft"
 	"github.com/tecbot/gorocksdb"
@@ -17,7 +18,7 @@ type RocksDbStore struct {
 
 // NewLogRocksDbStorage is a function that creates a new RocksDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
-func NewLogRocksDbStorage(conf config.Config) (raft.LogStore, error) {
+func NewLogRocksDbStorage(conf config.Config) (DataStore, error) {
 	filename := conf.LogDataStoragePath
 	options := gorocksdb.NewDefaultOptions()
 	options.SetCreateIfMissing(true)
@@ -113,4 +114,63 @@ func (rds *RocksDbStore) DeleteRange(min, max uint64) error {
 		return err
 	}
 	return nil
+}
+
+func (rds *RocksDbStore) Set(key []byte, val []byte) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	wo := gorocksdb.NewDefaultWriteOptions()
+	wo.SetSync(true)
+	defer wo.Destroy()
+	err := rds.conn.Put(wo, key, val)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rds *RocksDbStore) Get(key []byte) ([]byte, error) {
+	if len(key) == 0 {
+		return nil, _const.ErrKeyIsEmpty
+	}
+	ro := gorocksdb.NewDefaultReadOptions()
+	defer ro.Destroy()
+
+	val, err := rds.conn.Get(ro, key)
+	if err != nil {
+		return nil, err
+	}
+	if val.Size() == 0 {
+		return nil, _const.ErrKeyNotFound
+	}
+	return val.Data(), nil
+}
+
+func (rds *RocksDbStore) SetUint64(key []byte, val uint64) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	wo := gorocksdb.NewDefaultWriteOptions()
+	wo.SetSync(true)
+	defer wo.Destroy()
+	err := rds.conn.Put(wo, key, uint64ToBytes(val))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rds *RocksDbStore) GetUint64(key []byte) (uint64, error) {
+	if len(key) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+	ro := gorocksdb.NewDefaultReadOptions()
+	defer ro.Destroy()
+
+	val, err := rds.conn.Get(ro, key)
+	if err != nil {
+		return 0, err
+	}
+	return bytesToUint64(val.Data()), nil
 }

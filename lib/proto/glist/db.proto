@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package glist;
+option go_package = "flydb/lib/proto/glist";
+
+service GListService {
+  // example
+  //rpc Get(GListGetRequest) returns (GListGetResponse) {}
+}

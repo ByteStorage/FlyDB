@@ -3,3 +3,4 @@ tmp/
 .git-old/
 .lib/logger/logs/
 .benchmark/benchmark/
+.bin/

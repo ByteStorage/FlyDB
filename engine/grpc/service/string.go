@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/ByteStorage/FlyDB/lib/proto/dbs"
+	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
@@ -31,7 +31,7 @@ func (s *Service) StartServer() {
 		panic("tcp listen error: " + err.Error())
 	}
 	server := grpc.NewServer()
-	dbs.RegisterFlyDBServiceServer(server, s)
+	gstring.RegisterGStringServiceServer(server, s)
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 	go func() {
 		err := server.Serve(listener)
@@ -56,7 +56,7 @@ func (s *Service) StartServer() {
 	signal.Notify(s.sig, syscall.SIGINT, syscall.SIGKILL)
 
 	<-s.sig
-	err = s.db.Stop()
+	err = s.dbs.Stop()
 	if err != nil {
 		fmt.Println("flydb stop error: ", err)
 		return
@@ -71,116 +71,116 @@ func (s *Service) StopServer() {
 }
 
 // Put is a grpc s for put
-func (s *Service) Put(ctx context.Context, req *dbs.SetRequest) (*dbs.SetResponse, error) {
+func (s *Service) Put(ctx context.Context, req *gstring.SetRequest) (*gstring.SetResponse, error) {
 	fmt.Println("receive put request: key: ", req.Key, " value: ", req.GetValue(), " duration: ", time.Duration(req.Expire))
 	var err error
 	switch req.Value.(type) {
-	case *dbs.SetRequest_StringValue:
-		err = s.db.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
-	case *dbs.SetRequest_Int32Value:
-		err = s.db.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
-	case *dbs.SetRequest_Int64Value:
-		err = s.db.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
-	case *dbs.SetRequest_Float32Value:
-		err = s.db.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
-	case *dbs.SetRequest_Float64Value:
-		err = s.db.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
-	case *dbs.SetRequest_BoolValue:
-		err = s.db.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
-	case *dbs.SetRequest_BytesValue:
-		err = s.db.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
+	case *gstring.SetRequest_StringValue:
+		err = s.dbs.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
+	case *gstring.SetRequest_Int32Value:
+		err = s.dbs.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
+	case *gstring.SetRequest_Int64Value:
+		err = s.dbs.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
+	case *gstring.SetRequest_Float32Value:
+		err = s.dbs.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
+	case *gstring.SetRequest_Float64Value:
+		err = s.dbs.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
+	case *gstring.SetRequest_BoolValue:
+		err = s.dbs.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
+	case *gstring.SetRequest_BytesValue:
+		err = s.dbs.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
 	default:
 		err = fmt.Errorf("unknown value type")
 	}
 	if err != nil {
-		return &dbs.SetResponse{}, err
+		return &gstring.SetResponse{}, err
 	}
-	return &dbs.SetResponse{Ok: true}, nil
+	return &gstring.SetResponse{Ok: true}, nil
 }
 
 // Get is a grpc s for get
-func (s *Service) Get(ctx context.Context, req *dbs.GetRequest) (*dbs.GetResponse, error) {
-	value, err := s.db.Get(req.Key)
+func (s *Service) Get(ctx context.Context, req *gstring.GetRequest) (*gstring.GetResponse, error) {
+	value, err := s.dbs.Get(req.Key)
 	if err != nil {
-		return &dbs.GetResponse{}, err
+		return &gstring.GetResponse{}, err
 	}
-	resp := &dbs.GetResponse{}
+	resp := &gstring.GetResponse{}
 	switch v := value.(type) {
 	case string:
-		resp.Value = &dbs.GetResponse_StringValue{StringValue: v}
+		resp.Value = &gstring.GetResponse_StringValue{StringValue: v}
 	case int32:
-		resp.Value = &dbs.GetResponse_Int32Value{Int32Value: v}
+		resp.Value = &gstring.GetResponse_Int32Value{Int32Value: v}
 	case int64:
-		resp.Value = &dbs.GetResponse_Int64Value{Int64Value: v}
+		resp.Value = &gstring.GetResponse_Int64Value{Int64Value: v}
 	case float32:
-		resp.Value = &dbs.GetResponse_Float32Value{Float32Value: v}
+		resp.Value = &gstring.GetResponse_Float32Value{Float32Value: v}
 	case float64:
-		resp.Value = &dbs.GetResponse_Float64Value{Float64Value: v}
+		resp.Value = &gstring.GetResponse_Float64Value{Float64Value: v}
 	case bool:
-		resp.Value = &dbs.GetResponse_BoolValue{BoolValue: v}
+		resp.Value = &gstring.GetResponse_BoolValue{BoolValue: v}
 	case []byte:
-		resp.Value = &dbs.GetResponse_BytesValue{BytesValue: v}
+		resp.Value = &gstring.GetResponse_BytesValue{BytesValue: v}
 	}
 	return resp, nil
 }
 
 // Del is a grpc s for del
-func (s *Service) Del(ctx context.Context, req *dbs.DelRequest) (*dbs.DelResponse, error) {
-	err := s.db.Del(req.Key)
+func (s *Service) Del(ctx context.Context, req *gstring.DelRequest) (*gstring.DelResponse, error) {
+	err := s.dbs.Del(req.Key)
 	if err != nil {
-		return &dbs.DelResponse{}, err
+		return &gstring.DelResponse{}, err
 	}
-	return &dbs.DelResponse{Ok: true}, nil
+	return &gstring.DelResponse{Ok: true}, nil
 }
 
-func (s *Service) Type(ctx context.Context, req *dbs.TypeRequest) (*dbs.TypeResponse, error) {
+func (s *Service) Type(ctx context.Context, req *gstring.TypeRequest) (*gstring.TypeResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) StrLen(ctx context.Context, req *dbs.StrLenRequest) (*dbs.StrLenResponse, error) {
+func (s *Service) StrLen(ctx context.Context, req *gstring.StrLenRequest) (*gstring.StrLenResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) GetSet(ctx context.Context, req *dbs.GetSetRequest) (*dbs.GetSetResponse, error) {
+func (s *Service) GetSet(ctx context.Context, req *gstring.GetSetRequest) (*gstring.GetSetResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) Append(ctx context.Context, req *dbs.AppendRequest) (*dbs.AppendResponse, error) {
+func (s *Service) Append(ctx context.Context, req *gstring.AppendRequest) (*gstring.AppendResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) Incr(ctx context.Context, req *dbs.IncrRequest) (*dbs.IncrResponse, error) {
+func (s *Service) Incr(ctx context.Context, req *gstring.IncrRequest) (*gstring.IncrResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) IncrBy(ctx context.Context, req *dbs.IncrByRequest) (*dbs.IncrByResponse, error) {
+func (s *Service) IncrBy(ctx context.Context, req *gstring.IncrByRequest) (*gstring.IncrByResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) IncrByFloat(ctx context.Context, req *dbs.IncrByFloatRequest) (*dbs.IncrByFloatResponse, error) {
+func (s *Service) IncrByFloat(ctx context.Context, req *gstring.IncrByFloatRequest) (*gstring.IncrByFloatResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) Decr(ctx context.Context, req *dbs.DecrRequest) (*dbs.DecrResponse, error) {
+func (s *Service) Decr(ctx context.Context, req *gstring.DecrRequest) (*gstring.DecrResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) DecrBy(ctx context.Context, req *dbs.DecrByRequest) (*dbs.DecrByResponse, error) {
+func (s *Service) DecrBy(ctx context.Context, req *gstring.DecrByRequest) (*gstring.DecrByResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) Exists(ctx context.Context, req *dbs.ExistsRequest) (*dbs.ExistsResponse, error) {
+func (s *Service) Exists(ctx context.Context, req *gstring.ExistsRequest) (*gstring.ExistsResponse, error) {
 	panic("implement me")
 }
 
-func (s *Service) Expire(ctx context.Context, req *dbs.ExpireRequest) (*dbs.ExpireResponse, error) {
-	err := s.db.Expire(req.Key, time.Duration(req.Expire))
+func (s *Service) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstring.ExpireResponse, error) {
+	err := s.dbs.Expire(req.Key, time.Duration(req.Expire))
 	if err != nil {
-		return &dbs.ExpireResponse{}, err
+		return &gstring.ExpireResponse{}, err
 	}
-	return &dbs.ExpireResponse{Ok: true}, nil
+	return &gstring.ExpireResponse{Ok: true}, nil
 }
 
-func (s *Service) Persist(ctx context.Context, req *dbs.PersistRequest) (*dbs.PersistResponse, error) {
+func (s *Service) Persist(ctx context.Context, req *gstring.PersistRequest) (*gstring.PersistResponse, error) {
 	panic("implement me")
 }

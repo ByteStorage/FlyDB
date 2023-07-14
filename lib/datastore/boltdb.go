@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"github.com/boltdb/bolt"
 	"github.com/hashicorp/raft"
@@ -13,8 +14,8 @@ import (
 
 // Define byte slices for bucket names
 var (
-	bucketLogs = []byte("logs")
-	bucketConf = []byte("conf")
+	bucketLogs   = []byte("logs")
+	bucketStable = []byte("stable")
 )
 
 // BoltDbStore is a struct that implements the raft.LogStore interface
@@ -26,7 +27,7 @@ type BoltDbStore struct {
 
 // NewLogBoltDbStorage is a function that creates a new BoltDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
-func NewLogBoltDbStorage(conf config.Config) (raft.LogStore, error) {
+func NewLogBoltDbStorage(conf config.Config) (DataStore, error) {
 	filename := conf.LogDataStoragePath
 	dbOpts := &bolt.Options{
 		ReadOnly: false, // Open the database in read-write mode
@@ -61,10 +62,9 @@ func (ds *BoltDbStore) init() error {
 	if _, err := tx.CreateBucketIfNotExists(bucketLogs); err != nil {
 		return err
 	}
-	if _, err := tx.CreateBucketIfNotExists(bucketConf); err != nil {
+	if _, err := tx.CreateBucketIfNotExists(bucketStable); err != nil {
 		return err
 	}
-
 	return tx.Commit()
 }
 
@@ -84,7 +84,6 @@ func (ds *BoltDbStore) FirstIndex() (uint64, error) {
 	if key != nil {
 		idx = binary.BigEndian.Uint64(key)
 	}
-
 	return idx, nil
 }
 
@@ -104,7 +103,6 @@ func (ds *BoltDbStore) LastIndex() (uint64, error) {
 	if key != nil {
 		idx = binary.BigEndian.Uint64(key) // Convert the key from bytes to uint64
 	}
-
 	return idx, nil
 }
 
@@ -155,7 +153,6 @@ func (ds *BoltDbStore) StoreLogs(logs []*raft.Log) error {
 			return err
 		}
 	}
-
 	return tx.Commit() // Commit the transaction
 }
 
@@ -166,7 +163,6 @@ func (ds *BoltDbStore) DeleteRange(min, max uint64) error {
 		return err
 	}
 	key := uint64ToBytes(min)
-
 	defer check(tx.Rollback)
 	curs := tx.Bucket(bucketLogs).Cursor()
 	for k, _ := curs.Seek(key[:]); k != nil; k, _ = curs.Next() {
@@ -179,6 +175,74 @@ func (ds *BoltDbStore) DeleteRange(min, max uint64) error {
 		}
 	}
 	return tx.Commit()
+}
+
+func (ds *BoltDbStore) Set(key []byte, val []byte) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	tx, err := ds.conn.Begin(true) // Start a read-write transaction
+	if err != nil {
+		return err
+	}
+	defer check(tx.Rollback)
+	bucket := tx.Bucket(bucketStable)
+	err = bucket.Put(key, val)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (ds *BoltDbStore) Get(key []byte) ([]byte, error) {
+	if len(key) == 0 {
+		return nil, _const.ErrKeyIsEmpty
+	}
+	tx, err := ds.conn.Begin(false) // Start a read-only transaction
+	if err != nil {
+		return nil, err
+	}
+	defer check(tx.Rollback)
+	bucket := tx.Bucket(bucketStable)
+	val := bucket.Get(key)
+	if val == nil {
+		return nil, _const.ErrKeyNotFound
+	}
+	return val, nil
+}
+
+func (ds *BoltDbStore) SetUint64(key []byte, val uint64) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	tx, err := ds.conn.Begin(true) // Start a read-write transaction
+	if err != nil {
+		return err
+	}
+	defer check(tx.Rollback)
+	bucket := tx.Bucket(bucketStable)
+	err = bucket.Put(key, uint64ToBytes(val))
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (ds *BoltDbStore) GetUint64(key []byte) (uint64, error) {
+	if len(key) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+	tx, err := ds.conn.Begin(false) // Start a read-only transaction
+	if err != nil {
+		return 0, err
+	}
+	defer check(tx.Rollback)
+	bucket := tx.Bucket(bucketStable)
+	val := bucket.Get(key)
+	if val == nil {
+		return 0, _const.ErrKeyNotFound
+	}
+	return bytesToUint64(val), nil
 }
 
 // uint64ToBytes is a helper function that converts an uint64 to a byte slice
