@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -32,6 +33,7 @@ func (s *Service) StartServer() {
 	}
 	server := grpc.NewServer()
 	gstring.RegisterGStringServiceServer(server, s)
+	ghash.RegisterGHashServiceServer(server, s)
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 	go func() {
 		err := server.Serve(listener)
