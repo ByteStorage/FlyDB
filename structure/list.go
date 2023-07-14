@@ -13,29 +13,6 @@ import (
 // Due to the complexity of each operation is at least O(n)
 // So we can directly use slice to implement the list at the bottom level
 // If the implementation of the db is improved later, we need to switch to a linked list
-
-// ListStructure is a structure that stores list data
-
-// NewListStructure returns a new ListStructure
-// It will return a nil ListStructure if the database cannot be opened
-// or the database cannot be created
-// The database will be created if it does not exist
-
-// LPush adds a value to the left of the list corresponding to the key
-// If the key does not exist, it will create the key
-
-// LPushs adds one or more values to the left of the list corresponding to the key
-// If the key does not exist, it will create the key
-
-// RPush adds a value to the right of the list corresponding to the key
-// If the key does not exist, it will create the key
-
-// RPushs adds one or more values to the right of the list corresponding to the key
-// If the key does not exist, it will create the key
-
-// Due to the complexity of each operation is at least O(n)
-// So we can directly use slice to implement the list at the bottom level
-// If the implementation of the db is improved later, we need to switch to a linked list
 type ListStructure struct {
 	db *engine.DB
 }

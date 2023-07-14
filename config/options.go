@@ -43,6 +43,9 @@ const (
 
 	// ART (Adpative Radix Tree)
 	ART
+
+	// SkipList
+	SkipList
 )
 
 const (

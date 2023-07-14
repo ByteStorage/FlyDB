@@ -3,6 +3,7 @@ package datastore
 import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/config"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/hashicorp/raft"
 	"math"
 	"sync"
@@ -15,13 +16,17 @@ type InMemStore struct {
 	firstIndex uint64
 	lastIndex  uint64
 	logs       map[uint64]*raft.Log
+	kv         map[string][]byte
+	kvUint     map[string]uint64
 }
 
 // NewLogInMemStorage is a function that creates a new in-memory store
 // It returns a raft.LogStore and an error
-func NewLogInMemStorage(conf config.Config) (raft.LogStore, error) {
+func NewLogInMemStorage(conf config.Config) (DataStore, error) {
 	a := &InMemStore{
-		logs: make(map[uint64]*raft.Log),
+		logs:   make(map[uint64]*raft.Log),
+		kv:     map[string][]byte{},
+		kvUint: map[string]uint64{},
 	}
 	return a, nil
 }
@@ -91,6 +96,60 @@ func (ds *InMemStore) DeleteRange(min, max uint64) error {
 	}
 
 	return nil
+}
+func (ds *InMemStore) Set(key []byte, val []byte) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	ds.mux.Lock()
+	defer ds.mux.Unlock()
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	ds.kv[string(key)] = val
+	return nil
+}
+
+func (ds *InMemStore) Get(key []byte) ([]byte, error) {
+	if len(key) == 0 {
+		return nil, _const.ErrKeyIsEmpty
+	}
+	ds.mux.RLock()
+	defer ds.mux.RUnlock()
+	if len(key) == 0 {
+		return nil, _const.ErrKeyIsEmpty
+	}
+	val, ok := ds.kv[string(key)]
+	if !ok {
+		return nil, _const.ErrKeyNotFound
+	}
+	return val, nil
+}
+
+func (ds *InMemStore) SetUint64(key []byte, val uint64) error {
+	if len(key) == 0 {
+		return _const.ErrKeyIsEmpty
+	}
+	ds.mux.Lock()
+	defer ds.mux.Unlock()
+	ds.kvUint[string(key)] = val
+	return nil
+}
+
+func (ds *InMemStore) GetUint64(key []byte) (uint64, error) {
+	if len(key) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+	ds.mux.RLock()
+	defer ds.mux.RUnlock()
+	if len(key) == 0 {
+		return 0, _const.ErrKeyIsEmpty
+	}
+	val, ok := ds.kvUint[string(key)]
+	if !ok {
+		return 0, _const.ErrKeyNotFound
+	}
+	return val, nil
 }
 
 // min is a helper method on InMemStore that returns the smallest index in the log

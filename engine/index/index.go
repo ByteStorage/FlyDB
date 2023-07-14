@@ -36,6 +36,9 @@ const (
 
 	// ART Index
 	ART
+
+	// SkipList Index
+	SkipListIndex
 )
 
 func NewIndexer(typeIndex IndexType, dirPath string) Indexer {
@@ -44,6 +47,8 @@ func NewIndexer(typeIndex IndexType, dirPath string) Indexer {
 		return NewBTree()
 	case ART:
 		return NewART()
+	case SkipListIndex:
+		return NewSkipList()
 	default:
 		panic("unsupported index type")
 	}
@@ -80,4 +85,8 @@ type Iterator interface {
 
 	// Close closes the iterator and releases any resources.
 	Close()
+}
+
+func Compare(a, b []byte) int {
+	return bytes.Compare(a, b)
 }

@@ -1,14 +1,14 @@
 package service
 
 import (
-	"github.com/ByteStorage/FlyDB/lib/proto/dbs"
+	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"github.com/ByteStorage/FlyDB/structure"
 	"os"
 )
 
 // Service is a grpc Service for db
 type Service struct {
-	dbs.FlyDBServiceServer
+	gstring.GStringServiceServer
 	Addr string // db server address
 	db   *structure.StringStructure
 	sig  chan os.Signal
