@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package ghash;
+
+option go_package = 	".;ghash";
+
+service GHashService {
+  rpc HSet(GHashSetRequest) returns (GHashSetResponse) {}
+  rpc HGet(GHashGetRequest) returns (GHashGetResponse) {}
+  rpc HDel(GHashDelRequest) returns (GHashDelResponse) {}
+}
+
+message GHashSetRequest {
+  string key = 1;
+  oneof field {
+    string StringField = 2;
+    int32 Int32Field = 3;
+    int64 Int64Field = 4;
+    float Float32Field = 5;
+    double Float64Field = 6;
+    bool BoolField = 7;
+    bytes BytesField = 8;
+  };
+  oneof value {
+    string StringValue = 9;
+    int32 Int32Value = 10;
+    int64 Int64Value = 11;
+    float Float32Value = 12;
+    double Float64Value = 13;
+    bool BoolValue = 14;
+    bytes BytesValue = 15;
+  };
+}
+
+message GHashSetResponse {
+  bool ok = 1;
+}
+
+message GHashGetRequest {
+  string key = 1;
+  oneof field {
+    string StringField = 2;
+    int32 Int32Field = 3;
+    int64 Int64Field = 4;
+    float Float32Field = 5;
+    double Float64Field = 6;
+    bool BoolField = 7;
+    bytes BytesField = 8;
+  };
+}
+
+message GHashGetResponse {
+  oneof value {
+    string StringValue = 1;
+    int32 Int32Value = 2;
+    int64 Int64Value = 3;
+    float Float32Value = 4;
+    double Float64Value = 5;
+    bool BoolValue = 6;
+    bytes BytesValue = 7;
+  };
+}
+
+message GHashDelRequest {
+  string key = 1;
+  oneof field {
+    string StringField = 2;
+    int32 Int32Field = 3;
+    int64 Int64Field = 4;
+    float Float32Field = 5;
+    double Float64Field = 6;
+    bool BoolField = 7;
+    bytes BytesField = 8;
+  };
+}
+
+message GHashDelResponse {
+  bool ok = 1;
+}
