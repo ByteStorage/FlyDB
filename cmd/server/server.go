@@ -3,29 +3,19 @@ package server
 import (
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine/grpc/service"
-	"github.com/ByteStorage/FlyDB/structure"
+	base "github.com/ByteStorage/FlyDB/engine/grpc"
 	"os"
 )
 
-var s *service.Service
-
 func StartServer() {
 	options := config.DefaultOptions
-	//str, err := structure.NewStringStructure(options)
-	//if err != nil {
-	//	fmt.Println("flydb start error: ", err)
-	//	return
-	//}
-	//s = service.NewService(config.DefaultAddr, str)
-	//s.StartServer()
-	hash, err := structure.NewHashStructure(options)
+	options.FIOType = config.MmapIOType
+	service, err := base.NewService(options, config.DefaultAddr)
 	if err != nil {
 		fmt.Println("flydb start error: ", err)
 		return
 	}
-	s = service.NewHashService(config.DefaultAddr, hash)
-	s.StartHashServer()
+	service.StartGrpcServer()
 }
 
 func CleanServer() {

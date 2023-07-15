@@ -3,59 +3,90 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
-	"net"
-	"os/signal"
-	"syscall"
+	"github.com/ByteStorage/FlyDB/structure"
 )
 
-// StartHashServer starts a grpc server
-func (s *Service) StartHashServer() {
-	listener, err := net.Listen("tcp", s.Addr)
-	if err != nil {
-		panic("tcp listen error: " + err.Error())
-	}
-	server := grpc.NewServer()
-	ghash.RegisterGHashServiceServer(server, s)
-	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
-	go func() {
-		err := server.Serve(listener)
-		if err != nil {
-			panic("dbh server start error: " + err.Error())
-		}
-	}()
-	//wait for server start
-	for {
-		conn, err := grpc.Dial(s.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			continue
-		}
-		err = conn.Close()
-		if err != nil {
-			continue
-		}
-		break
-	}
-	fmt.Println("flydbh start success on ", s.Addr)
-	// graceful shutdown
-	signal.Notify(s.sig, syscall.SIGINT, syscall.SIGKILL)
+type HashService interface {
+	Base
+	ghash.GHashServiceServer
+}
 
-	<-s.sig
-	err = s.dbh.Stop()
-	if err != nil {
-		fmt.Println("flydbh stop error: ", err)
-		return
-	}
-	fmt.Println("flydbh stop success on ", s.Addr)
+type hash struct {
+	dbh *structure.HashStructure
+	ghash.GHashServiceServer
+}
 
+func NewHashService(options config.Options) (HashService, error) {
+	dbh, err := structure.NewHashStructure(options)
+	if err != nil {
+		return nil, err
+	}
+	return &hash{dbh: dbh}, nil
+}
+
+func (s *hash) CloseDb() error {
+	return s.dbh.Stop()
+}
+
+func (s *hash) HExists(ctx context.Context, request *ghash.GHashExistsRequest) (*ghash.GHashExistsResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HLen(ctx context.Context, request *ghash.GHashLenRequest) (*ghash.GHashLenResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HUpdate(ctx context.Context, request *ghash.GHashUpdateRequest) (*ghash.GHashUpdateResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HIncrBy(ctx context.Context, request *ghash.GHashIncrByRequest) (*ghash.GHashIncrByResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HIncrByFloat(ctx context.Context, request *ghash.GHashIncrByFloatRequest) (*ghash.GHashIncrByFloatResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HDecrBy(ctx context.Context, request *ghash.GHashDecrByRequest) (*ghash.GHashDecrByResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HStrLen(ctx context.Context, request *ghash.GHashStrLenRequest) (*ghash.GHashStrLenResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HMove(ctx context.Context, request *ghash.GHashMoveRequest) (*ghash.GHashMoveResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HSetNX(ctx context.Context, request *ghash.GHashSetNXRequest) (*ghash.GHashSetNXResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) HType(ctx context.Context, request *ghash.GHashTypeRequest) (*ghash.GHashTypeResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *hash) mustEmbedUnimplementedGHashServiceServer() {
+	//TODO implement me
+	panic("implement me")
 }
 
 // HSet is a grpc s for put
-func (s *Service) HSet(ctx context.Context, req *ghash.GHashSetRequest) (*ghash.GHashSetResponse, error) {
+func (s *hash) HSet(ctx context.Context, req *ghash.GHashSetRequest) (*ghash.GHashSetResponse, error) {
 	fmt.Println("receive put request: key: ", req.Key, " field: ", req.GetField(), " value: ", req.GetValue())
 	var err error
 	result, err := setValue(s, req.Key, req.Field, req)
@@ -67,7 +98,7 @@ func (s *Service) HSet(ctx context.Context, req *ghash.GHashSetRequest) (*ghash.
 }
 
 // HGet is a grpc s for get
-func (s *Service) HGet(ctx context.Context, req *ghash.GHashGetRequest) (*ghash.GHashGetResponse, error) {
+func (s *hash) HGet(ctx context.Context, req *ghash.GHashGetRequest) (*ghash.GHashGetResponse, error) {
 	value, err := s.dbh.HGet(req.Key, req.Field)
 	if err != nil {
 		return &ghash.GHashGetResponse{}, err
@@ -93,7 +124,7 @@ func (s *Service) HGet(ctx context.Context, req *ghash.GHashGetRequest) (*ghash.
 }
 
 // HDel is a grpc s for del
-func (s *Service) HDel(ctx context.Context, req *ghash.GHashDelRequest) (*ghash.GHashDelResponse, error) {
+func (s *hash) HDel(ctx context.Context, req *ghash.GHashDelRequest) (*ghash.GHashDelResponse, error) {
 	ok, err := s.dbh.HDel(req.Key, req.Field)
 	if err != nil {
 		return &ghash.GHashDelResponse{Ok: ok}, err
@@ -101,7 +132,7 @@ func (s *Service) HDel(ctx context.Context, req *ghash.GHashDelRequest) (*ghash.
 	return &ghash.GHashDelResponse{Ok: ok}, err
 }
 
-func setValue(s *Service, key string, field interface{}, r *ghash.GHashSetRequest) (bool, error) {
+func setValue(s *hash, key string, field interface{}, r *ghash.GHashSetRequest) (bool, error) {
 	switch r.Value.(type) {
 	case *ghash.GHashSetRequest_StringValue:
 		ok, err := s.dbh.HSet(key, field, r.GetStringValue())
