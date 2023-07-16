@@ -2,73 +2,35 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
-	"net"
-	"os/signal"
-	"syscall"
+	"github.com/ByteStorage/FlyDB/structure"
 	"time"
 )
 
-// IsGrpcServerRunning returns whether the grpc server is running
-func (s *Service) IsGrpcServerRunning() bool {
-	conn, err := grpc.Dial(s.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return false
-	}
-	err = conn.Close()
-	return err == nil
+type StringService interface {
+	Base
+	gstring.GStringServiceServer
 }
 
-// StartServer starts a grpc server
-func (s *Service) StartServer() {
-	listener, err := net.Listen("tcp", s.Addr)
-	if err != nil {
-		panic("tcp listen error: " + err.Error())
-	}
-	server := grpc.NewServer()
-	gstring.RegisterGStringServiceServer(server, s)
-	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
-	go func() {
-		err := server.Serve(listener)
-		if err != nil {
-			panic("db server start error: " + err.Error())
-		}
-	}()
-	//wait for server start
-	for {
-		conn, err := grpc.Dial(s.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			continue
-		}
-		err = conn.Close()
-		if err != nil {
-			continue
-		}
-		break
-	}
-	fmt.Println("flydb start success on ", s.Addr)
-	// graceful shutdown
-	signal.Notify(s.sig, syscall.SIGINT, syscall.SIGKILL)
-
-	<-s.sig
-	err = s.dbs.Stop()
-	if err != nil {
-		fmt.Println("flydb stop error: ", err)
-		return
-	}
-	fmt.Println("flydb stop success on ", s.Addr)
-
+type str struct {
+	dbs *structure.StringStructure
+	gstring.GStringServiceServer
 }
 
-// StopServer stops a grpc server
-func (s *Service) StopServer() {
-	s.sig <- syscall.SIGINT
+func (s *str) CloseDb() error {
+	return s.dbs.Stop()
+}
+
+func NewStringService(options config.Options) (StringService, error) {
+	stringStructure, err := structure.NewStringStructure(options)
+	if err != nil {
+		return nil, err
+	}
+	return &str{
+		dbs: stringStructure,
+	}, nil
 }
 
 // Put is a grpc s for put
@@ -139,86 +101,15 @@ func (s *Service) Type(ctx context.Context, req *gstring.TypeRequest) (*gstring.
 }
 
 func (s *Service) StrLen(ctx context.Context, req *gstring.StrLenRequest) (*gstring.StrLenResponse, error) {
-	value, err := s.dbs.Get(req.Key)
-	if err != nil {
-		return nil, err
-	}
-	resp := &gstring.StrLenResponse{}
-	switch v := value.(type) {
-	case string:
-		resp.Length = int32(len(v))
-	case []byte:
-		resp.Length = int32(len(v))
-	default:
-		resp.Length = 0
-	}
-	return resp, nil
+	panic("implement me")
 }
 
 func (s *Service) GetSet(ctx context.Context, req *gstring.GetSetRequest) (*gstring.GetSetResponse, error) {
-	previousValue, err := s.dbs.Get(req.Key)
-	if err != nil {
-		return nil, err
-	}
-	switch req.Value.(type) {
-	case *gstring.GetSetRequest_StringValue:
-		err = s.dbs.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
-	case *gstring.GetSetRequest_Int32Value:
-		err = s.dbs.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
-	case *gstring.GetSetRequest_Int64Value:
-		err = s.dbs.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
-	case *gstring.GetSetRequest_Float32Value:
-		err = s.dbs.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
-	case *gstring.GetSetRequest_Float64Value:
-		err = s.dbs.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
-	case *gstring.GetSetRequest_BoolValue:
-		err = s.dbs.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
-	case *gstring.GetSetRequest_BytesValue:
-		err = s.dbs.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
-	default:
-		err = fmt.Errorf("unknown value type")
-	}
-	if err != nil {
-		return nil, err
-	}
-	resp := &gstring.GetSetResponse{}
-	switch v := previousValue.(type) {
-	case string:
-		resp.Value = &gstring.GetSetResponse_StringValue{StringValue: v}
-	case int32:
-		resp.Value = &gstring.GetSetResponse_Int32Value{Int32Value: v}
-	case int64:
-		resp.Value = &gstring.GetSetResponse_Int64Value{Int64Value: v}
-	case float32:
-		resp.Value = &gstring.GetSetResponse_Float32Value{Float32Value: v}
-	case float64:
-		resp.Value = &gstring.GetSetResponse_Float64Value{Float64Value: v}
-	case bool:
-		resp.Value = &gstring.GetSetResponse_BoolValue{BoolValue: v}
-	case []byte:
-		resp.Value = &gstring.GetSetResponse_BytesValue{BytesValue: v}
-	}
-	return resp, nil
+	panic("implement me")
 }
 
 func (s *Service) Append(ctx context.Context, req *gstring.AppendRequest) (*gstring.AppendResponse, error) {
-	value, err := s.dbs.Get(req.Key)
-	if err != nil {
-		return nil, err
-	}
-
-	switch v := value.(type) {
-	case string:
-		newValue := v + req.Value
-		err := s.dbs.Set(req.Key, newValue, time.Duration(req.Expire))
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return nil, errors.New("append operation not supported for the given key")
-	}
-
-	return &gstring.AppendResponse{Ok: true}, nil
+	panic("implement me")
 }
 
 func (s *Service) Incr(ctx context.Context, req *gstring.IncrRequest) (*gstring.IncrResponse, error) {
