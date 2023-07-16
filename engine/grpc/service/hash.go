@@ -30,61 +30,6 @@ func (s *hash) CloseDb() error {
 	return s.dbh.Stop()
 }
 
-func (s *hash) HExists(ctx context.Context, request *ghash.GHashExistsRequest) (*ghash.GHashExistsResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HLen(ctx context.Context, request *ghash.GHashLenRequest) (*ghash.GHashLenResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HUpdate(ctx context.Context, request *ghash.GHashUpdateRequest) (*ghash.GHashUpdateResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HIncrBy(ctx context.Context, request *ghash.GHashIncrByRequest) (*ghash.GHashIncrByResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HIncrByFloat(ctx context.Context, request *ghash.GHashIncrByFloatRequest) (*ghash.GHashIncrByFloatResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HDecrBy(ctx context.Context, request *ghash.GHashDecrByRequest) (*ghash.GHashDecrByResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HStrLen(ctx context.Context, request *ghash.GHashStrLenRequest) (*ghash.GHashStrLenResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HMove(ctx context.Context, request *ghash.GHashMoveRequest) (*ghash.GHashMoveResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HSetNX(ctx context.Context, request *ghash.GHashSetNXRequest) (*ghash.GHashSetNXResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HType(ctx context.Context, request *ghash.GHashTypeRequest) (*ghash.GHashTypeResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) mustEmbedUnimplementedGHashServiceServer() {
-	//TODO implement me
-	panic("implement me")
-}
-
 // HSet is a grpc s for put
 func (s *hash) HSet(ctx context.Context, req *ghash.GHashSetRequest) (*ghash.GHashSetResponse, error) {
 	fmt.Println("receive put request: key: ", req.Key, " field: ", req.GetField(), " value: ", req.GetValue())
@@ -158,4 +103,166 @@ func setValue(s *hash, key string, field interface{}, r *ghash.GHashSetRequest) 
 	default:
 		return false, fmt.Errorf("unknown value type")
 	}
+}
+
+func (s *hash) HExists(ctx context.Context, req *ghash.GHashExistsRequest) (*ghash.GHashExistsResponse, error) {
+	exists, err := s.dbh.HExists(req.Key, req.Field)
+	if err != nil {
+		return nil, err
+	}
+	return &ghash.GHashExistsResponse{Ok: exists}, nil
+}
+
+func (s *hash) HLen(ctx context.Context, req *ghash.GHashLenRequest) (*ghash.GHashLenResponse, error) {
+	length, err := s.dbh.HLen(req.Key)
+	if err != nil {
+		return nil, err
+	}
+	resp := &ghash.GHashLenResponse{
+		Length: int64(length),
+	}
+	return resp, nil
+}
+
+func (s *hash) HUpdate(ctx context.Context, req *ghash.GHashUpdateRequest) (*ghash.GHashUpdateResponse, error) {
+
+	ok, err := updateValue(s, req.Key, req.Field, req)
+	if err != nil {
+		return &ghash.GHashUpdateResponse{Ok: ok}, err
+	}
+
+	return &ghash.GHashUpdateResponse{Ok: ok}, nil
+}
+
+func updateValue(s *hash, key string, field interface{}, r *ghash.GHashUpdateRequest) (bool, error) {
+	switch r.Value.(type) {
+	case *ghash.GHashUpdateRequest_StringValue:
+		ok, err := s.dbh.HUpdate(key, field, r.GetStringValue())
+		return ok, err
+	case *ghash.GHashUpdateRequest_Int32Value:
+		ok, err := s.dbh.HUpdate(key, field, r.GetInt32Value())
+		return ok, err
+	case *ghash.GHashUpdateRequest_Int64Value:
+		ok, err := s.dbh.HUpdate(key, field, r.GetInt64Value())
+		return ok, err
+	case *ghash.GHashUpdateRequest_Float32Value:
+		ok, err := s.dbh.HUpdate(key, field, r.GetFloat32Value())
+		return ok, err
+	case *ghash.GHashUpdateRequest_Float64Value:
+		ok, err := s.dbh.HUpdate(key, field, r.GetFloat64Value())
+		return ok, err
+	case *ghash.GHashUpdateRequest_BoolValue:
+		ok, err := s.dbh.HUpdate(key, field, r.GetBoolValue())
+		return ok, err
+	case *ghash.GHashUpdateRequest_BytesValue:
+		ok, err := s.dbh.HUpdate(key, field, r.GetBytesValue())
+		return ok, err
+	default:
+		return false, fmt.Errorf("unknown value type")
+	}
+}
+
+func (s *hash) HIncrBy(ctx context.Context, req *ghash.GHashIncrByRequest) (*ghash.GHashIncrByResponse, error) {
+	value, err := s.dbh.HIncrBy(req.Key, req.Field, req.Value)
+	if err != nil {
+		return &ghash.GHashIncrByResponse{}, err
+	}
+
+	resp := &ghash.GHashIncrByResponse{
+		Value: value,
+	}
+	return resp, nil
+}
+
+func (s *hash) HIncrByFloat(ctx context.Context, req *ghash.GHashIncrByFloatRequest) (*ghash.GHashIncrByFloatResponse, error) {
+	value, err := s.dbh.HIncrByFloat(req.Key, req.Field, req.Value)
+	if err != nil {
+		return &ghash.GHashIncrByFloatResponse{}, err
+	}
+
+	resp := &ghash.GHashIncrByFloatResponse{
+		Value: value,
+	}
+	return resp, nil
+}
+
+func (s *hash) HDecrBy(ctx context.Context, req *ghash.GHashDecrByRequest) (*ghash.GHashDecrByResponse, error) {
+	value, err := s.dbh.HDecrBy(req.Key, req.Field, req.Value)
+	if err != nil {
+		return &ghash.GHashDecrByResponse{}, err
+	}
+
+	resp := &ghash.GHashDecrByResponse{
+		Value: value,
+	}
+	return resp, nil
+}
+
+func (s *hash) HStrLen(ctx context.Context, req *ghash.GHashStrLenRequest) (*ghash.GHashStrLenResponse, error) {
+	length, err := s.dbh.HStrLen(req.Key, req.Field)
+	if err != nil {
+		return &ghash.GHashStrLenResponse{}, err
+	}
+	resp := &ghash.GHashStrLenResponse{
+		Length: int64(length),
+	}
+	return resp, nil
+}
+
+func (s *hash) HMove(ctx context.Context, req *ghash.GHashMoveRequest) (*ghash.GHashMoveResponse, error) {
+	ok, err := s.dbh.HMove(req.Key, req.Dest, req.Field)
+	if err != nil {
+		return &ghash.GHashMoveResponse{Ok: ok}, err
+	}
+	return &ghash.GHashMoveResponse{Ok: ok}, nil
+}
+
+func (s *hash) HSetNX(ctx context.Context, req *ghash.GHashSetNXRequest) (*ghash.GHashSetNXResponse, error) {
+	// Check if the key already exists
+	ok, err := setNXValue(s, req.Key, req.Field, req)
+	if err != nil {
+		return &ghash.GHashSetNXResponse{Ok: ok}, err
+	}
+
+	return &ghash.GHashSetNXResponse{Ok: ok}, nil
+}
+func setNXValue(s *hash, key string, field interface{}, r *ghash.GHashSetNXRequest) (bool, error) {
+	switch r.Value.(type) {
+	case *ghash.GHashSetNXRequest_StringValue:
+		ok, err := s.dbh.HSetNX(key, field, r.GetStringValue())
+		return ok, err
+	case *ghash.GHashSetNXRequest_Int32Value:
+		ok, err := s.dbh.HSetNX(key, field, r.GetInt32Value())
+		return ok, err
+	case *ghash.GHashSetNXRequest_Int64Value:
+		ok, err := s.dbh.HSetNX(key, field, r.GetInt64Value())
+		return ok, err
+	case *ghash.GHashSetNXRequest_Float32Value:
+		ok, err := s.dbh.HSetNX(key, field, r.GetFloat32Value())
+		return ok, err
+	case *ghash.GHashSetNXRequest_Float64Value:
+		ok, err := s.dbh.HSetNX(key, field, r.GetFloat64Value())
+		return ok, err
+	case *ghash.GHashSetNXRequest_BoolValue:
+		ok, err := s.dbh.HSetNX(key, field, r.GetBoolValue())
+		return ok, err
+	case *ghash.GHashSetNXRequest_BytesValue:
+		ok, err := s.dbh.HSetNX(key, field, r.GetBytesValue())
+		return ok, err
+	default:
+		return false, fmt.Errorf("unknown value type")
+	}
+}
+
+func (s *hash) HType(ctx context.Context, req *ghash.GHashTypeRequest) (*ghash.GHashTypeResponse, error) {
+	hashType, err := s.dbh.HTypes(req.Key, req.Field)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ghash.GHashTypeResponse{
+		Type: hashType,
+	}
+
+	return response, nil
 }
