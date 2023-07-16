@@ -160,6 +160,48 @@ func (s *StreamStructure) XRead(name string, count int) ([]StreamMessage, error)
 	return result, nil
 }
 
+func (s *StreamStructure) XDel(name string, ids string) (bool, int, error) {
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return false, len(s.streams.Messages), err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return false, len(s.streams.Messages), err
+	}
+
+	// Get the messages
+	messages := s.streams.Messages
+
+	// Create a new slice of StreamMessage
+	var result []*StreamMessage
+
+	// Get the messages
+	for _, msg := range messages {
+		if msg.Id != ids {
+			result = append(result, msg)
+		}
+	}
+
+	// Set the messages
+	s.streams.Messages = result
+
+	// Encode the streams
+	encodedStreams, err = s.encodeStreams(s.streams)
+	if err != nil {
+		return false, len(s.streams.Messages), err
+	}
+
+	// Set the stream
+	if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
+		return false, len(s.streams.Messages), err
+	}
+
+	return true, len(s.streams.Messages), nil
+}
+
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
 	// Encode the streams
 	data, err := json.Marshal(ss)
