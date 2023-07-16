@@ -60,6 +60,21 @@ func stringDeleteKey(c *grumble.Context) error {
 	return nil
 }
 
+func stringGetType(c *grumble.Context) error {
+	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
+	valueType, err := newClient().Type(key)
+	if err != nil {
+		fmt.Println("get type error: ", err)
+		return err
+	}
+	fmt.Println("Type:", valueType)
+	return nil
+}
+
 func stringStrLen(c *grumble.Context) error {
 	key := c.Args.String("key")
 	strLen, err := newClient().StrLen(key)
@@ -78,11 +93,101 @@ func stringGetSet(c *grumble.Context) error {
 		fmt.Println("key or value is empty")
 		return nil
 	}
-	oleValue, err := newClient().GetSet(key, value)
+	oldValue, err := newClient().GetSet(key, value)
 	if err != nil {
 		return err
 	}
-	fmt.Println(oleValue)
+	fmt.Println(oldValue)
+	return nil
+}
+
+func stringAppend(c *grumble.Context) error {
+	key := c.Args.String("key")
+	value := c.Args.String("value")
+	err := newClient().Append(key, value)
+	if err != nil {
+		fmt.Println("Append failed")
+		return err
+	}
+	fmt.Println("Append is successful")
+	return nil
+}
+
+func stringIncr(c *grumble.Context) error {
+	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
+	err := newClient().Incr(key)
+	if err != nil {
+		fmt.Println("incr operation error: ", err)
+		return err
+	}
+	fmt.Println("Incr operation success")
+	return nil
+}
+
+func stringIncrBy(c *grumble.Context) error {
+	key := c.Args.String("key")
+	amount := c.Args.Int64("amount")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
+	err := newClient().IncrBy(key, amount)
+	if err != nil {
+		fmt.Println("incrby operation error: ", err)
+		return err
+	}
+	fmt.Println("IncrBy operation success")
+	return nil
+}
+
+func stringIncrByFloat(c *grumble.Context) error {
+	key := c.Args.String("key")
+	amount := c.Args.Float64("amount")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
+	err := newClient().IncrByFloat(key, amount)
+	if err != nil {
+		fmt.Println("incrbyfloat operation error: ", err)
+		return err
+	}
+	fmt.Println("IncrByFloat operation success")
+	return nil
+}
+
+func stringDecr(c *grumble.Context) error {
+	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
+	err := newClient().Decr(key)
+	if err != nil {
+		fmt.Println("decr operation error: ", err)
+		return err
+	}
+	fmt.Println("Decr operation success")
+	return nil
+}
+
+func stringDecrBy(c *grumble.Context) error {
+	key := c.Args.String("key")
+	amount := c.Args.Int64("amount")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
+	err := newClient().DecrBy(key, amount)
+	if err != nil {
+		fmt.Println("decrby operation error: ", err)
+		return err
+	}
+	fmt.Println("DecrBy operation success")
 	return nil
 }
 
@@ -105,18 +210,6 @@ func stringExpire(c *grumble.Context) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func stringAppend(c *grumble.Context) error {
-	key := c.Args.String("key")
-	value := c.Args.String("value")
-	err := newClient().Append(key, value)
-	if err != nil {
-		fmt.Println("Append failed")
-		return err
-	}
-	fmt.Println("Append is successful")
 	return nil
 }
 

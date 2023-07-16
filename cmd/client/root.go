@@ -63,6 +63,15 @@ func register(app *grumble.App) {
 	})
 
 	app.AddCommand(&grumble.Command{
+		Name: "type",
+		Help: "get the type of a key",
+		Run:  stringGetType,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
 		Name: "strlen",
 		Help: "str value length in string-structure",
 		Run:  stringStrLen,
@@ -88,6 +97,54 @@ func register(app *grumble.App) {
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "incr",
+		Help: "increment the value of a key in string-structure",
+		Run:  stringIncr,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "incrby",
+		Help: "increment the value of a key by a specific amount in string-structure",
+		Run:  stringIncrBy,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int64("amount", "amount", grumble.Default(0))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "incrbyfloat",
+		Help: "increment the value of a key by a floating-point amount in string-structure",
+		Run:  stringIncrByFloat,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Float64("amount", "amount", grumble.Default(0.0))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "decr",
+		Help: "decrement the value of a key",
+		Run:  stringDecr,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "decrby",
+		Help: "decrement the value of a key by a specific amount in string-structure",
+		Run:  stringDecrBy,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int64("amount", "amount", grumble.Default(0))
 		},
 	})
 
