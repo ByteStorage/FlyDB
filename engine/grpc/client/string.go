@@ -100,6 +100,20 @@ func (c *Client) StrLen(key string) (int32, error) {
 	return resp.Length, nil
 }
 
+func (c *Client) Type(key string) (string, error) {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return "", err
+	}
+
+	typeResp, err := client.Type(context.Background(), &gstring.TypeRequest{Key: key})
+	if err != nil {
+		return "", err
+	}
+
+	return typeResp.Type, nil
+}
+
 func (c *Client) Append(key string, value string) error {
 	client, err := newGrpcClient(c.Addr)
 	if err != nil {
@@ -118,7 +132,7 @@ func (c *Client) Append(key string, value string) error {
 func (c *Client) GetSet(key string, value interface{}) (interface{}, error) {
 	client, err := newGrpcClient(c.Addr)
 	if err != nil {
-		return errors.New("new grpc client error: " + err.Error()), nil
+		return err, nil
 	}
 	req := &gstring.GetSetRequest{
 		Key: key,
@@ -148,24 +162,96 @@ func (c *Client) GetSet(key string, value interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	switch v := resp.Value.(type) {
+	switch value := resp.Value.(type) {
 	case *gstring.GetSetResponse_StringValue:
-		return v.StringValue, nil
+		return value.StringValue, nil
 	case *gstring.GetSetResponse_Int32Value:
-		return v.Int32Value, nil
+		return value.Int32Value, nil
 	case *gstring.GetSetResponse_Int64Value:
-		return v.Int64Value, nil
+		return value.Int64Value, nil
 	case *gstring.GetSetResponse_Float32Value:
-		return v.Float32Value, nil
+		return value.Float32Value, nil
 	case *gstring.GetSetResponse_Float64Value:
-		return v.Float64Value, nil
+		return value.Float64Value, nil
 	case *gstring.GetSetResponse_BoolValue:
-		return v.BoolValue, nil
+		return value.BoolValue, nil
 	case *gstring.GetSetResponse_BytesValue:
-		return v.BytesValue, nil
+		return value.BytesValue, nil
 	default:
 		return nil, fmt.Errorf("unknown response value type")
 	}
+}
+
+func (c *Client) Incr(key string) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+	_, err = client.Incr(context.Background(), &gstring.IncrRequest{Key: key})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) IncrBy(key string, amount int64) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+	_, err = client.IncrBy(context.Background(),
+		&gstring.IncrByRequest{Key: key, Amount: int32(amount)})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) IncrByFloat(key string, amount float64) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.IncrByFloat(context.Background(),
+		&gstring.IncrByFloatRequest{Key: key, Amount: amount})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) Decr(key string) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.Decr(context.Background(),
+		&gstring.DecrRequest{Key: key})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DecrBy(key string, amount int64) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.DecrBy(context.Background(),
+		&gstring.DecrByRequest{Key: key, Amount: int32(amount)})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) Exists(key string) (bool, error) {
