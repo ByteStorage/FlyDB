@@ -232,6 +232,40 @@ func (s *StreamStructure) XLen(name string) (int, error) {
 	return len(messages), nil
 }
 
+// XRange returns the messages in the stream
+// with the []StreamMessage as the return value
+func (s *StreamStructure) XRange(name string, start, stop int) ([]StreamMessage, error) {
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return nil, err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return nil, err
+	}
+
+	// Get the messages
+	messages := s.streams.Messages
+
+	// Create a new slice of StreamMessage
+	var result []StreamMessage
+
+	// Get the messages
+	if len(messages) >= stop {
+		messages = messages[start:stop]
+		// Convert []*StreamMessage to []StreamMessage
+		for _, msg := range messages {
+			result = append(result, *msg)
+		}
+	} else {
+		return nil, ErrAmountOfData
+	}
+
+	return result, nil
+}
+
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
 	// Encode the streams
 	data, err := json.Marshal(ss)

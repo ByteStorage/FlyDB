@@ -132,3 +132,33 @@ func TestStreamStructure_XLen(t *testing.T) {
 	assert.Equal(t, 1, length)
 
 }
+
+func TestStreamStructure_XRange(t *testing.T) {
+	stc, _ := initStreamDB()
+	defer stc.db.Clean()
+
+	ok1, err := stc.XAdd("test", "1", map[string]interface{}{"name1": "flydb1"})
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := stc.XAdd("test", "2", map[string]interface{}{"name2": "flydb2"})
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := stc.XAdd("test", "3", map[string]interface{}{"name3": "flydb3"})
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	ok4, err := stc.XAdd("test1", "1", map[string]interface{}{"name11": "flydb11"})
+	assert.Nil(t, err)
+	assert.True(t, ok4)
+
+	items, err := stc.XRange("test", 1, 3)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(items))
+
+	items, err = stc.XRange("test1", 1, 3)
+	assert.NotNil(t, err)
+	assert.Equal(t, 0, len(items))
+
+}
