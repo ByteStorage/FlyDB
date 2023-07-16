@@ -55,8 +55,8 @@ func NewStreamStructure(options config.Options) (*StreamStructure, error) {
 }
 
 var (
-	// ErrInvalidArgs is returned when the arguments are invalid
-	ErrInvalidArgs = errors.New("id or fields cannot be empty")
+	// ErrInvalidXArgs is returned when the arguments are invalid
+	ErrInvalidXArgs = errors.New("id or fields cannot be empty")
 	// ErrExistID is returned when the message ID already exists
 	ErrExistID = errors.New("message ID already exists")
 	// ErrInvalidCount is returned when the count is invalid
@@ -71,7 +71,7 @@ var (
 func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (bool, error) {
 	// Check if the arguments are valid
 	if len(id) == 0 || len(fields) == 0 || fields == nil {
-		return false, ErrInvalidArgs
+		return false, ErrInvalidXArgs
 	}
 
 	// init stream if not exist
@@ -266,6 +266,8 @@ func (s *StreamStructure) XRange(name string, start, stop int) ([]StreamMessage,
 	return result, nil
 }
 
+// encodeStreams encodes the streams
+// with the []byte as the return value
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
 	// Encode the streams
 	data, err := json.Marshal(ss)
@@ -275,6 +277,7 @@ func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
 	return data, nil
 }
 
+// decodeStreams decodes the streams
 func (s *StreamStructure) decodeStreams(ss []byte, ss2 *Streams) error {
 	// Decode the streams
 	if err := json.Unmarshal(ss, ss2); err != nil {
