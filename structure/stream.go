@@ -65,6 +65,9 @@ var (
 	ErrAmountOfData = errors.New("The number of queries exceeds the amount of data in the stream")
 )
 
+// XAdd adds a new message to a stream
+// If the stream does not exist, it will be created
+// If the message ID already exists, it will return false
 func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (bool, error) {
 	// Check if the arguments are valid
 	if len(id) == 0 || len(fields) == 0 || fields == nil {
@@ -124,6 +127,8 @@ func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (
 	return true, nil
 }
 
+// XRead reads messages from a stream
+// Returns a slice of StreamMessage
 func (s *StreamStructure) XRead(name string, count int) ([]StreamMessage, error) {
 	if count <= 0 {
 		return nil, ErrInvalidCount
@@ -160,6 +165,10 @@ func (s *StreamStructure) XRead(name string, count int) ([]StreamMessage, error)
 	return result, nil
 }
 
+// XDel deletes a message from a stream
+// Returns true if the message was deleted
+// Returns false if the message was not deleted
+// Returns the number of messages in the stream
 func (s *StreamStructure) XDel(name string, ids string) (bool, int, error) {
 	// Get the stream
 	encodedStreams, err := s.db.Get([]byte(name))
@@ -200,6 +209,27 @@ func (s *StreamStructure) XDel(name string, ids string) (bool, int, error) {
 	}
 
 	return true, len(s.streams.Messages), nil
+}
+
+// XLen returns the number of elements in a given stream
+// with the name of the stream as an argument
+// and the number of elements in the stream as the return value
+func (s *StreamStructure) XLen(name string) (int, error) {
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return 0, err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return 0, err
+	}
+
+	// Get the messages
+	messages := s.streams.Messages
+
+	return len(messages), nil
 }
 
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {

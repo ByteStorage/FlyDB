@@ -102,3 +102,33 @@ func TestStreamStructure_XDel(t *testing.T) {
 	assert.Nil(t, item1)
 
 }
+
+func TestStreamStructure_XLen(t *testing.T) {
+	stc, _ := initStreamDB()
+	defer stc.db.Clean()
+
+	ok1, err := stc.XAdd("test", "1", map[string]interface{}{"name1": "flydb1"})
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := stc.XAdd("test", "2", map[string]interface{}{"name2": "flydb2"})
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := stc.XAdd("test", "3", map[string]interface{}{"name3": "flydb3"})
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	ok4, err := stc.XAdd("test1", "1", map[string]interface{}{"name11": "flydb11"})
+	assert.Nil(t, err)
+	assert.True(t, ok4)
+
+	length, err := stc.XLen("test")
+	assert.Nil(t, err)
+	assert.Equal(t, 3, length)
+
+	length, err = stc.XLen("test1")
+	assert.Nil(t, err)
+	assert.Equal(t, 1, length)
+
+}
