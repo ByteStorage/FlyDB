@@ -24,9 +24,9 @@ type StreamGroup struct {
 	// LastDeliveredID is the last delivered message ID
 	LastGeneratedID string `json:"last_generated_id"`
 	// LastDeliveredTime is the last delivered message time
-	LastDeliveredTime time.Time
+	LastDeliveredTime time.Time `json:"last_delivered_time"`
 	// PendingMessages is the list of pending messages
-	PendingMessages map[string]*StreamMessage
+	PendingMessages map[string]*StreamMessage `json:"pending_messages"`
 }
 
 // Streams represents a stream with messages and consumer groups
@@ -354,6 +354,46 @@ func (s *StreamStructure) XTrim(name string, maxLen int) (int, error) {
 	return len(s.streams.Messages), nil
 }
 
+// XGroup creates a new consumer group
+// with the name of the stream, the name of the group, and the id of the message as arguments
+// and a boolean as the return value
+func (s *StreamStructure) XGroup(name, group, id string) (bool, error) {
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return false, err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return false, err
+	}
+
+	// Create a new stream group
+	sg := &StreamGroup{
+		Name:              group,
+		LastGeneratedID:   id,
+		LastDeliveredTime: time.Now(),
+		PendingMessages:   make(map[string]*StreamMessage),
+	}
+
+	// Set the stream group
+	s.streams.Groups[group] = sg
+
+	// Encode the streams
+	encodedStreams, err = s.encodeStreams(s.streams)
+	if err != nil {
+		return false, err
+	}
+
+	// Set the stream
+	if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // encodeStreams encodes the streams
 // with the []byte as the return value
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
@@ -372,4 +412,15 @@ func (s *StreamStructure) decodeStreams(ss []byte, ss2 *Streams) error {
 		return err
 	}
 	return nil
+}
+
+// encodeStreamGroup encodes the stream group
+// with the []byte as the return value
+func (s *StreamStructure) encodeStreamGroup(sg *StreamGroup) ([]byte, error) {
+	// Encode the stream group
+	data, err := json.Marshal(sg)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
