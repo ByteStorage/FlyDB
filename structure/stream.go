@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
+	"sort"
 	"time"
 )
 
@@ -262,6 +263,45 @@ func (s *StreamStructure) XRange(name string, start, stop int) ([]StreamMessage,
 	} else {
 		return nil, ErrAmountOfData
 	}
+
+	return result, nil
+}
+
+// XRevRange returns the messages in the stream
+// with the []StreamMessage as the return value
+func (s *StreamStructure) XRevRange(name string, start, stop int) ([]StreamMessage, error) {
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return nil, err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return nil, err
+	}
+
+	// Get the messages
+	messages := s.streams.Messages
+
+	// Create a new slice of StreamMessage
+	var result []StreamMessage
+
+	// Get the messages
+	if len(messages) >= stop {
+		messages = messages[start:stop]
+		// Convert []*StreamMessage to []StreamMessage
+		for _, msg := range messages {
+			result = append(result, *msg)
+		}
+	} else {
+		return nil, ErrAmountOfData
+	}
+
+	// Reverse the slice
+	sort.Slice(result, func(i, j int) bool {
+		return i > j
+	})
 
 	return result, nil
 }
