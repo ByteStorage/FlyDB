@@ -306,6 +306,54 @@ func (s *StreamStructure) XRevRange(name string, start, stop int) ([]StreamMessa
 	return result, nil
 }
 
+// XTrim trims the stream to a certain size
+// with the number of messages in the stream as the return value
+func (s *StreamStructure) XTrim(name string, maxLen int) (int, error) {
+	// Get the stream
+	encodedStreams, err := s.db.Get([]byte(name))
+	if err != nil {
+		return 0, err
+	}
+
+	// Decode the streams
+	if err = s.decodeStreams(encodedStreams, s.streams); err != nil {
+		return 0, err
+	}
+
+	// Get the messages
+	messages := s.streams.Messages
+
+	// Create a new slice of StreamMessage
+	var result []*StreamMessage
+
+	// Get the messages
+	if len(messages) >= maxLen {
+		messages = messages[:maxLen]
+		// Convert []*StreamMessage to []StreamMessage
+		for _, msg := range messages {
+			result = append(result, msg)
+		}
+	} else {
+		return 0, ErrAmountOfData
+	}
+
+	// Set the messages
+	s.streams.Messages = result
+
+	// Encode the streams
+	encodedStreams, err = s.encodeStreams(s.streams)
+	if err != nil {
+		return 0, err
+	}
+
+	// Set the stream
+	if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
+		return 0, err
+	}
+
+	return len(s.streams.Messages), nil
+}
+
 // encodeStreams encodes the streams
 // with the []byte as the return value
 func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
