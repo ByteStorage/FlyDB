@@ -20,33 +20,32 @@ type MessagePackCodec struct {
 // it manages IDs and counts of the encoded objects.
 type MessagePackCodecEncoder struct {
 	MessagePackCodec // Embedded MessagePackCodec
-
-	// nextId is used probably for tracking ID of the next object to encode.
-	nextId uint
-
-	// objects represents the count of objects that have been encoded.
-	objects int
 }
 
 // MessagePackCodecDecoder struct, holds a reference to a MessagePackCodec instance.
 type MessagePackCodecDecoder struct {
-	MessagePackCodec
+	*MessagePackCodec
+}
+
+// NewMsgPackHandle is a helper function to create a new instance of MsgpackHandle
+func NewMsgPackHandle() *codec.MsgpackHandle {
+	return &codec.MsgpackHandle{}
 }
 
 // InitMessagePack function initializes MessagePackCodec struct and returns it.
 func InitMessagePack() MessagePackCodec {
 	return MessagePackCodec{
-		MsgPack: &codec.MsgpackHandle{},
+		MsgPack: NewMsgPackHandle(),
 	}
 }
 
 // NewMessagePackEncoder function creates new MessagePackCodecEncoder and initializes it.
 func NewMessagePackEncoder() *MessagePackCodecEncoder {
-	msgPack := &codec.MsgpackHandle{}
+	msgPack := NewMsgPackHandle()
 	b := make([]byte, 0)
 	return &MessagePackCodecEncoder{
 		MessagePackCodec: MessagePackCodec{
-			MsgPack: &codec.MsgpackHandle{},
+			MsgPack: msgPack,
 			b:       &b,
 			enc:     codec.NewEncoderBytes(&b, msgPack),
 		},
@@ -56,10 +55,10 @@ func NewMessagePackEncoder() *MessagePackCodecEncoder {
 // NewMessagePackDecoder function takes in a byte slice, and returns a pointer to newly created
 // and initialized MessagePackCodecDecoder
 func NewMessagePackDecoder(b []byte) *MessagePackCodecDecoder {
-	msgPack := &codec.MsgpackHandle{}
+	msgPack := NewMsgPackHandle()
 	return &MessagePackCodecDecoder{
-		MessagePackCodec: MessagePackCodec{
-			MsgPack: &codec.MsgpackHandle{},
+		MessagePackCodec: &MessagePackCodec{
+			MsgPack: msgPack,
 			b:       &b,
 			dec:     codec.NewDecoderBytes(b, msgPack),
 		},
@@ -122,7 +121,7 @@ func (m *MessagePackCodec) AddExtension(
 func EncodeMessagePack(msg interface{}) ([]byte, error) {
 	// Directly initialize the byte slice and encoder.
 	b := make([]byte, 0)
-	enc := codec.NewEncoderBytes(&b, &codec.MsgpackHandle{})
+	enc := codec.NewEncoderBytes(&b, NewMsgPackHandle())
 
 	// Attempt to encode the message.
 	if err := enc.Encode(msg); err != nil {
@@ -135,7 +134,7 @@ func EncodeMessagePack(msg interface{}) ([]byte, error) {
 
 // DecodeMessagePack function decodes a byte slice of MessagePack data into a given object.
 func DecodeMessagePack(in []byte, out interface{}) error {
-	dec := codec.NewDecoder(bytes.NewBuffer(in), &codec.MsgpackHandle{})
+	dec := codec.NewDecoder(bytes.NewBuffer(in), NewMsgPackHandle())
 	return dec.Decode(out)
 }
 
@@ -157,12 +156,19 @@ func EncodeString(s string) ([]byte, error) {
 	return b, nil
 }
 
-// DecodeString is a function that takes an input byte slice and attempts to decode it to obtain a string.
-// Return parameters are an integer, a string and an error. Integer denotes the length of the byte slice
-// representation of the string including length-field. The second return parameter is the decoded string.
-// DecodeString raises an error if the length of byte slice is less than the expected string length plus
-// one (considering the string length field) or if the provided byte slice is empty.
-// If successful, returns length of byte representation of string, the decoded string and a nil error.
+/*
+DecodeString converts an input byte slice into a string.
+Arguments:
+
+	b: Input byte slice to be decoded.
+
+Returns:
+- Integer: Length of byte representation of the string.
+- String: Decoded string.
+- Error: 'invalid length' if slice is empty or insufficient length, else nil.
+
+The function reads the first byte as string length (l), creates a slice of length l and returns the formed string.
+*/
 func DecodeString(b []byte) (int, string, error) {
 	// Check that byte slice is not empty.
 	if len(b) == 0 {

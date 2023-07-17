@@ -4,7 +4,10 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"math/rand"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -31,28 +34,13 @@ func TestSortedSet(t *testing.T) {
 	err = zs.InsertNode(44, "orange", "hello")
 	err = zs.InsertNode(9, "strawberry", "delish")
 	err = zs.InsertNode(15, "dragon-fruit", "nonDelish")
-	t.Log(zs.skipList.getRank(9, "strawberry"))
-	t.Log(zs.skipList.getNodeByRank(1))
-	t.Log(zs.skipList.getNodeByRank(2))
-	t.Log(zs.skipList.getNodeByRank(3))
-	t.Log(zs.skipList.getNodeByRank(5))
-	//var bufEnc bytes.Buffer
-	//enc := gob.NewEncoder(&bufEnc)
-	//err = enc.Encode(zs)
-	//assert.NoError(t, err)
 	b, err := zs.Bytes()
-	t.Log(b)
 
 	fromBytes := newZSetNodes()
-	//buf := bytes.NewBuffer(bufEnc.Bytes())
-	//gd := gob.NewDecoder(buf)
-	//err = gd.Decode(fromBytes.FromBytes(b))
-	//assert.NoError(t, err)
-
-	t.Log(fromBytes.FromBytes(b))
-	//t.Log(fromBytes)
+	err = fromBytes.FromBytes(b)
 	assert.NoError(t, err)
-
+	assert.NotNil(t, fromBytes.skipList)
+	assert.Equal(t, fromBytes.size, zs.size)
 	tests := []test{
 		{
 			name:        "empty",
@@ -79,14 +67,404 @@ func TestSortedSet_Bytes(t *testing.T) {
 
 }
 
+func TestZRem(t *testing.T) {
+	mockZSetStructure, _ := initZSetDB()
+
+	// 1. Test for Key is Empty
+	err := mockZSetStructure.ZRem("", "member")
+	require.Error(t, err)
+	require.Equal(t, _const.ErrKeyIsEmpty, err)
+	type testCase struct {
+		key    string
+		score  int
+		member string
+		value  string
+		err    error
+	}
+
+	testCases := []testCase{
+		{"key", 10, "member", "value", nil},
+		{"", 10, "member", "value", _const.ErrKeyIsEmpty},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.key, func(t *testing.T) {
+			err := mockZSetStructure.ZAdd(tc.key, tc.score, tc.member, tc.value)
+			// check to see if element added
+			assert.Equal(t, tc.err, err)
+			if tc.err == nil {
+				// check if member added
+				assert.True(t, mockZSetStructure.exists(tc.key, tc.score, tc.member))
+			}
+
+		})
+	}
+}
+func TestZAdd(t *testing.T) {
+	zs, _ := initZSetDB()
+	type testCase struct {
+		key    string
+		score  int
+		member string
+		value  string
+		want   SkipListNodeValue
+		err    error
+	}
+
+	testCases := []testCase{
+		{
+			"key",
+			10,
+			"member",
+			"value",
+			SkipListNodeValue{member: "member"},
+			nil,
+		},
+		{
+			"",
+			10,
+			"member",
+			"value",
+			SkipListNodeValue{member: ""},
+			_const.ErrKeyIsEmpty,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.key, func(t *testing.T) {
+			err := zs.ZAdd(tc.key, tc.score, tc.member, tc.value)
+			assert.Equal(t, tc.err, err)
+			if tc.err == nil {
+				// check if member added
+				assert.True(t, zs.exists(tc.key, tc.score, tc.member))
+				err = zs.ZRem(tc.key, tc.member)
+				assert.NoError(t, err)
+				// should be removed successfully
+				assert.False(t, zs.exists(tc.key, tc.score, tc.member))
+			}
+			// Adjust according to your error handling
+
+		})
+	}
+}
+func TestZIncrBy(t *testing.T) {
+	zs, _ := initZSetDB()
+	err := zs.ZIncrBy("", "non-existingMember", 5)
+	if err == nil {
+		t.Error("Expected error for empty key not returned")
+	}
+
+	err = zs.ZIncrBy("key", "non-existingMember", 5)
+	if !assert.ErrorIs(t, err, _const.ErrKeyNotFound) {
+		t.Error("Expected ErrKeyNotFound for non-existing member not returned")
+	}
+	err = zs.ZAdd("key", 1, "existingMember", "")
+	assert.NoError(t, err)
+	err = zs.ZIncrBy("key", "existingMember", 5)
+	assert.NoError(t, err)
+
+	Zset, err := zs.getZSetFromDB(stringToBytesWithKey("key"))
+	assert.Equal(t, 6, Zset.dict["existingMember"].score)
+}
+func TestZRank(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	// Assume that ZAdd adds a member to a set and assigns the member a score.
+	// Here the score does not matter
+	err := zs.ZAdd("myKey", 1, "member1", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 2, "member2", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 3, "member3", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 4, "member4", "")
+	assert.NoError(t, err)
+
+	// Test when member is present in the set
+	rank, err := zs.ZRank("myKey", "member1")
+	assert.NoError(t, err)   // no error should occur
+	assert.Equal(t, 1, rank) // as we inserted 'member1' first, its rank should be 1
+
+	// Test when member is not present in the set
+	rank, err = zs.ZRank("myKey", "unavailableMember")
+	assert.Error(t, err)     // an error should occur
+	assert.Equal(t, 0, rank) // as 'unavailableMember' is not part of set, rank should be 0
+
+	// Test with an empty key
+	rank, err = zs.ZRank("", "member")
+	assert.Error(t, err)     // an error should occur
+	assert.Equal(t, 0, rank) // rank should be 0 for invalid key}
+
+	// Test member2 which should be 2nd
+	rank, err = zs.ZRank("myKey", "member2")
+	assert.NoError(t, err)   // there should be no errors
+	assert.Equal(t, 2, rank) // rank should be 2 for key `member2`
+
+	// Test member3 which should be 3rd
+	rank, err = zs.ZRank("myKey", "member3")
+	assert.NoError(t, err) // there should be no errors
+	assert.Equal(t, 3, rank)
+
+	// remove member2 and test `member3` which should become 2
+	err = zs.ZRem("myKey", "member2")
+	assert.NoError(t, err) // there should be no errors
+	rank, err = zs.ZRank("myKey", "member3")
+	assert.NoError(t, err)   // there should be no errors
+	assert.Equal(t, 2, rank) // now `member3` should become 2nd
+}
+func TestZRevRank(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	// Assume that ZAdd adds a member to a set and assigns the member a score.
+	// Here the score does not matter
+	err := zs.ZAdd("myKey", 1, "member1", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 2, "member2", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 3, "member3", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 4, "member4", "")
+	assert.NoError(t, err)
+
+	// Test when member is present in the set
+	rank, err := zs.ZRevRank("myKey", "member3")
+	assert.NoError(t, err)   // no error should occur
+	assert.Equal(t, 2, rank) // as we inserted 'member1' first, its rank should be 1
+
+	// Test when member is not present in the set
+	rank, err = zs.ZRevRank("myKey", "unavailableMember")
+	assert.Error(t, err)     // an error should occur
+	assert.Equal(t, 0, rank) // as 'unavailableMember' is not part of set, rank should be 0
+
+	// Test with an empty key
+	rank, err = zs.ZRevRank("", "member")
+	assert.Error(t, err)     // an error should occur
+	assert.Equal(t, 0, rank) // rank should be 0 for invalid key}
+
+	// Test member2 which should be 2nd
+	rank, err = zs.ZRevRank("myKey", "member1")
+	assert.NoError(t, err)   // there should be no errors
+	assert.Equal(t, 4, rank) // rank should be 2 for key `member2`
+
+	// Test member3 which should be 3rd
+	rank, err = zs.ZRevRank("myKey", "member4")
+	assert.NoError(t, err) // there should be no errors
+	assert.Equal(t, 1, rank)
+
+	// remove member2 and test `member3` which should become 2
+	err = zs.ZRem("myKey", "member2")
+	assert.NoError(t, err) // there should be no errors
+	rank, err = zs.ZRevRank("myKey", "member3")
+	assert.NoError(t, err)   // there should be no errors
+	assert.Equal(t, 2, rank) // now `member3` should become 2nd
+}
+func TestZRevRange(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	err := zs.ZAdd("myKey", 1, "member1", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 2, "member2", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 3, "member3", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 4, "member4", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 5, "member5", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 6, "member6", "")
+	assert.NoError(t, err)
+
+	var n []uint8
+	tests := []struct {
+		key     string
+		start   int
+		end     int
+		want    []SkipListNodeValue
+		wantErr error
+	}{
+		{"myKey", 0, 3, []SkipListNodeValue{
+			{6, "member6", n},
+			{5, "member5", n},
+			{4, "member4", n},
+		}, nil},
+		{"", 0, 2, nil, _const.ErrKeyIsEmpty},
+		{"fail", 0, 2, nil, _const.ErrKeyNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key, func(t *testing.T) {
+			got, err := zs.ZRevRange(tt.key, tt.start, tt.end)
+
+			if !reflect.DeepEqual(err, tt.wantErr) {
+				t.Errorf("ZRange() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ZRange() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func TestZRange(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	err := zs.ZAdd("myKey", 1, "member1", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 2, "member2", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 3, "member3", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 4, "member4", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 5, "member5", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 6, "member6", "")
+	assert.NoError(t, err)
+	var n []uint8
+	tests := []struct {
+		key     string
+		start   int
+		end     int
+		want    []SkipListNodeValue
+		wantErr error
+	}{
+		{"myKey", 0, 3, []SkipListNodeValue{
+			{1, "member1", n},
+			{2, "member2", n},
+			{3, "member3", n},
+		}, nil},
+		{"", 0, 2, nil, _const.ErrKeyIsEmpty},
+		{"fail", 0, 2, nil, _const.ErrKeyNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key, func(t *testing.T) {
+			got, err := zs.ZRange(tt.key, tt.start, tt.end)
+
+			if !reflect.DeepEqual(err, tt.wantErr) {
+				t.Errorf("ZRange() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ZRange() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func TestZCard(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	err := zs.ZAdd("myKey", 1, "member1", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 2, "member2", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 3, "member3", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 4, "member4", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 5, "member5", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 6, "member6", "")
+	assert.NoError(t, err)
+	tests := []struct {
+		name    string
+		key     string
+		want    int
+		wantErr error
+	}{
+		{"Empty Key", "", 0, _const.ErrKeyIsEmpty},
+		{"Non-Existent Key", "nonExist", 0, _const.ErrKeyNotFound},
+		{"Existing Key", "myKey", 6, nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key, func(t *testing.T) {
+			got, err := zs.ZCard(tt.key)
+
+			if tt.want != got {
+				t.Fatalf("expected %d, got %d", tt.want, got)
+			}
+
+			if tt.wantErr != nil {
+				if err == nil || tt.wantErr.Error() != err.Error() {
+					t.Fatalf("expected error '%v', got '%v'", tt.wantErr, err)
+				}
+
+			} else if err != nil {
+				t.Fatalf("expected no error, got error '%v'", err)
+			}
+		})
+	}
+}
+func TestZScore(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	err := zs.ZAdd("myKey", 1, "member1", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 2, "member2", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 3, "member3", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 4, "member4", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 5, "member5", "")
+	assert.NoError(t, err)
+
+	err = zs.ZAdd("myKey", 6, "member6", "")
+	assert.NoError(t, err)
+	tests := []struct {
+		expectError   error
+		expectedScore int
+		key           string
+		member        string
+	}{
+		{_const.ErrKeyIsEmpty, 0, "", "member1"},
+		{_const.ErrKeyNotFound, 0, "key1", "foo"},
+		{nil, 1, "myKey", "member1"},
+		{nil, 2, "myKey", "member2"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.key, func(t *testing.T) {
+			score, err := zs.ZScore(test.key, test.member)
+			assert.Equal(t, test.expectError, err)
+			assert.Equal(t, test.expectedScore, score)
+		})
+	}
+}
 func TestNewSkipList(t *testing.T) {
 	s := newSkipList()
 
-	assert := assert.New(t)
-	assert.Equal(1, s.level)
-	assert.Nil(s.head.prev)
-	assert.Equal(0, s.head.value.score)
-	assert.Equal("", s.head.value.member)
+	assertions := assert.New(t)
+	assertions.Equal(1, s.level)
+	assertions.Nil(s.head.prev)
+	assertions.Equal(0, s.head.value.score)
+	assertions.Equal("", s.head.value.member)
 }
 
 func TestNewSkipListNode(t *testing.T) {
@@ -111,29 +489,6 @@ func TestNewSkipListNode(t *testing.T) {
 	for _, l := range node.level {
 		if l.next != nil || l.span != 0 {
 			t.Errorf("Unexpected SkipListLevel, got: %v, want: {forward: nil, span: 0}.\n", l)
-		}
-	}
-}
-func TestZAdd(t *testing.T) {
-	zs, _ := initZSetDB()
-	type testCase struct {
-		key    string
-		score  int
-		member string
-		value  string
-		err    error
-	}
-
-	testCases := []testCase{
-		{"key", 10, "member", "value", nil},
-		{"", 10, "member", "value", _const.ErrKeyIsEmpty},
-	}
-
-	for _, tc := range testCases {
-		err := zs.ZAdd(tc.key, tc.score, tc.member, tc.value)
-		// Adjust according to your error handling
-		if err != tc.err {
-			t.Errorf("Expected error to be %v, but got %v", tc.err, err)
 		}
 	}
 }
@@ -196,5 +551,48 @@ func populateSkipListFromSlice(nodes *ZSetNodes, zSetNodeValues []testZSetNodeVa
 	// Iterate over the zsetNodes array
 	for _, zSetNode := range zSetNodeValues {
 		_ = nodes.InsertNode(zSetNode.score, zSetNode.member, zSetNode.value)
+	}
+}
+func TestRandomLevel(t *testing.T) {
+	rand.Seed(1)
+
+	for i := 0; i < 1000; i++ {
+		level := randomLevel()
+		if level < 1 || level > SKIPLIST_MAX_LEVEL {
+			t.Errorf("Generated level out of range: %v", level)
+		}
+	}
+}
+func TestZSetNodes_InsertNode(t *testing.T) {
+	pq := &ZSetNodes{}
+
+	// Case 1: Insert new node
+	err := pq.InsertNode(1, "test", "value")
+	if err != nil {
+		t.Error("Failed when inserting a new node")
+	}
+
+	if _, ok := pq.dict["test"]; !ok {
+		t.Error("Insert node failed, expected key to exist in dictionary")
+	}
+
+	// Case 2: Update existing node with same score
+	err = pq.InsertNode(1, "test", "newvalue")
+	if err != nil {
+		t.Error("Failed when updating a score with same value")
+	}
+
+	if v, ok := pq.dict["test"]; !ok || v.value != "newvalue" {
+		t.Error("Update node failed, expected value to be updated")
+	}
+
+	// Case 3: Insert node with existing key but different score
+	err = pq.InsertNode(2, "test", "newvalue")
+	if err != nil {
+		t.Error("Failed when updating a score with a new value")
+	}
+
+	if v, ok := pq.dict["test"]; !ok || v.score != 2 {
+		t.Error("Update node failed, expected score to be updated")
 	}
 }

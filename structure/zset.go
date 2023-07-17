@@ -333,20 +333,23 @@ func (sl *SkipList) getRange(start int, end int, reverse bool) (nv []SkipListNod
 	if start > end {
 		return
 	}
-	if end < 0 {
+	if end <= 0 {
 		return nil // todo unexpected behavior, we can set it to zero as well
 	}
+
 	node := sl.head
 	if reverse {
-		node = sl.getNodeByRank(end)
+		node = sl.tail
+		if start > 0 {
+			node = sl.getNodeByRank(sl.size - start)
+		}
 	} else {
-		node = sl.getNodeByRank(start)
+		node = node.level[0].next
+		if start > 0 {
+			node = sl.getNodeByRank(start + 1)
+		}
 	}
-	if reverse {
-		node = sl.getNodeByRank(end)
-	} else {
-		node = sl.getNodeByRank(start)
-	}
+
 	for i := start; i < end; i++ {
 		if reverse {
 			nv = append(nv, *node.value)
@@ -503,6 +506,20 @@ func (zs *ZSetStructure) ZAdd(key string, score int, member string, value string
 
 	return nil
 }
+func (zs *ZSetStructure) exists(key string, score int, member string) bool {
+	if len(key) == 0 {
+		return false
+	}
+	keyBytes := stringToBytesWithKey(key)
+
+	zSet, err := zs.getZSetFromDB(keyBytes)
+
+	if err != nil {
+		return false
+	}
+
+	return zSet.exists(score, member)
+}
 
 /*
 ZRem is a method belonging to ZSetStructure that removes a member from a ZSet.
@@ -545,7 +562,7 @@ func (zs *ZSetStructure) ZScore(key string, member string) (int, error) {
 
 	zSet, err := zs.getZSetFromDB(keyBytes)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
+		return 0, err
 	}
 	// if the member in the sorted set is found, return the score associated with it
 	if v, ok := zSet.dict[member]; ok {
@@ -601,6 +618,25 @@ func (zs *ZSetStructure) ZRank(key string, member string) (int, error) {
 	// rank zero means no rank found
 	return 0, _const.ErrKeyNotFound
 }
+
+// ZRevRank calculates the reverse rank of a member in a ZSet (Sorted Set) associated with a given key.
+// ZSet exploits the Sorted Set data structure of Redis with O(log(N)) time complexity for Fetching the rank.
+//
+// Parameters:
+//
+//	key:    This is a string that serves as the key of a ZSet stored in the database.
+//	member: This is a string that represents a member of a ZSet whose rank needs to be obtained.
+//
+// Returns:
+//
+//	int:    The integer represents the reverse rank of the member in the ZSet. It returns 0 if the member is not found in the ZSet.
+//	        On successful execution, it returns the difference of the ZSet size and the member's rank.
+//	error:  The error which will be null if no errors occurred. If the key provided is empty, an ErrKeyIsEmpty error is returned.
+//	        If there's a problem getting or creating the ZSet from the database, an error message is returned with the format
+//	        "failed to get or create ZSet from DB with key '%v': %w", where '%v' is the key and '%w' shows the error detail.
+//	        If the member is not found in the ZSet, it returns an ErrKeyNotFound error.
+//
+// Note: The reverse rank is calculated as 'size - rank', and the ranks start from 1.
 func (zs *ZSetStructure) ZRevRank(key string, member string) (int, error) {
 	if len(key) == 0 {
 		return 0, _const.ErrKeyIsEmpty
@@ -613,12 +649,43 @@ func (zs *ZSetStructure) ZRevRank(key string, member string) (int, error) {
 	}
 	if v, ok := zSet.dict[member]; ok {
 		rank := zSet.skipList.getRank(v.score, member)
-		return zSet.size - rank, nil
+		return (zSet.size) - rank + 1, nil
 	}
 
 	// rank zero means no rank found
 	return 0, _const.ErrKeyNotFound
 }
+
+// ZRange retrieves a specific range of elements from a sorted set (ZSet) denoted by a specific key.
+// It returns a slice of SkipListNodeValue containing the elements within the specified range (inclusive), and a nil error when successful.
+//
+// The order of the returned elements is based on their rank in the set, not their score.
+//
+// Parameters:
+//
+//	key: A string identifier representing the ZSet. The key shouldn't be an empty string.
+//	start: A zero-based integer representing the first index of the range.
+//	end: A zero-based integer representing the last index of the range.
+//
+// Returns:
+//
+//	 []SkipListNodeValue:
+//			Slice of SkipListNodeValue containing elements within the specified range.
+//	 error:
+//			An error if it occurs during execution, such as:
+//	     		1. The provided key string is empty.
+//	     		2. An error occurs while fetching the ZSet from the database, i.e., the ZSet represented by the given key doesn't exist.
+//	     		In the case of an error, an empty slice and the actual error encountered will be returned.
+//
+// Note:
+// On successful execution, ZRange returns the elements starting from 'start' index up to 'end' index inclusive.
+// If the set doesn't exist or an error occurs during execution, ZRange returns an empty slice and the error.
+//
+// Example:
+// Assume we have ZSet with the following elements: ["element1", "element2", "element3", "element4"]
+// ZRange("someKey", 0, 2) will return ["element1", "element2", "element3"] and nil error.
+//
+// This method is part of the ZSetStructure type.
 func (zs *ZSetStructure) ZRange(key string, start int, end int) ([]SkipListNodeValue, error) {
 	if len(key) == 0 {
 		return nil, _const.ErrKeyIsEmpty
@@ -627,14 +694,25 @@ func (zs *ZSetStructure) ZRange(key string, start int, end int) ([]SkipListNodeV
 
 	zSet, err := zs.getZSetFromDB(keyBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
+		return nil, err
 	}
 	r := zSet.skipList.getRange(start, end, false)
 
 	// rank zero means no rank found
 	return r, nil
 }
-func (zs *ZSetStructure) ZRevRange(key string, start int, end int) ([]SkipListNodeValue, error) {
+
+// ZRevRange retrieves a range of elements from a sorted set (ZSet) in descending order.
+// Inputs:
+//   - key: Name of the ZSet
+//   - startRank: Initial rank of the desired range
+//   - endRank: Final rank of the desired range
+//
+// Output:
+//   - An array of SkipListNodeValue, representing elements from the range [startRank, endRank] in descending order
+//   - Error if an issue occurs, such as when the key is empty or ZSet retrieval fails
+//     error
+func (zs *ZSetStructure) ZRevRange(key string, startRank int, endRank int) ([]SkipListNodeValue, error) {
 	if len(key) == 0 {
 		return nil, _const.ErrKeyIsEmpty
 	}
@@ -642,13 +720,16 @@ func (zs *ZSetStructure) ZRevRange(key string, start int, end int) ([]SkipListNo
 
 	zSet, err := zs.getZSetFromDB(keyBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
+		return nil, err
 	}
-	r := zSet.skipList.getRange(start, end, true)
+	r := zSet.skipList.getRange(startRank, endRank, true)
 
 	// rank zero means no rank found
 	return r, nil
 }
+
+// The ZCard function returns the size of the dictionary of the sorted set stored at key in the database.
+// It takes a string key as an argument.
 func (zs *ZSetStructure) ZCard(key string) (int, error) {
 	if len(key) == 0 {
 		return 0, _const.ErrKeyIsEmpty
@@ -657,23 +738,47 @@ func (zs *ZSetStructure) ZCard(key string) (int, error) {
 
 	zSet, err := zs.getZSetFromDB(keyBytes)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
+		return 0, err
 	}
 	// get the size of the dictionary
 	return zSet.size, nil
 }
+
+// ZIncrBy increases the score of an existing member in a sorted set stored at specified key by
+// the increment `incBy` provided. If member does not exist, ErrKeyNotFound error is returned.
+// If the key does not exist, it treats it as an empty sorted set and returns an error.
+//
+// The method accepts three parameters:
+// `key`: a string type parameter that identifies the sorted set
+// `member`: a string type parameter representing member in the sorted set
+// `incBy`: an int type parameter provides the increment value for a member score
+//
+// The method throws error under following circumstances -
+// if provided key is empty (ErrKeyIsEmpty error),
+// if provided key or member is not present in the database (ErrKeyNotFound error),
+// if it's unable to fetch or create ZSet from DB,
+// if there's an issue with node insertion,
+// if unable to set ZSet to DB post increment operation
 func (zs *ZSetStructure) ZIncrBy(key string, member string, incBy int) error {
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
 	}
+
 	keyBytes := stringToBytesWithKey(key)
 
 	zSet, err := zs.getZSetFromDB(keyBytes)
 	if err != nil {
 		return fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
 	}
+
 	if v, ok := zSet.dict[member]; ok {
-		return zSet.InsertNode(v.score+incBy, member, v.value)
+		if err = zSet.InsertNode(v.score+incBy, member, v.value); err != nil {
+			return err
+		}
+		if err = zs.setZSetToDB(keyBytes, zSet); err != nil {
+			return err
+		}
+		return nil
 	}
 
 	return _const.ErrKeyNotFound
@@ -728,10 +833,13 @@ func (pq *ZSetNodes) InsertNode(score int, member string, value interface{}) err
 	if pq.dict == nil {
 		pq.dict = make(map[string]*SkipListNodeValue)
 	}
+	if pq.skipList == nil {
+		pq.skipList = newSkipList()
+	}
 
 	// Check if key exists in dictionary
 	if v, ok := pq.dict[member]; ok {
-		if v.score == score {
+		if v.score != score {
 			// Update value and score as the score remains the same
 			pq.skipList.delete(score, member)
 			pq.dict[member] = pq.skipList.insert(score, member, value)
@@ -820,12 +928,13 @@ func (zs *ZSetStructure) getZSetFromDB(key []byte) (*ZSetNodes, error) {
 
 		return nil, err
 	}
-
+	dec := encoding.NewMessagePackDecoder(dbData)
 	// Deserialize the data.
 	var zSetValue ZSetNodes
-	if err := encoding.DecodeMessagePack(dbData, zSetValue); err != nil {
+	if err = dec.Decode(&zSetValue); err != nil {
 		return nil, err
 	}
+
 	// return a pointer to the deserialized ZSetNodes, nil for the error
 	return &zSetValue, nil
 }
@@ -840,11 +949,12 @@ func (zs *ZSetStructure) getZSetFromDB(key []byte) (*ZSetNodes, error) {
 // either during serialization or when writing to the database, that specific error is returned.
 // If the process is successful, it returns nil.
 func (zs *ZSetStructure) setZSetToDB(key []byte, zSetValue *ZSetNodes) error {
-	val, err := encoding.EncodeMessagePack(zSetValue)
+	val := encoding.NewMessagePackEncoder()
+	err := val.Encode(zSetValue)
 	if err != nil {
 		return err
 	}
-	return zs.db.Put(key, val)
+	return zs.db.Put(key, val.Bytes())
 }
 
 // UnmarshalBinary de-serializes the given byte slice into ZSetNodes instance
