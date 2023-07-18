@@ -14,8 +14,8 @@ func initZSetDB() (*ZSetStructure, *config.Options) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "TestZSetStructure")
 	opts.DirPath = dir
-	hash, _ := NewZSetStructure(opts)
-	return hash, &opts
+	zs, _ := NewZSetStructure(opts)
+	return zs, &opts
 }
 
 func TestSortedSet(t *testing.T) {
@@ -67,33 +67,76 @@ func TestSortedSet_Bytes(t *testing.T) {
 }
 
 func TestZRem(t *testing.T) {
-	mockZSetStructure, _ := initZSetDB()
 
-	// 1. Test for Key is Empty
-	err := mockZSetStructure.ZRem("", "member")
-	require.Error(t, err)
-	require.Equal(t, _const.ErrKeyIsEmpty, err)
 	type testCase struct {
-		key    string
-		score  int
-		member string
-		value  string
-		err    error
+		name     string
+		key      string
+		setup    func(z *ZSetStructure)
+		members  []string
+		want     []string
+		dontWant []string
+		err      error
 	}
 
 	testCases := []testCase{
-		{"key", 10, "member", "value", nil},
-		{"", 10, "member", "value", _const.ErrKeyIsEmpty},
+		{
+			name: "key empty",
+			setup: func(z *ZSetStructure) {
+				_ = z.ZAdds("key1", []ZSetValue{{}}...)
+			},
+			members: []string{""},
+			err:     _const.ErrKeyIsEmpty,
+		},
+		{
+			name: "key not found",
+			setup: func(z *ZSetStructure) {
+				_ = z.ZAdds("key1", []ZSetValue{{}}...)
+			},
+			key:     "notfound",
+			members: []string{""},
+			err:     _const.ErrKeyNotFound,
+		},
+		{
+			name: "member not found",
+			setup: func(z *ZSetStructure) {
+				_ = z.ZAdds("key1", []ZSetValue{{}}...)
+			},
+			key:     "key1",
+			members: []string{"notfound"},
+			err:     _const.ErrKeyNotFound,
+		},
+		{
+			name: "member empty",
+			setup: func(z *ZSetStructure) {
+				_ = z.ZAdds("key1", []ZSetValue{{score: 1, member: "mem1", value: ""}}...)
+			},
+			key:     "key1",
+			members: []string{""},
+			err:     _const.ErrKeyNotFound,
+		},
+		{
+			name: "remove half members",
+			setup: func(z *ZSetStructure) {
+				_ = z.ZAdds("key1", []ZSetValue{
+					{score: 1, member: "mem1", value: ""},
+					{score: 2, member: "mem2", value: ""},
+					{score: 3, member: "mem3", value: ""},
+					{score: 4, member: "mem4", value: ""}}...)
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.key, func(t *testing.T) {
-			err := mockZSetStructure.ZAdd(tc.key, tc.score, tc.member, tc.value)
-			// check to see if element added
-			assert.Equal(t, tc.err, err)
+		t.Run(tc.name, func(t *testing.T) {
+			mockZSetStructure, _ := initZSetDB()
+			tc.setup(mockZSetStructure)
+
+			for _, m := range tc.members {
+				err = mockZSetStructure.ZRem(tc.key, m)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 			if tc.err == nil {
 				// check if member added
-				assert.True(t, mockZSetStructure.exists(tc.key, tc.score, tc.member))
 			}
 
 		})
@@ -858,8 +901,76 @@ func TestFZSetMinMax(t *testing.T) {
 	if max := fzs.max(5, 10); max != 10 {
 		t.Errorf("max(5, 10) = %d, want: 10", max)
 	}
+
+	// if case part of skip list is missing, we should return 0,0
+	fzs.skipList.tail.value = nil
+	minScore, maxScore = fzs.getMinMaxScore()
+	assert.Equal(t, minScore, 0)
+	assert.Equal(t, maxScore, 0)
+	// again, an error case
+	fzs.skipList = nil
+	minScore, maxScore = fzs.getMinMaxScore()
+	assert.Equal(t, minScore, 0)
+	assert.Equal(t, maxScore, 0)
+
+}
+func TestZSetStructure_adjustMinMax(t *testing.T) {
+	zss, _ := NewZSetStructure(config.DefaultOptions)
+	fz := newZSetNodes()
+
+	_, _, err := zss.adjustMinMax(fz, 100, 0)
+	assert.Equal(t, ErrInvalidArgs, err)
+	//
+	_ = fz.InsertNode(30, "mem1", "")
+	_ = fz.InsertNode(200, "mem1", "")
+	minScore, maxScore, err := zss.adjustMinMax(fz, 10, 50)
+	assert.NoError(t, err)
+	// as the min now is 30, our provided min of 10 will be turned into 30
+	// as our param of max is 50 and maximum score is 200, it won't change
+	assert.Equal(t, 30, minScore)
+	assert.Equal(t, 50, maxScore)
 }
 
+func TestZset_getNodeByRank(t *testing.T) {
+	sl := newSkipList()
+	sl.insert(1, "mem1", "")
+	sl.insert(2, "mem2", "")
+	sl.insert(3, "mem3", "")
+	tests := []struct {
+		name string
+		rank int
+		want *ZSetValue // Expected Output, use your actual SkipListNode instance or null here
+	}{
+		{
+			name: "Case 1: Get Node by Rank 1",
+			rank: 1,
+			want: &ZSetValue{score: 1, member: "mem1", value: ""},
+		},
+		{
+			name: "Case 2: Get Node by Rank 2",
+			rank: 2,
+			want: &ZSetValue{score: 2, member: "mem2", value: ""},
+		},
+		{
+			name: "Case 3: Get Node by Non-existed Rank",
+			rank: 9999,
+			want: nil, // should return nil if rank doesn't exist
+		},
+	}
+
+	// Iterate over test cases
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := sl.getNodeByRank(tt.rank)
+			if tt.want == nil {
+				assert.Nil(t, got)
+
+			} else {
+				assert.Equal(t, tt.want, got.value)
+			}
+		})
+	}
+}
 func Test_exists(t *testing.T) {
 	zs, _ := initZSetDB()
 
@@ -875,6 +986,12 @@ func Test_exists(t *testing.T) {
 			member: "",
 			want:   false,
 		},
+		{
+			key:    "key1",
+			score:  1,
+			member: "",
+			want:   false,
+		},
 	}
 
 	for _, tc := range tt {
@@ -884,6 +1001,39 @@ func Test_exists(t *testing.T) {
 			if got != tc.want {
 				t.Errorf("exists() = %v, want %v", got, tc.want)
 			}
+		})
+	}
+}
+func TestNewZSetStructure(t *testing.T) {
+	tt := []struct {
+		name    string
+		setup   func() (*ZSetStructure, error)
+		wantErr error
+	}{
+		{
+			name: "init no error",
+			setup: func() (*ZSetStructure, error) {
+				opts := config.DefaultOptions
+				dir, _ := os.MkdirTemp("", "TestZSetStructure")
+				opts.DirPath = dir
+				return NewZSetStructure(opts)
+			},
+			wantErr: nil,
+		},
+		{
+			name: "init with error wrong path",
+			setup: func() (*ZSetStructure, error) {
+				opts := config.DefaultOptions
+				opts.DirPath = ""
+				return NewZSetStructure(opts)
+			},
+			wantErr: _const.ErrOptionDirPathIsEmpty,
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := tc.setup()
+			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }

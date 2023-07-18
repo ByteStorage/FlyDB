@@ -504,10 +504,10 @@ func (zs *ZSetStructure) ZAdds(key string, vals ...ZSetValue) error {
 
 	for _, val := range vals {
 		// if values didn't change, do nothing
-		if zs.valuesDidntChange(zSet, val.score, val.member, val.value.(string)) {
+		if zs.valuesDidntChange(zSet, val.score, val.member, val.value) {
 			continue
 		}
-		if err := zs.updateZSet(zSet, key, val.score, val.member, val.value.(string)); err != nil {
+		if err := zs.updateZSet(zSet, key, val.score, val.member, val.value); err != nil {
 			return fmt.Errorf("failed to set ZSet to DB with key '%v': %w", key, err)
 		}
 	}
@@ -568,9 +568,8 @@ func (zs *ZSetStructure) ZRem(key string, member string) error {
 	keyBytes := stringToBytesWithKey(key)
 
 	zSet, err := zs.getZSetFromDB(keyBytes)
-
 	if err != nil {
-		return fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
+		return err
 	}
 	if err = zSet.RemoveNode(member); err != nil {
 		return err
@@ -902,7 +901,7 @@ func (zs *ZSetStructure) getOrCreateZSet(key string) (*FZSet, error) {
 }
 
 // valuesDidntChange checks if the data of a specific member in a sorted set remained the same.
-func (zs *ZSetStructure) valuesDidntChange(zSet *FZSet, score int, member string, value string) bool {
+func (zs *ZSetStructure) valuesDidntChange(zSet *FZSet, score int, member string, value interface{}) bool {
 	if v, ok := zSet.dict[member]; ok {
 		return v.score == score && v.member == member && v.value == value
 	}
@@ -911,7 +910,7 @@ func (zs *ZSetStructure) valuesDidntChange(zSet *FZSet, score int, member string
 }
 
 // updateZSet updates or inserts a member in a sorted set and saves the change in storage.
-func (zs *ZSetStructure) updateZSet(zSet *FZSet, key string, score int, member string, value string) error {
+func (zs *ZSetStructure) updateZSet(zSet *FZSet, key string, score int, member string, value interface{}) error {
 	return zSet.InsertNode(score, member, value)
 }
 
@@ -987,10 +986,6 @@ func (fzs *FZSet) max(a, b int) int {
 		return a
 	}
 	return b
-}
-func getMinMaxScore(zSet *FZSet) (minScore int, maxScore int) {
-	return zSet.skipList.head.level[0].next.value.score,
-		zSet.skipList.tail.value.score
 }
 
 // RemoveNode is a method for FZSet structure.
