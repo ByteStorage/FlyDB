@@ -19,6 +19,7 @@ service GStringService {
   rpc Exists(ExistsRequest) returns (ExistsResponse) {}
   rpc Expire(ExpireRequest) returns (ExpireResponse) {}
   rpc Persist(PersistRequest) returns (PersistResponse) {}
+  rpc MGet(MGetRequest) returns (MGetResponse) {}
 }
 
 message GetRequest {
@@ -186,4 +187,24 @@ message PersistRequest {
 
 message PersistResponse {
   bool ok = 1;
+}
+
+message MGetRequest {
+  repeated string keys = 1;
+}
+
+message MGetResponse {
+  repeated MGetValue values = 2;
+}
+
+message MGetValue {
+  oneof value {
+    string  string_value  = 1;
+    int32   int32_value   = 2;
+    int64   int64_value   = 3;
+    float   float32_value = 4;
+    double  float64_value = 5;
+    bool    bool_value    = 6;
+    bytes   bytes_value   = 7;
+  }
 }
