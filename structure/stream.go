@@ -3,6 +3,7 @@ package structure
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	"sort"
@@ -75,57 +76,73 @@ func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (
 		return false, ErrInvalidXArgs
 	}
 
-	// init stream if not exist
-	if s.streams == nil {
+	// Get the stream
+	value, _ := s.db.Get([]byte(name))
+	if value == nil {
 		// Create a new stream
 		s.streams = &Streams{
 			Name:        name,
 			Messages:    []*StreamMessage{},
-			Groups:      make(map[string]*StreamGroup),
-			LastMessage: time.Time{},
+			Groups:      map[string]*StreamGroup{},
+			LastMessage: time.Now(),
 		}
+
+		// Create a new message
+		message := &StreamMessage{
+			Id:     id,
+			Fields: fields,
+		}
+		// Add the message to the stream
+		s.streams.Messages = append(s.streams.Messages, message)
+
+		// Encode the streams
+		encodedStreams, err := s.encodeStreams(s.streams)
+		if err != nil {
+			return false, err
+		}
+
+		// Set the stream
+		if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
+			return false, err
+		}
+
+		return true, nil
 	} else {
-		// Check if the stream name is the same
-		if s.streams.Name != name {
-			s.streams = &Streams{
-				Name:        name,
-				Messages:    []*StreamMessage{},
-				Groups:      make(map[string]*StreamGroup),
-				LastMessage: time.Time{},
+		// Decode the streams
+		err := s.decodeStreams(value, s.streams)
+		if err != nil {
+			return false, err
+		}
+
+		// Check if the message ID already exists
+		for _, msg := range s.streams.Messages {
+			if msg.Id == id {
+				return false, ErrExistID
 			}
 		}
+
+		// Create a new message
+		message := &StreamMessage{
+			Id:     id,
+			Fields: fields,
+		}
+
+		// Add the message to the stream
+		s.streams.Messages = append(s.streams.Messages, message)
+
+		// Encode the streams
+		encodedStreams, err := s.encodeStreams(s.streams)
+		if err != nil {
+			return false, err
+		}
+
+		// Set the stream
+		if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
+			return false, err
+		}
+
+		return true, nil
 	}
-
-	// Check if the message ID already exists
-	_, err := s.db.Get([]byte(id))
-	if err == nil {
-		return false, ErrExistID
-	}
-
-	// Create a new message
-	message := &StreamMessage{
-		Id:     id,
-		Fields: fields,
-	}
-
-	// Append the message to the stream
-	s.streams.Messages = append(s.streams.Messages, message)
-
-	// Set the last message time
-	s.streams.LastMessage = time.Now()
-
-	// Encode the streams
-	encodedStreams, err := s.encodeStreams(s.streams)
-	if err != nil {
-		return false, err
-	}
-
-	// Set the stream
-	if err = s.db.Put([]byte(s.streams.Name), encodedStreams); err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 // XRead reads messages from a stream
@@ -409,6 +426,7 @@ func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
 func (s *StreamStructure) decodeStreams(ss []byte, ss2 *Streams) error {
 	// Decode the streams
 	if err := json.Unmarshal(ss, ss2); err != nil {
+		fmt.Println("err", err)
 		return err
 	}
 	return nil
