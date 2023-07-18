@@ -5,7 +5,6 @@ import (
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"math/rand"
 	"os"
 	"reflect"
 	"testing"
@@ -23,7 +22,7 @@ func TestSortedSet(t *testing.T) {
 	type test struct {
 		name        string
 		input       map[string]int
-		want        *ZSetNodes
+		want        *FZSet
 		expectError bool
 	}
 
@@ -45,7 +44,7 @@ func TestSortedSet(t *testing.T) {
 		{
 			name:        "empty",
 			input:       map[string]int{},
-			want:        &ZSetNodes{},
+			want:        &FZSet{},
 			expectError: false,
 		},
 		{
@@ -100,6 +99,90 @@ func TestZRem(t *testing.T) {
 		})
 	}
 }
+func TestZRems(t *testing.T) {
+	mockZSetStructure, _ := initZSetDB()
+
+	// 1. Test for Key is Empty
+	err := mockZSetStructure.ZRems("", "member")
+	require.Error(t, err)
+	require.Equal(t, _const.ErrKeyIsEmpty, err)
+	type testCase struct {
+		key   string
+		input []ZSetValue
+		rems  []string
+		want  []ZSetValue
+		err   error
+	}
+
+	testCases := []testCase{
+		{"key",
+			[]ZSetValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			[]string{
+				"mem0",
+				"mem1",
+				"mem6",
+			}, []ZSetValue{
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+			}, nil},
+		{"",
+			[]ZSetValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+			},
+			[]string{
+				"mem0",
+				"mem1",
+				"mem2",
+				"mem3",
+				"mem4",
+				"mem5",
+				"mem6",
+			},
+			[]ZSetValue{},
+			_const.ErrKeyIsEmpty},
+		{
+			"Key1",
+			[]ZSetValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+			},
+			[]string{
+				"mem0",
+				"mem1",
+				"mem2",
+				"mem3",
+				"mem4",
+				"mem5",
+				"mem6",
+			}, []ZSetValue{}, _const.ErrKeyNotFound},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.key, func(t *testing.T) {
+			_ = mockZSetStructure.ZAdds(tc.key, tc.input...)
+
+			//remove all the elements
+			err = mockZSetStructure.ZRems(tc.key, tc.rems...)
+			assert.Equal(t, tc.err, err)
+			//validate
+			for _, value := range tc.want {
+				te := mockZSetStructure.exists(tc.key, value.score, value.member)
+				assert.True(t, te)
+			}
+		})
+	}
+}
 func TestZAdd(t *testing.T) {
 	zs, _ := initZSetDB()
 	type testCase struct {
@@ -107,7 +190,7 @@ func TestZAdd(t *testing.T) {
 		score  int
 		member string
 		value  string
-		want   SkipListNodeValue
+		want   ZSetValue
 		err    error
 	}
 
@@ -117,7 +200,7 @@ func TestZAdd(t *testing.T) {
 			10,
 			"member",
 			"value",
-			SkipListNodeValue{member: "member"},
+			ZSetValue{member: "member"},
 			nil,
 		},
 		{
@@ -125,7 +208,7 @@ func TestZAdd(t *testing.T) {
 			10,
 			"member",
 			"value",
-			SkipListNodeValue{member: ""},
+			ZSetValue{member: ""},
 			_const.ErrKeyIsEmpty,
 		},
 	}
@@ -144,6 +227,65 @@ func TestZAdd(t *testing.T) {
 			}
 			// Adjust according to your error handling
 
+		})
+	}
+}
+func TestZAdds(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	// 1. Test for Key is Empty
+	err := zs.ZAdds("", []ZSetValue{}...)
+	require.Error(t, err)
+	require.Equal(t, _const.ErrKeyIsEmpty, err)
+	type testCase struct {
+		key   string
+		input []ZSetValue
+		want  []ZSetValue
+		err   error
+	}
+
+	testCases := []testCase{
+		{"key",
+			[]ZSetValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			[]ZSetValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			nil},
+		{"",
+			[]ZSetValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+			},
+			[]ZSetValue{},
+			_const.ErrKeyIsEmpty,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.key, func(t *testing.T) {
+			err = zs.ZAdds(tc.key, tc.input...)
+			assert.Equal(t, tc.err, err)
+			//validate
+			for _, value := range tc.want {
+				te := zs.exists(tc.key, value.score, value.member)
+				assert.True(t, te)
+			}
 		})
 	}
 }
@@ -290,10 +432,10 @@ func TestZRevRange(t *testing.T) {
 		key     string
 		start   int
 		end     int
-		want    []SkipListNodeValue
+		want    []ZSetValue
 		wantErr error
 	}{
-		{"myKey", 0, 3, []SkipListNodeValue{
+		{"myKey", 0, 3, []ZSetValue{
 			{6, "member6", n},
 			{5, "member5", n},
 			{4, "member4", n},
@@ -341,10 +483,10 @@ func TestZRange(t *testing.T) {
 		key     string
 		start   int
 		end     int
-		want    []SkipListNodeValue
+		want    []ZSetValue
 		wantErr error
 	}{
-		{"myKey", 0, 3, []SkipListNodeValue{
+		{"myKey", 0, 3, []ZSetValue{
 			{1, "member1", n},
 			{2, "member2", n},
 			{3, "member3", n},
@@ -547,15 +689,13 @@ type testZSetNodeValue struct {
 	value  interface{}
 }
 
-func populateSkipListFromSlice(nodes *ZSetNodes, zSetNodeValues []testZSetNodeValue) {
+func populateSkipListFromSlice(nodes *FZSet, zSetNodeValues []testZSetNodeValue) {
 	// Iterate over the zsetNodes array
 	for _, zSetNode := range zSetNodeValues {
 		_ = nodes.InsertNode(zSetNode.score, zSetNode.member, zSetNode.value)
 	}
 }
 func TestRandomLevel(t *testing.T) {
-	rand.Seed(1)
-
 	for i := 0; i < 1000; i++ {
 		level := randomLevel()
 		if level < 1 || level > SKIPLIST_MAX_LEVEL {
@@ -564,7 +704,7 @@ func TestRandomLevel(t *testing.T) {
 	}
 }
 func TestZSetNodes_InsertNode(t *testing.T) {
-	pq := &ZSetNodes{}
+	pq := &FZSet{}
 
 	// Case 1: Insert new node
 	err := pq.InsertNode(1, "test", "value")
@@ -594,5 +734,156 @@ func TestZSetNodes_InsertNode(t *testing.T) {
 
 	if v, ok := pq.dict["test"]; !ok || v.score != 2 {
 		t.Error("Update node failed, expected score to be updated")
+	}
+}
+func TestZCount(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	tests := []struct {
+		key   string
+		input []testZSetNodeValue
+		min   int
+		max   int
+		want  int
+		err   error
+	}{
+		{
+			"test1",
+			[]testZSetNodeValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			1, 5, 5, nil,
+		},
+		{
+			"test2",
+			[]testZSetNodeValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			0, 5, 6, nil,
+		},
+		{
+			"test3",
+			[]testZSetNodeValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			1, 3, 3, nil,
+		},
+		{
+			"test4",
+			[]testZSetNodeValue{
+				{score: 0, member: "mem0", value: ""},
+				{score: 1, member: "mem1", value: ""},
+				{score: 2, member: "mem2", value: ""},
+				{score: 3, member: "mem3", value: ""},
+				{score: 4, member: "mem4", value: ""},
+				{score: 5, member: "mem5", value: ""},
+				{score: 6, member: "mem6", value: ""},
+			},
+			2, 2, 1, nil,
+		},
+		{
+			"test5",
+			[]testZSetNodeValue{
+				{score: 3, member: "mem3", value: ""},
+			},
+			10, 20, 0, nil,
+		},
+		{
+			"test6",
+			[]testZSetNodeValue{
+				{score: 3, member: "mem3", value: ""},
+			},
+			10, 5, 0, ErrInvalidArgs,
+		},
+		{
+			"",
+			[]testZSetNodeValue{
+				{score: 3, member: "mem3", value: ""},
+			},
+			10, 5, 0, _const.ErrKeyIsEmpty,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key, func(t *testing.T) {
+			for _, value := range tt.input {
+				_ = zs.ZAdd(tt.key, value.score, value.member, value.value.(string))
+			}
+			got, err := zs.ZCount(tt.key, tt.min, tt.max)
+			if got != tt.want {
+				t.Errorf("TestZCount(%v, %v, %v) = %v, want: %v", tt.key, tt.min, tt.max, got, tt.want)
+			}
+			if err != nil && err.Error() != tt.err.Error() {
+				t.Errorf("TestZCount(%v, %v, %v) returned unexpected error: got %v, want: %v", tt.key, tt.min, tt.max, err, tt.err)
+			}
+		})
+	}
+}
+
+func TestFZSetMinMax(t *testing.T) {
+	fzs := &FZSet{
+		skipList: newSkipList(),
+	}
+	_ = fzs.InsertNode(1, "mem1", "")
+	_ = fzs.InsertNode(100, "mem2", "")
+
+	minScore, maxScore := fzs.getMinMaxScore()
+
+	if minScore != 1 || maxScore != 100 {
+		t.Errorf("getMinMaxScore() = %d, %d, want: 1, 100", minScore, maxScore)
+	}
+
+	if min := fzs.min(5, 10); min != 5 {
+		t.Errorf("min(5, 10) = %d, want: 5", min)
+	}
+
+	if max := fzs.max(5, 10); max != 10 {
+		t.Errorf("max(5, 10) = %d, want: 10", max)
+	}
+}
+
+func Test_exists(t *testing.T) {
+	zs, _ := initZSetDB()
+
+	tt := []struct {
+		key    string
+		score  int
+		member string
+		want   bool
+	}{
+		{
+			key:    "",
+			score:  1,
+			member: "",
+			want:   false,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run("", func(t *testing.T) {
+			got := zs.exists(tc.key, tc.score, tc.member)
+
+			if got != tc.want {
+				t.Errorf("exists() = %v, want %v", got, tc.want)
+			}
+		})
 	}
 }
