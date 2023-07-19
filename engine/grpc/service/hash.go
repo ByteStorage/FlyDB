@@ -108,7 +108,7 @@ func setValue(s *hash, key string, field interface{}, r *ghash.GHashSetRequest) 
 func (s *hash) HExists(ctx context.Context, req *ghash.GHashExistsRequest) (*ghash.GHashExistsResponse, error) {
 	exists, err := s.dbh.HExists(req.Key, req.Field)
 	if err != nil {
-		return nil, err
+		return &ghash.GHashExistsResponse{Ok: exists}, err
 	}
 	return &ghash.GHashExistsResponse{Ok: exists}, nil
 }
@@ -116,7 +116,7 @@ func (s *hash) HExists(ctx context.Context, req *ghash.GHashExistsRequest) (*gha
 func (s *hash) HLen(ctx context.Context, req *ghash.GHashLenRequest) (*ghash.GHashLenResponse, error) {
 	length, err := s.dbh.HLen(req.Key)
 	if err != nil {
-		return nil, err
+		return &ghash.GHashLenResponse{}, err
 	}
 	resp := &ghash.GHashLenResponse{
 		Length: int64(length),
@@ -257,12 +257,7 @@ func setNXValue(s *hash, key string, field interface{}, r *ghash.GHashSetNXReque
 func (s *hash) HType(ctx context.Context, req *ghash.GHashTypeRequest) (*ghash.GHashTypeResponse, error) {
 	hashType, err := s.dbh.HTypes(req.Key, req.Field)
 	if err != nil {
-		return nil, err
+		return &ghash.GHashTypeResponse{}, err
 	}
-
-	response := &ghash.GHashTypeResponse{
-		Type: hashType,
-	}
-
-	return response, nil
+	return &ghash.GHashTypeResponse{Type: hashType}, nil
 }
