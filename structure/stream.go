@@ -282,8 +282,7 @@ func (s *StreamStructure) XDel(name string, ids string) (bool, int, error) {
 	found := false
 	for _, msg := range messages {
 		if msg.Id != ids {
-			//result = append(result, msg)
-			result = append(result, messages...)
+			result = append(result, msg)
 		} else {
 			found = true
 		}
