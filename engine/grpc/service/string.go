@@ -97,47 +97,128 @@ func (s *str) Del(ctx context.Context, req *gstring.DelRequest) (*gstring.DelRes
 }
 
 func (s *str) Type(ctx context.Context, req *gstring.TypeRequest) (*gstring.TypeResponse, error) {
-	panic("implement me")
+	strtype, err := s.dbs.Type(req.Key)
+	if err != nil {
+		return &gstring.TypeResponse{}, err
+	}
+	return &gstring.TypeResponse{Type: strtype}, nil
 }
 
 func (s *str) StrLen(ctx context.Context, req *gstring.StrLenRequest) (*gstring.StrLenResponse, error) {
-	panic("implement me")
+	length, err := s.dbs.StrLen(req.Key)
+	if err != nil {
+		return &gstring.StrLenResponse{}, err
+	}
+	return &gstring.StrLenResponse{
+		Length: int32(length),
+	}, nil
 }
 
 func (s *str) GetSet(ctx context.Context, req *gstring.GetSetRequest) (*gstring.GetSetResponse, error) {
-	panic("implement me")
+	var previousValue interface{}
+	var err error
+
+	switch v := req.Value.(type) {
+	case *gstring.GetSetRequest_StringValue:
+		previousValue, err = s.dbs.GetSet(req.Key, v.StringValue, time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Int32Value:
+		previousValue, err = s.dbs.GetSet(req.Key, v.Int32Value, time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Int64Value:
+		previousValue, err = s.dbs.GetSet(req.Key, v.Int64Value, time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Float32Value:
+		previousValue, err = s.dbs.GetSet(req.Key, v.Float32Value, time.Duration(req.Expire))
+	case *gstring.GetSetRequest_Float64Value:
+		previousValue, err = s.dbs.GetSet(req.Key, v.Float64Value, time.Duration(req.Expire))
+	case *gstring.GetSetRequest_BoolValue:
+		previousValue, err = s.dbs.GetSet(req.Key, v.BoolValue, time.Duration(req.Expire))
+	case *gstring.GetSetRequest_BytesValue:
+		previousValue, err = s.dbs.GetSet(req.Key, v.BytesValue, time.Duration(req.Expire))
+	default:
+		return nil, fmt.Errorf("unknown value type")
+	}
+	if err != nil {
+		return &gstring.GetSetResponse{}, err
+	}
+	resp := &gstring.GetSetResponse{}
+	switch v := previousValue.(type) {
+	case string:
+		resp.Value = &gstring.GetSetResponse_StringValue{StringValue: v}
+	case int32:
+		resp.Value = &gstring.GetSetResponse_Int32Value{Int32Value: v}
+	case int64:
+		resp.Value = &gstring.GetSetResponse_Int64Value{Int64Value: v}
+	case float32:
+		resp.Value = &gstring.GetSetResponse_Float32Value{Float32Value: v}
+	case float64:
+		resp.Value = &gstring.GetSetResponse_Float64Value{Float64Value: v}
+	case bool:
+		resp.Value = &gstring.GetSetResponse_BoolValue{BoolValue: v}
+	case []byte:
+		resp.Value = &gstring.GetSetResponse_BytesValue{BytesValue: v}
+	}
+
+	return resp, nil
 }
 
 func (s *str) Append(ctx context.Context, req *gstring.AppendRequest) (*gstring.AppendResponse, error) {
-	panic("implement me")
+	err := s.dbs.Append(req.Key, req.Value, time.Duration(req.Expire))
+	if err != nil {
+		return &gstring.AppendResponse{}, err
+	}
+	return &gstring.AppendResponse{Ok: true}, nil
 }
 
 func (s *str) Incr(ctx context.Context, req *gstring.IncrRequest) (*gstring.IncrResponse, error) {
-	panic("implement me")
+	err := s.dbs.Incr(req.Key, time.Duration(req.Expire))
+	if err != nil {
+		return &gstring.IncrResponse{}, err
+	}
+	return &gstring.IncrResponse{Ok: true}, nil
 }
 
 func (s *str) IncrBy(ctx context.Context, req *gstring.IncrByRequest) (*gstring.IncrByResponse, error) {
-	panic("implement me")
+	err := s.dbs.IncrBy(req.Key, int(req.Amount), time.Duration(req.Expire))
+	if err != nil {
+		return &gstring.IncrByResponse{}, err
+	}
+	return &gstring.IncrByResponse{Ok: true}, nil
 }
 
 func (s *str) IncrByFloat(ctx context.Context, req *gstring.IncrByFloatRequest) (*gstring.IncrByFloatResponse, error) {
-	panic("implement me")
+	err := s.dbs.IncrByFloat(req.Key, req.Amount, time.Duration(req.Expire))
+	if err != nil {
+		return &gstring.IncrByFloatResponse{Ok: true}, err
+	}
+	return &gstring.IncrByFloatResponse{Ok: true}, nil
 }
 
 func (s *str) Decr(ctx context.Context, req *gstring.DecrRequest) (*gstring.DecrResponse, error) {
-	panic("implement me")
+	err := s.dbs.Decr(req.Key, time.Duration(req.Expire))
+	if err != nil {
+		return &gstring.DecrResponse{}, err
+	}
+	return &gstring.DecrResponse{Ok: true}, nil
 }
 
 func (s *str) DecrBy(ctx context.Context, req *gstring.DecrByRequest) (*gstring.DecrByResponse, error) {
-	panic("implement me")
+	err := s.dbs.DecrBy(req.Key, int(req.Amount), time.Duration(req.Expire))
+	if err != nil {
+		return &gstring.DecrByResponse{}, err
+	}
+	return &gstring.DecrByResponse{Ok: true}, nil
 }
 
 func (s *str) Exists(ctx context.Context, req *gstring.ExistsRequest) (*gstring.ExistsResponse, error) {
-	panic("implement me")
+	exists, err := s.dbs.Exists(req.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gstring.ExistsResponse{Exists: exists}, nil
 }
 
 func (s *str) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstring.ExpireResponse, error) {
-	err := s.dbs.Expire(req.Key, time.Duration(req.Expire))
+	err := s.dbs.Expire(req.Key, time.Duration(req.Expire)*time.Second)
 	if err != nil {
 		return &gstring.ExpireResponse{}, err
 	}
@@ -145,5 +226,39 @@ func (s *str) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstring.
 }
 
 func (s *str) Persist(ctx context.Context, req *gstring.PersistRequest) (*gstring.PersistResponse, error) {
-	panic("implement me")
+	err := s.dbs.Persist(req.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gstring.PersistResponse{Ok: true}, nil
+}
+
+func (s *str) MGet(ctx context.Context, req *gstring.MGetRequest) (*gstring.MGetResponse, error) {
+	values, err := s.dbs.MGet(req.Keys...)
+	if err != nil {
+		return &gstring.MGetResponse{}, err
+	}
+	resp := &gstring.MGetResponse{}
+
+	for _, value := range values {
+		switch v := value.(type) {
+		case string:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_StringValue{StringValue: v}})
+		case int32:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Int32Value{Int32Value: v}})
+		case int64:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Int64Value{Int64Value: v}})
+		case float32:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Float32Value{Float32Value: v}})
+		case float64:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_Float64Value{Float64Value: v}})
+		case bool:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_BoolValue{BoolValue: v}})
+		case []byte:
+			resp.Values = append(resp.Values, &gstring.MGetValue{Value: &gstring.MGetValue_BytesValue{BytesValue: v}})
+		}
+	}
+
+	return resp, nil
 }
