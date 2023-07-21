@@ -524,9 +524,7 @@ func (s *StreamStructure) XTrim(name string, maxLen int) (int, error) {
 	if len(messages) >= maxLen {
 		messages = messages[:maxLen]
 		// Convert []*StreamMessage to []StreamMessage
-		for _, msg := range messages {
-			result = append(result, msg)
-		}
+		result = append(result, messages...)
 	} else {
 		return 0, ErrAmountOfData
 	}
