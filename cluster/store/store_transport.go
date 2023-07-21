@@ -8,7 +8,9 @@ import (
 	raftPB "github.com/ByteStorage/FlyDB/lib/proto/raft"
 	"github.com/hashicorp/raft"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"io"
+	"net"
 	"sync"
 	"time"
 )
@@ -41,24 +43,49 @@ type appendFuture struct {
 type Transport struct {
 	//implement me
 	localAddr        raft.ServerAddress
-	consumer         chan raft.RPC
 	clients          map[raft.ServerAddress]*ClientConn
-	server           *grpc.Server
-	heartbeatFn      func(raft.RPC)
+	server           *TransportServer
 	dialOptions      []grpc.DialOption
 	heartbeatTimeout time.Duration
 	sync.RWMutex
 }
+type TransportServer struct {
+	server      *grpc.Server
+	consumer    chan raft.RPC
+	heartbeatFn func(raft.RPC)
+	serverQuit  chan struct{}
+	raftPB.UnsafeRaftServiceServer
+}
 
 // NewTransport returns a new transport, it needs start a grpc server
-func newTransport(conf config.Config) raft.Transport {
+func newTransport(conf config.Config, l net.Listener, do []grpc.DialOption) (*Transport, error) {
+	s := grpc.NewServer()
+	ts := &TransportServer{
+		server:     s,
+		consumer:   make(chan raft.RPC),
+		serverQuit: make(chan struct{}),
+	}
+	raftPB.RegisterRaftServiceServer(s, ts)
+
+	go func() {
+		if err := s.Serve(l); err != nil {
+			panic(err)
+		}
+	}()
+
 	return &Transport{
 		localAddr:        conf.LocalAddress,
-		dialOptions:      []grpc.DialOption{grpc.WithInsecure()},
+		dialOptions:      do,
 		heartbeatTimeout: conf.HeartbeatTimeout,
-		consumer:         make(chan raft.RPC),
+		server:           ts,
 		clients:          map[raft.ServerAddress]*ClientConn{},
-	}
+	}, nil
+}
+func newListener(conf config.Config) (net.Listener, error) {
+	return net.Listen("tcp", string(conf.LocalAddress))
+}
+func newDialOption(conf config.Config) []grpc.DialOption {
+	return []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 }
 
 // AppendEntriesPipeline returns an interface that can be used to pipeline
@@ -152,7 +179,7 @@ func (t *Transport) TimeoutNow(id raft.ServerID, target raft.ServerAddress, args
 // Consumer returns a channel that can be used to
 // consume and respond to RPC requests.
 func (t *Transport) Consumer() <-chan raft.RPC {
-	return t.consumer
+	return t.server.consumer
 }
 
 // LocalAddr is used to return our local address to distinguish from our peers.
@@ -177,7 +204,7 @@ func (t *Transport) DecodePeer(p []byte) raft.ServerAddress {
 func (t *Transport) SetHeartbeatHandler(handler func(rpc raft.RPC)) {
 	t.RWMutex.RLock()
 	defer t.RWMutex.RUnlock()
-	t.heartbeatFn = handler
+	t.server.heartbeatFn = handler
 }
 
 func (t *Transport) getPeer(target raft.ServerAddress) (raftPB.RaftServiceClient, error) {
@@ -198,8 +225,8 @@ func (t *Transport) getPeer(target raft.ServerAddress) (raftPB.RaftServiceClient
 			if err != nil {
 				return nil, err
 			}
-			c.conn = conn
 			c.client = raftPB.NewRaftServiceClient(conn)
+			c.conn = conn
 		}
 	}
 
@@ -289,4 +316,66 @@ func (af *appendFuture) processMessage(r *raftPipeline) {
 	}
 	close(af.done)
 	r.doneCh <- af
+}
+
+func (t *TransportServer) AppendEntries(ctx context.Context, req *raftPB.AppendEntriesRequest) (*raftPB.AppendEntriesResponse, error) {
+	resp, err := t.sendRPC(encoding.DecodeAppendEntriesRequest(req), nil)
+	if err != nil {
+		return nil, err
+	}
+	return encoding.EncodeAppendEntriesResponse(resp.(*raft.AppendEntriesResponse)), nil
+}
+func (t *TransportServer) RequestVote(ctx context.Context, req *raftPB.RequestVoteRequest) (*raftPB.RequestVoteResponse, error) {
+	resp, err := t.sendRPC(encoding.DecodeRequestVoteRequest(req), nil)
+	if err != nil {
+		return nil, err
+	}
+	return encoding.EncodeRequestVoteResponse(resp.(*raft.RequestVoteResponse)), nil
+}
+func (t *TransportServer) AppendEntriesPipeline(server raftPB.RaftService_AppendEntriesPipelineServer) error {
+	return nil
+}
+func (t *TransportServer) TimeoutNow(ctx context.Context, in *raftPB.TimeoutNowRequest) (*raftPB.TimeoutNowResponse, error) {
+	resp, err := t.sendRPC(encoding.DecodeTimeoutNowRequest(in), nil)
+	if err != nil {
+		return nil, err
+	}
+	return encoding.EncodeTimeoutNowResponse(resp.(*raft.TimeoutNowResponse)), nil
+}
+func (t *TransportServer) InstallSnapshot(ctx context.Context, req *raftPB.InstallSnapshotRequest) (*raftPB.InstallSnapshotResponse, error) {
+	resp, err := t.sendRPC(encoding.DecodeInstallSnapshotRequest(req), nil)
+	if err != nil {
+		return nil, err
+	}
+	return encoding.EncodeInstallSnapshotResponse(resp.(*raft.InstallSnapshotResponse)), nil
+}
+
+func (t *TransportServer) sendRPC(command interface{}, data io.Reader) (interface{}, error) {
+	ch := make(chan raft.RPCResponse, 1)
+	rpc := raft.RPC{
+		Command:  command,
+		RespChan: ch,
+		Reader:   data,
+	}
+	if isHeartbeat(command) {
+		fn := t.heartbeatFn
+		if fn != nil {
+			fn(rpc)
+		}
+	} else {
+		t.consumer <- rpc
+	}
+	resp := <-ch
+	if resp.Error != nil {
+		return nil, resp.Error
+	}
+	return resp.Response, nil
+}
+func (t *TransportServer) Close() {
+	t.server.GracefulStop()
+	return
+}
+func (t *Transport) Close() {
+	t.server.server.GracefulStop()
+	return
 }

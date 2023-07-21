@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702
 	github.com/klauspost/reedsolomon v1.11.7
-	github.com/linxGnu/grocksdb v1.7.10
+	github.com/linxGnu/grocksdb v1.6.48
 	github.com/pkg/errors v0.9.1
 	github.com/plar/go-adaptive-radix-tree v1.0.5
 	github.com/stretchr/testify v1.8.3

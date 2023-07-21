@@ -292,7 +292,7 @@ func TestInMemStore_SetUint64(t *testing.T) {
 	for _, tc := range tests {
 		// set all inputs
 		for _, v := range tc.input {
-			err := ds.Set(stringToBytes(v.key), uint64ToBytes(v.val))
+			err := ds.SetUint64(stringToBytes(v.key), v.val)
 			if tc.expectError {
 				assert.NotNil(t, err)
 			} else {
@@ -301,12 +301,12 @@ func TestInMemStore_SetUint64(t *testing.T) {
 		}
 		// recall all inputs
 		for _, v := range tc.input {
-			val, err := ds.Get(stringToBytes(v.key))
+			val, err := ds.GetUint64(stringToBytes(v.key))
 			if tc.expectError {
 				assert.NotNil(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, v.val, bytesToUint64(val))
+				assert.Equal(t, v.val, val)
 			}
 		}
 
@@ -348,27 +348,28 @@ func TestInMemStore_GetUint64(t *testing.T) {
 				{key: "1", val: 2},
 				{key: "2", val: 4},
 			},
-			expectError: true,
+			expectError: false, // although key does not exist in the db, it should be created upon request
 		},
 	}
 	for _, tc := range tests {
-		ds := testMemoryDatastore()
-		// set all inputs
-		for _, v := range tc.input {
-			_ = ds.Set(stringToBytes(v.key), uint64ToBytes(v.val))
+		t.Run(tc.name, func(t *testing.T) {
+			ds := testMemoryDatastore()
+			// set all inputs
+			for _, v := range tc.input {
+				_ = ds.Set(stringToBytes(v.key), uint64ToBytes(v.val))
 
-		}
-		// recall all inputs
-		for _, v := range tc.query {
-			val, err := ds.Get(stringToBytes(v.key))
-			if tc.expectError {
-				assert.NotNil(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, v.val, bytesToUint64(val))
 			}
-		}
-
+			// recall all inputs
+			for _, v := range tc.query {
+				val, err := ds.GetUint64(stringToBytes(v.key))
+				if tc.expectError {
+					assert.NotNil(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, v.val, val)
+				}
+			}
+		})
 	}
 
 }
