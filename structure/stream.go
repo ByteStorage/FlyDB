@@ -174,25 +174,27 @@ func (s *StreamStructure) XAdd(name, id string, fields map[string]interface{}) (
 // Returns a slice of StreamMessage.
 //
 // Parameters:
-//   name: The name of the stream.
-//   count: The maximum number of messages to read.
+//
+//	name: The name of the stream.
+//	count: The maximum number of messages to read.
 //
 // Returns:
-//   []StreamMessage: A slice of StreamMessage containing the read messages.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	[]StreamMessage: A slice of StreamMessage containing the read messages.
+//	error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
-// - The name parameter represents the name of the stream to read from.
-// - The count parameter specifies the maximum number of messages to read.
-// - If count is less than or equal to 0, it will return ErrInvalidCount.
-// - It retrieves the stream from the database using the specified name.
-// - If the stream does not exist, it will return ErrKeyNotFound.
-// - It decodes the stream data and stores it in the internal s.streams field.
-// - It retrieves the messages from s.streams.Messages.
-// - If the number of messages in the stream is greater than or equal to count,
-//   it returns a slice of StreamMessage with the first count messages.
-// - If the number of messages in the stream is less than count, it returns
-//   ErrAmountOfData, indicating that there is not enough data in the stream.
+//   - The name parameter represents the name of the stream to read from.
+//   - The count parameter specifies the maximum number of messages to read.
+//   - If count is less than or equal to 0, it will return ErrInvalidCount.
+//   - It retrieves the stream from the database using the specified name.
+//   - If the stream does not exist, it will return ErrKeyNotFound.
+//   - It decodes the stream data and stores it in the internal s.streams field.
+//   - It retrieves the messages from s.streams.Messages.
+//   - If the number of messages in the stream is greater than or equal to count,
+//     it returns a slice of StreamMessage with the first count messages.
+//   - If the number of messages in the stream is less than count, it returns
+//     ErrAmountOfData, indicating that there is not enough data in the stream.
 func (s *StreamStructure) XRead(name string, count int) ([]StreamMessage, error) {
 	if count <= 0 {
 		return nil, ErrInvalidCount
@@ -235,13 +237,15 @@ func (s *StreamStructure) XRead(name string, count int) ([]StreamMessage, error)
 // Returns the number of messages in the stream after deletion.
 //
 // Parameters:
-//   name: The name of the stream.
-//   ids: The ID of the message to delete.
+//
+//	name: The name of the stream.
+//	ids: The ID of the message to delete.
 //
 // Returns:
-//   bool: Indicates whether the message was successfully deleted.
-//   int: The number of messages in the stream after deletion.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	bool: Indicates whether the message was successfully deleted.
+//	int: The number of messages in the stream after deletion.
+//	error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
 // - The name parameter represents the name of the stream to delete from.
@@ -309,11 +313,13 @@ func (s *StreamStructure) XDel(name string, ids string) (bool, int, error) {
 // It takes the name of the stream as an argument and returns the number of elements in the stream.
 //
 // Parameters:
-//   name: The name of the stream.
+//
+//	name: The name of the stream.
 //
 // Returns:
-//   int: The number of elements (messages) in the stream.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	int: The number of elements (messages) in the stream.
+//	error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
 // - The name parameter represents the name of the stream to get the length of.
@@ -345,26 +351,28 @@ func (s *StreamStructure) XLen(name string) (int, error) {
 // and returns a slice of StreamMessage containing the messages within the specified range.
 //
 // Parameters:
-//   name: The name of the stream.
-//   start: The start index of the range (inclusive).
-//   stop: The stop index of the range (exclusive).
+//
+//	name: The name of the stream.
+//	start: The start index of the range (inclusive).
+//	stop: The stop index of the range (exclusive).
 //
 // Returns:
-//   []StreamMessage: A slice of StreamMessage containing the messages within the specified range.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	[]StreamMessage: A slice of StreamMessage containing the messages within the specified range.
+//	error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
-// - The name parameter represents the name of the stream to get the messages from.
-// - The start parameter specifies the start index of the range (inclusive).
-// - The stop parameter specifies the stop index of the range (exclusive).
-// - It retrieves the stream from the database using the specified name.
-// - If the stream does not exist, it will return ErrKeyNotFound.
-// - It decodes the stream data and stores it in the internal s.streams field.
-// - It retrieves the messages from s.streams.Messages.
-// - If the number of messages in the stream is greater than or equal to stop,
-//   it returns a slice of StreamMessage within the specified range.
-// - If the number of messages in the stream is less than stop, it returns
-//   ErrAmountOfData, indicating that there is not enough data in the stream.
+//   - The name parameter represents the name of the stream to get the messages from.
+//   - The start parameter specifies the start index of the range (inclusive).
+//   - The stop parameter specifies the stop index of the range (exclusive).
+//   - It retrieves the stream from the database using the specified name.
+//   - If the stream does not exist, it will return ErrKeyNotFound.
+//   - It decodes the stream data and stores it in the internal s.streams field.
+//   - It retrieves the messages from s.streams.Messages.
+//   - If the number of messages in the stream is greater than or equal to stop,
+//     it returns a slice of StreamMessage within the specified range.
+//   - If the number of messages in the stream is less than stop, it returns
+//     ErrAmountOfData, indicating that there is not enough data in the stream.
 func (s *StreamStructure) XRange(name string, start, stop int) ([]StreamMessage, error) {
 	// Get the stream
 	encodedStreams, err := s.db.Get([]byte(name))
@@ -386,6 +394,7 @@ func (s *StreamStructure) XRange(name string, start, stop int) ([]StreamMessage,
 	// Get the messages
 	if len(messages) >= stop {
 		messages = messages[start:stop]
+
 		// Convert []*StreamMessage to []StreamMessage
 		for _, msg := range messages {
 			result = append(result, *msg)
@@ -403,28 +412,30 @@ func (s *StreamStructure) XRange(name string, start, stop int) ([]StreamMessage,
 // specified range in reverse order.
 //
 // Parameters:
-//   name: The name of the stream.
-//   start: The start index of the range (inclusive).
-//   stop: The stop index of the range (exclusive).
+//
+//	name: The name of the stream.
+//	start: The start index of the range (inclusive).
+//	stop: The stop index of the range (exclusive).
 //
 // Returns:
-//   []StreamMessage: A slice of StreamMessage containing the messages
-//  				  within the specified range in reverse order.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	 []StreamMessage: A slice of StreamMessage containing the messages
+//					  within the specified range in reverse order.
+//	 error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
-// - The name parameter represents the name of the stream to get the messages from.
-// - The start parameter specifies the start index of the range (inclusive).
-// - The stop parameter specifies the stop index of the range (exclusive).
-// - It retrieves the stream from the database using the specified name.
-// - If the stream does not exist, it will return ErrKeyNotFound.
-// - It decodes the stream data and stores it in the internal s.streams field.
-// - It retrieves the messages from s.streams.Messages.
-// - If the number of messages in the stream is greater than or equal to stop,
-//   it returns a slice of StreamMessage within the specified range in reverse order.
-// - If the number of messages in the stream is less than stop, it returns
-//   ErrAmountOfData, indicating that there is not enough data in the stream.
-// - The returned slice of StreamMessage is reversed compared to the original order.
+//   - The name parameter represents the name of the stream to get the messages from.
+//   - The start parameter specifies the start index of the range (inclusive).
+//   - The stop parameter specifies the stop index of the range (exclusive).
+//   - It retrieves the stream from the database using the specified name.
+//   - If the stream does not exist, it will return ErrKeyNotFound.
+//   - It decodes the stream data and stores it in the internal s.streams field.
+//   - It retrieves the messages from s.streams.Messages.
+//   - If the number of messages in the stream is greater than or equal to stop,
+//     it returns a slice of StreamMessage within the specified range in reverse order.
+//   - If the number of messages in the stream is less than stop, it returns
+//     ErrAmountOfData, indicating that there is not enough data in the stream.
+//   - The returned slice of StreamMessage is reversed compared to the original order.
 func (s *StreamStructure) XRevRange(name string, start, stop int) ([]StreamMessage, error) {
 	// Get the stream
 	encodedStreams, err := s.db.Get([]byte(name))
@@ -467,27 +478,29 @@ func (s *StreamStructure) XRevRange(name string, start, stop int) ([]StreamMessa
 // and returns the number of messages in the stream after the trim operation.
 //
 // Parameters:
-//   name: The name of the stream.
-//   maxLen: The maximum length to trim the stream to.
+//
+//	name: The name of the stream.
+//	maxLen: The maximum length to trim the stream to.
 //
 // Returns:
-//   int: The number of messages in the stream after the trim operation.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	int: The number of messages in the stream after the trim operation.
+//	error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
-// - The name parameter represents the name of the stream to trim.
-// - The maxLen parameter specifies the maximum length to trim the stream to.
-// - It retrieves the stream from the database using the specified name.
-// - If the stream does not exist, it will return ErrKeyNotFound.
-// - It decodes the stream data and stores it in the internal s.streams field.
-// - It retrieves the messages from s.streams.Messages.
-// - If the number of messages in the stream is greater than or equal to maxLen,
-//   it trims the stream to the specified length.
-// - If the number of messages in the stream is less than maxLen, it returns
-//   ErrAmountOfData, indicating that there is not enough data in the stream.
-// - It sets the trimmed messages back to s.streams.Messages.
-// - It encodes the streams and updates the stream in the database.
-// - It returns the number of messages in the stream after the trim operation.
+//   - The name parameter represents the name of the stream to trim.
+//   - The maxLen parameter specifies the maximum length to trim the stream to.
+//   - It retrieves the stream from the database using the specified name.
+//   - If the stream does not exist, it will return ErrKeyNotFound.
+//   - It decodes the stream data and stores it in the internal s.streams field.
+//   - It retrieves the messages from s.streams.Messages.
+//   - If the number of messages in the stream is greater than or equal to maxLen,
+//     it trims the stream to the specified length.
+//   - If the number of messages in the stream is less than maxLen, it returns
+//     ErrAmountOfData, indicating that there is not enough data in the stream.
+//   - It sets the trimmed messages back to s.streams.Messages.
+//   - It encodes the streams and updates the stream in the database.
+//   - It returns the number of messages in the stream after the trim operation.
 func (s *StreamStructure) XTrim(name string, maxLen int) (int, error) {
 	// Get the stream
 	encodedStreams, err := s.db.Get([]byte(name))
@@ -539,13 +552,15 @@ func (s *StreamStructure) XTrim(name string, maxLen int) (int, error) {
 // and returns a boolean indicating whether the group was created successfully or not, and an error if any.
 //
 // Parameters:
-//   name: The name of the stream.
-//   group: The name of the consumer group.
-//   id: The ID of the message.
+//
+//	name: The name of the stream.
+//	group: The name of the consumer group.
+//	id: The ID of the message.
 //
 // Returns:
-//   bool: A boolean indicating whether the group was created successfully or not.
-//   error: An error if any occurred during the operation, or nil on success.
+//
+//	bool: A boolean indicating whether the group was created successfully or not.
+//	error: An error if any occurred during the operation, or nil on success.
 //
 // Note:
 // - The name parameter represents the name of the stream to create the consumer group on.
@@ -600,11 +615,13 @@ func (s *StreamStructure) XGroup(name, group, id string) (bool, error) {
 // It takes the Streams object as an argument and returns the encoded data as a byte slice.
 //
 // Parameters:
-//   ss: The Streams object to encode.
+//
+//	ss: The Streams object to encode.
 //
 // Returns:
-//   []byte: The encoded data as a byte slice.
-//   error: An error if any occurred during the encoding process, or nil on success.
+//
+//	[]byte: The encoded data as a byte slice.
+//	error: An error if any occurred during the encoding process, or nil on success.
 //
 // Note:
 // - The ss parameter represents the Streams object to be encoded.
@@ -624,11 +641,13 @@ func (s *StreamStructure) encodeStreams(ss *Streams) ([]byte, error) {
 // It takes the encoded data as a byte slice and the target Streams object as arguments.
 //
 // Parameters:
-//   ss: The encoded data as a byte slice.
-//   ss2: The target Streams object to store the decoded data.
+//
+//	ss: The encoded data as a byte slice.
+//	ss2: The target Streams object to store the decoded data.
 //
 // Returns:
-//   error: An error if any occurred during the decoding process, or nil on success.
+//
+//	error: An error if any occurred during the decoding process, or nil on success.
 //
 // Note:
 // - The ss parameter represents the encoded data to be decoded.
@@ -649,11 +668,13 @@ func (s *StreamStructure) decodeStreams(ss []byte, ss2 *Streams) error {
 // It takes the StreamGroup object as an argument and returns the encoded data as a byte slice.
 //
 // Parameters:
-//   sg: The StreamGroup object to encode.
+//
+//	sg: The StreamGroup object to encode.
 //
 // Returns:
-//   []byte: The encoded data as a byte slice.
-//   error: An error if any occurred during the encoding process, or nil on success.
+//
+//	[]byte: The encoded data as a byte slice.
+//	error: An error if any occurred during the encoding process, or nil on success.
 //
 // Note:
 // - The sg parameter represents the StreamGroup object to be encoded.
