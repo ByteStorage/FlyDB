@@ -82,7 +82,7 @@ func (s *store) newRaftNode() error {
 	conf := s.newDefaultConfig()
 
 	// setup Raft communication
-	t := newTransport()
+	t := newTransport(s.conf)
 
 	// create the snapshot store. This allows the Raft to truncate the log.
 	snapshots, err := newSnapshotStore(s.conf)

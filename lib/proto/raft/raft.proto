@@ -1,0 +1,98 @@
+syntax="proto3";
+
+package raft_pb;
+option go_package = 	".;raftPB";
+import "google/protobuf/timestamp.proto";
+
+message RPCHeader{
+  int64 ProtocolVersion=1;
+  bytes ID=2;
+  bytes Addr=3;
+}
+// RequestVoteRequest are initiated by node in Candidate state, on election.
+// Fields matched to condensed summary of Raft consensus algorithm in ISUCA.
+message RequestVoteRequest {
+  RPCHeader rpc_header=1;
+  uint64 term = 2;
+  bytes candidate = 3;
+  uint64 last_log_index = 4;
+  uint64 last_log_term = 5;
+  bool leadership_transfer=6;
+}
+
+message RequestVoteResponse {
+  RPCHeader rpc_header=1;
+  uint64 term = 2;
+  bytes peers = 3; // deprecated as of version 2+
+  bool granted = 4;
+}
+message AppendEntriesRequest {
+  RPCHeader rpc_header = 1;
+  uint64 term = 2;
+  bytes leader = 3;
+  uint64 prev_log_entry = 4;
+  uint64 prev_log_term = 5;
+  repeated Log entries = 6;
+  uint64 leader_commit_index = 7;
+}
+message Log {
+  enum LogType {
+    LOG_COMMAND = 0;
+    LOG_NOOP = 1;
+    LOG_ADD_PEER_DEPRECATED = 2;
+    LOG_REMOVE_PEER_DEPRECATED = 3;
+    LOG_BARRIER = 4;
+    LOG_CONFIGURATION = 5;
+  }
+  uint64 index = 1;
+  uint64 term = 2;
+  LogType type = 3;
+  bytes data = 4;
+  bytes extensions = 5;
+  google.protobuf.Timestamp appended_at = 6;
+}
+
+message AppendEntriesResponse {
+  RPCHeader rpc_header = 1;
+  uint64 term = 2;
+  uint64 last_log = 3;
+  bool success = 4;
+  bool no_retry_backoff = 5;
+}
+
+message TimeoutNowRequest {
+  RPCHeader rpc_header = 1;
+}
+message TimeoutNowResponse {
+  RPCHeader rpc_header = 1;
+}
+
+message InstallSnapshotRequest {
+  RPCHeader rpc_header = 1;
+
+  int64 snapshot_version = 2;
+  uint64 term = 3;
+  bytes leader = 4;
+  uint64 last_log_index = 5;
+  uint64 last_log_term = 6;
+  bytes peers = 7;
+  bytes configuration = 8;
+  uint64 configuration_index = 9;
+  int64 size = 10;
+  bytes data = 11;
+
+}
+message InstallSnapshotResponse {
+  RPCHeader rpc_header = 1;
+  uint64 term = 2;
+  bool success=3;
+}
+
+service RaftService {
+  rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+  rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse) {}
+  rpc AppendEntriesPipeline(stream AppendEntriesRequest) returns (stream AppendEntriesResponse) {}
+  rpc TimeoutNow(TimeoutNowRequest) returns (TimeoutNowResponse) {}
+  rpc InstallSnapshot(InstallSnapshotRequest) returns (InstallSnapshotResponse) {}
+}
+

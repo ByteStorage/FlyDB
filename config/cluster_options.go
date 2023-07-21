@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"github.com/hashicorp/raft"
+	"time"
+)
 
 type Config struct {
 	ReplicationFactor   int
@@ -12,4 +15,6 @@ type Config struct {
 	SnapshotStoragePath string
 	LogDataStorageSize  int64
 	HeartbeatInterval   time.Duration
+	HeartbeatTimeout    time.Duration
+	LocalAddress        raft.ServerAddress
 }
