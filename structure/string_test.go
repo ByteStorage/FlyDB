@@ -306,12 +306,26 @@ func TestStringStructure_Expire(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v1, "1")
+	assert.Equal(t, v1, []byte("1"))
 
 	time.Sleep(2 * time.Second)
 	v2, err := str.Get("1")
 	assert.Equal(t, err, ErrKeyExpired)
 	assert.Equal(t, v2, nil)
+
+	err = str.Set("2", "你好", 0)
+	assert.Nil(t, err)
+
+	err = str.Expire("2", 1*time.Second)
+	assert.Nil(t, err)
+	v3, err := str.Get("2")
+	assert.Nil(t, err)
+	assert.Equal(t, v3, "你好")
+
+	time.Sleep(2 * time.Second)
+	v4, err := str.Get("2")
+	assert.Equal(t, err, ErrKeyExpired)
+	assert.Equal(t, v4, nil)
 }
 
 func TestStringStructure_Persist(t *testing.T) {
@@ -325,11 +339,81 @@ func TestStringStructure_Persist(t *testing.T) {
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v1, "1")
+	assert.Equal(t, v1, []byte("1"))
 
 	err = str.Persist("1")
 	assert.Nil(t, err)
 	v2, err := str.Get("1")
 	assert.Nil(t, err)
-	assert.Equal(t, v2, "1")
+	assert.Equal(t, v2, []byte("1"))
+}
+
+func TestStringStructure_MGet(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err := str.Set("key1", "value1", 0)
+	assert.Nil(t, err)
+	err = str.Set("key2", "value2", 0)
+	assert.Nil(t, err)
+
+	keys := []string{"key1", "key2"} // Simulating keys to be retrieved
+	values, err := str.MGet(keys...)
+	assert.Nil(t, err)
+	assert.Equal(t, len(values), len(keys))
+
+	expectedValues := []interface{}{"value1", "value2", nil} // Expected values based on the keys
+	for i, value := range values {
+		assert.Equal(t, value, expectedValues[i])
+	}
+}
+
+func TestStringStructure_MSet(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err := str.MSet("key1", "value1", "key2", "value2", "key3", "value3")
+	assert.Nil(t, err)
+
+	value1, err := str.Get("key1")
+	assert.Nil(t, err)
+	assert.Equal(t, value1, "value1")
+
+	value2, err := str.Get("key2")
+	assert.Nil(t, err)
+	assert.Equal(t, value2, "value2")
+
+	value3, err := str.Get("key3")
+	assert.Nil(t, err)
+	assert.Equal(t, value3, "value3")
+}
+
+func TestStringStructure_MSetNX(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	// Test case: All keys and values are new, should return true
+	success, err := str.MSetNX("key1", "value1", "key2", "value2", "key3", "value3")
+	assert.Nil(t, err)
+	assert.True(t, success)
+
+	// Test case: At least one key already exists, should return false
+	err = str.Set("key1", "existingValue", 0)
+	assert.Nil(t, err)
+
+	success, err = str.MSetNX("key1", "value1", "key2", "value2", "key3", "value3")
+	assert.Nil(t, err)
+	assert.False(t, success)
+
+	value1, err := str.Get("key1")
+	assert.Nil(t, err)
+	assert.Equal(t, value1, "existingValue")
+
+	value2, err := str.Get("key2")
+	assert.Nil(t, err)
+	assert.Equal(t, value2, "value2")
+
+	value3, err := str.Get("key3")
+	assert.Nil(t, err)
+	assert.Equal(t, value3, "value3")
 }

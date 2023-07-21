@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/cluster/region"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/hashicorp/raft"
 	"sync"
 )
@@ -12,7 +13,9 @@ import (
 // Each region under the store is in a raftGroups, and the region clusters in the raftGroups communicate through grpc
 // store stores the data of a store.
 type store struct {
-	id         string                    // store id
+	id         string // store id
+	conf       config.Config
+	opts       config.Options
 	addr       string                    // store address
 	regionList map[uint64]*region.Region // region list, to store the regions in the store.
 	size       int64                     // size
@@ -76,23 +79,32 @@ func (s *store) newRaftNode() error {
 	// All new methods below can add other return values as needed, such as err
 
 	// setup Raft configuration
-	config := s.newDefaultConfig()
+	conf := s.newDefaultConfig()
 
 	// setup Raft communication
 	t := newTransport()
 
 	// create the snapshot store. This allows the Raft to truncate the log.
-	snapshots := newSnapshot()
+	snapshots, err := newSnapshotStore(s.conf)
+	if err != nil {
+		return err
+	}
 
 	// create the log store and stable store
-	logStore := newRaftLog()
-	stableStore := newStableLog()
+	logStore, err := newRaftLog(s.conf)
+	if err != nil {
+		return err
+	}
+	stableStore, err := newStableLog(s.conf)
+	if err != nil {
+		return err
+	}
 
 	// create a new finite state machine
 	f := newFSM()
 
 	// instantiate the Raft system
-	r, err := raft.NewRaft(config, f, logStore, stableStore, snapshots, t)
+	r, err := raft.NewRaft(conf, f, logStore, stableStore, snapshots, t)
 	if err != nil {
 		return err
 	}

@@ -327,16 +327,8 @@ func (s *StringStructure) Expire(key string, ttl time.Duration) error {
 		return err
 	}
 
-	// Convert the old value to an integer
-	intValue, err := convertToInt(oldValue)
-	if err != nil {
-		return err
-	}
-
-	newValue := strconv.Itoa(intValue)
-
 	// Set the value
-	return s.Set(key, newValue, ttl)
+	return s.Set(key, oldValue, ttl)
 }
 
 // Persist removes the expiration time of a key
@@ -349,6 +341,98 @@ func (s *StringStructure) Persist(key string) error {
 
 	// Set the value
 	return s.Set(key, value, 0)
+}
+
+func (s *StringStructure) MGet(keys ...string) ([]interface{}, error) {
+	// Create a slice to store the values
+	values := make([]interface{}, len(keys))
+
+	// Get the value for each key
+	for i, key := range keys {
+		value, err := s.Get(key)
+		if err != nil {
+			return nil, err
+		}
+		values[i] = value
+	}
+
+	return values, nil
+}
+
+func (s *StringStructure) MSet(pairs ...interface{}) error {
+	if len(pairs)%2 != 0 {
+		return errors.New("Wrong number of arguments")
+	}
+
+	// Create a map to store the key-value pairs
+	data := make(map[string]interface{})
+
+	// Extract key-value pairs from the input arguments and store them in the map
+	for i := 0; i < len(pairs); i += 2 {
+		key, ok := pairs[i].(string)
+		if !ok {
+			return errors.New("Invalid key")
+		}
+
+		value := pairs[i+1]
+		data[key] = value
+	}
+
+	// Set each key-value pair in the map
+	for key, value := range data {
+		if err := s.Set(key, value, 0); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MSetNX sets multiple key-value pairs only if none of the specified keys exist
+func (s *StringStructure) MSetNX(pairs ...interface{}) (bool, error) {
+	if len(pairs)%2 != 0 {
+		return false, errors.New("Wrong number of arguments")
+	}
+
+	// Check if any of the specified keys already exist
+	for i := 0; i < len(pairs); i += 2 {
+		key, ok := pairs[i].(string)
+		if !ok {
+			return false, errors.New("Invalid key")
+		}
+
+		exists, err := s.Exists(key)
+		if err != nil {
+			return false, err
+		}
+
+		if exists {
+			return false, nil
+		}
+	}
+
+	// Create a map to store the key-value pairs
+	data := make(map[string]interface{})
+
+	// Extract key-value pairs from the input arguments and store them in the map
+	for i := 0; i < len(pairs); i += 2 {
+		key, ok := pairs[i].(string)
+		if !ok {
+			return false, errors.New("Invalid key")
+		}
+
+		value := pairs[i+1]
+		data[key] = value
+	}
+
+	// Set each key-value pair in the map
+	for key, value := range data {
+		if err := s.Set(key, value, 0); err != nil {
+			return false, err
+		}
+	}
+
+	return true, nil
 }
 
 // encodeStringValue encodes the value
