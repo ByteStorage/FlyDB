@@ -41,7 +41,7 @@ func (s *str) NewFlyDBService(ctx context.Context, req *gstring.FlyDBOption) (*g
 	if req.DataFileSize != 0 {
 		option.DataFileSize = req.DataFileSize
 	}
-	if req.SyncWrite != false {
+	if req.SyncWrite {
 		option.SyncWrite = req.SyncWrite
 	}
 	fmt.Println("new flydb option: ", req.DirPath)
