@@ -3,6 +3,7 @@ package fileio
 import (
 	"errors"
 	"os"
+	"sync"
 	"syscall"
 	"unsafe"
 )
@@ -10,14 +11,33 @@ import (
 type MMapIO struct {
 	fd       *os.File // system file descriptor
 	data     []byte   // the mapping area corresponding to the file
-	dirty    bool     // has changed
 	offset   int64    // next write location
 	fileSize int64    // max file size
+	count    int
+}
+
+type mmapFileController struct {
+	lock  sync.Mutex
+	files map[string]*MMapIO
+}
+
+var controller = mmapFileController{
+	lock:  sync.Mutex{},
+	files: map[string]*MMapIO{},
 }
 
 // NewMMapIOManager Initialize Mmap IO
 func NewMMapIOManager(fileName string, fileSize int64) (*MMapIO, error) {
-	mmapIO := &MMapIO{fileSize: fileSize}
+	controller.lock.Lock()
+	defer controller.lock.Unlock()
+
+	if v, ok := controller.files[fileName]; ok {
+		v.count++
+		return v, nil
+	}
+
+	mmapIO := &MMapIO{fileSize: fileSize, count: 1}
+	controller.files[fileName] = mmapIO
 
 	fd, err := os.OpenFile(
 		fileName,
@@ -60,27 +80,24 @@ func (mio *MMapIO) Write(b []byte) (int, error) {
 	}
 
 	mio.offset = newOffset
-	mio.dirty = true
-	return copy(mio.data[oldOffset:], b), nil
+	return copy(mio.data[oldOffset:newOffset], b), nil
 }
 
 // Sync Synchronize data from memory to disk
 func (mio *MMapIO) Sync() error {
-	if !mio.dirty {
-		return nil
-	}
-
 	_, _, err := syscall.Syscall(syscall.SYS_MSYNC, uintptr(unsafe.Pointer(&mio.data[0])), uintptr(mio.offset), uintptr(syscall.MS_SYNC))
 	if err != 0 {
 		return err
 	}
-
-	mio.dirty = false
 	return nil
 }
 
 // Close file
 func (mio *MMapIO) Close() (err error) {
+	mio.count--
+	if mio.count > 0 {
+		return nil
+	}
 	if err = mio.fd.Truncate(mio.offset); err != nil {
 		return err
 	}

@@ -192,7 +192,9 @@ func (db *DB) appendLogRecord(logRecord *data2.LogRecord) (*data2.LogRecordPst, 
 
 	// Write data coding
 	encRecord, size := data2.EncodeLogRecord(logRecord)
-	if db.activeFile.WriteOff+size > db.options.DataFileSize {
+	var writeOff int64
+	var ok bool
+	for writeOff, ok = SingleOffset().CanWrite(db.activeFile.FileID, db.options.DataFileSize, size); !ok; writeOff, ok = SingleOffset().CanWrite(db.activeFile.FileID, db.options.DataFileSize, size) {
 		// Persisting data files to ensure that existing data is persisted to disk
 		if err := db.activeFile.Sync(); err != nil {
 			return nil, err
@@ -207,7 +209,6 @@ func (db *DB) appendLogRecord(logRecord *data2.LogRecord) (*data2.LogRecordPst, 
 		}
 	}
 
-	writeOff := db.activeFile.WriteOff
 	if err := db.activeFile.Write(encRecord); err != nil {
 		return nil, err
 	}
@@ -243,6 +244,7 @@ func (db *DB) setActiveDataFile() error {
 		return err
 	}
 	db.activeFile = dataFile
+	SingleOffset().AddNew(initialFileID, 0)
 	return nil
 }
 
