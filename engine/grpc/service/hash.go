@@ -30,61 +30,6 @@ func (s *hash) CloseDb() error {
 	return s.dbh.Stop()
 }
 
-func (s *hash) HExists(ctx context.Context, request *ghash.GHashExistsRequest) (*ghash.GHashExistsResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HLen(ctx context.Context, request *ghash.GHashLenRequest) (*ghash.GHashLenResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HUpdate(ctx context.Context, request *ghash.GHashUpdateRequest) (*ghash.GHashUpdateResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HIncrBy(ctx context.Context, request *ghash.GHashIncrByRequest) (*ghash.GHashIncrByResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HIncrByFloat(ctx context.Context, request *ghash.GHashIncrByFloatRequest) (*ghash.GHashIncrByFloatResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HDecrBy(ctx context.Context, request *ghash.GHashDecrByRequest) (*ghash.GHashDecrByResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HStrLen(ctx context.Context, request *ghash.GHashStrLenRequest) (*ghash.GHashStrLenResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HMove(ctx context.Context, request *ghash.GHashMoveRequest) (*ghash.GHashMoveResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HSetNX(ctx context.Context, request *ghash.GHashSetNXRequest) (*ghash.GHashSetNXResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) HType(ctx context.Context, request *ghash.GHashTypeRequest) (*ghash.GHashTypeResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *hash) mustEmbedUnimplementedGHashServiceServer() {
-	//TODO implement me
-	panic("implement me")
-}
-
 // HSet is a grpc s for put
 func (s *hash) HSet(ctx context.Context, req *ghash.GHashSetRequest) (*ghash.GHashSetResponse, error) {
 	fmt.Println("receive put request: key: ", req.Key, " field: ", req.GetField(), " value: ", req.GetValue())

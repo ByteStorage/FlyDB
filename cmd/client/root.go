@@ -184,4 +184,126 @@ func register(app *grumble.App) {
 			a.StringList("key", "key", grumble.Default(""))
 		},
 	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LPush",
+		Help: "Inserts a value at the head of a list in list-structure",
+		Run:  stringLPushData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LPushs",
+		Help: "Inserts multiple values at the head of a list in list-structure",
+		Run:  stringLPushsData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("values", "values", grumble.Default([]string{}))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "RPush",
+		Help: "Inserts a value at the tail of a list in list-structure",
+		Run:  stringRPushData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "RPushs",
+		Help: "Push elements to the end of a list in list-structure",
+		Run:  stringRPushsData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("values", "values", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LPop",
+		Help: "Removes and returns the first element of a list in list-structure",
+		Run:  stringLPopData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "RPop",
+		Help: "Removes and returns the last element of a list in list-structure",
+		Run:  stringRPopData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LRange",
+		Help: "Returns a range of elements from a list in list-structure",
+		Run:  stringLRangeData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("start", "start", grumble.Default(0))
+			a.Int("stop", "stop", grumble.Default(-1))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LLen",
+		Help: "Returns the length of a list in list-structure",
+		Run:  stringLLenData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LRem",
+		Help: "Remove elements from a list in list-structure",
+		Run:  stringLRemData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("count", "count", grumble.Default(0))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LIndex",
+		Help: "Get the element at a specific index in a list in list-structure",
+		Run:  stringLIndexData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("index", "index", grumble.Default(0))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LSet",
+		Help: "Set the value of an element at a specific index in a list in list-structure",
+		Run:  stringLSetData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("index", "index", grumble.Default(0))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LTrim",
+		Help: "Trim a list to a specified range of elements in list-structure",
+		Run:  stringLTrimData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("start", "start", grumble.Default(0))
+			a.Int("stop", "stop", grumble.Default(0))
+		},
+	})
+
 }
