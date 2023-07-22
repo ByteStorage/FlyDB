@@ -63,125 +63,107 @@ func register(app *grumble.App) {
 	})
 
 	app.AddCommand(&grumble.Command{
-		Name: "type",
-		Help: "get the type of a key",
-		Run:  stringGetType,
+		Name: "HExists",
+		Help: "Check if a field exists in a hash in hash-structure",
+		Run:  hashHExistsKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HLen",
+		Help: "Get the length of a hash in hash-structure",
+		Run:  hashHLenKey,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 		},
 	})
 
 	app.AddCommand(&grumble.Command{
-		Name: "strlen",
-		Help: "str value length in string-structure",
-		Run:  stringStrLen,
+		Name: "HUpdate",
+		Help: "Update a field in a hash in hash-structure",
+		Run:  hashHUpdateKey,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "getset",
-		Help: "get curvalue set newvalue in string-structure",
-		Run:  stringGetSet,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
 			a.String("value", "value", grumble.Default(""))
 		},
 	})
 
 	app.AddCommand(&grumble.Command{
-		Name: "append",
-		Help: "append value in string-structure",
-		Run:  stringAppend,
+		Name: "HIncrby",
+		Help: "Increment the value of a field in a hash by an integer in hash-structure",
+		Run:  hashHIncrByKey,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+			a.Int64("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HIncrbyfloat",
+		Help: "Increment the value of a field in a hash by a float in hash-structure",
+		Run:  hashHIncrByFloatKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+			a.Float64("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HDecrby",
+		Help: "Decrement the value of a field in a hash by an integer in hash-structure",
+		Run:  hashHDecrByKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+			a.Int64("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HStrlen",
+		Help: "Get the length of the string value of a field in a hash in hash-structure",
+		Run:  hashHStrLenKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HMove",
+		Help: "Move a field from one hash to another in hash-structure",
+		Run:  hashHMoveKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
+			a.String("dest", "dest", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "HSetnx",
+		Help: "Set the value of a field in a hash if it does not exist in hash-structure",
+		Run:  hashHSetNXKey,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
 			a.String("value", "value", grumble.Default(""))
 		},
 	})
 
 	app.AddCommand(&grumble.Command{
-		Name: "incr",
-		Help: "increment the value of a key in string-structure",
-		Run:  stringIncr,
+		Name: "HType",
+		Help: "Get the type of a field in a hash in hash-structure",
+		Run:  hashHType,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "incrby",
-		Help: "increment the value of a key by a specific amount in string-structure",
-		Run:  stringIncrBy,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-			a.Int64("amount", "amount", grumble.Default(0))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "incrbyfloat",
-		Help: "increment the value of a key by a floating-point amount in string-structure",
-		Run:  stringIncrByFloat,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-			a.Float64("amount", "amount", grumble.Default(0.0))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "decr",
-		Help: "decrement the value of a key",
-		Run:  stringDecr,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "decrby",
-		Help: "decrement the value of a key by a specific amount in string-structure",
-		Run:  stringDecrBy,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-			a.Int64("amount", "amount", grumble.Default(0))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "exist",
-		Help: "Check if the given key exists in string-structure",
-		Run:  stringExists,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "expire",
-		Help: "Set the expiration time for the key, which will no longer be available after expiration. Unit in seconds in string-structure",
-		Run:  stringExpire,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-			a.Int64("ttl", "time of this key", grumble.Default(""))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "persist",
-		Help: "Remove the expiration time of the given key so that it never expires in string-structure",
-		Run:  stringPersist,
-		Args: func(a *grumble.Args) {
-			a.String("key", "key", grumble.Default(""))
-		},
-	})
-
-	app.AddCommand(&grumble.Command{
-		Name: "MGet",
-		Help: "Gets the value of multiple keys simultaneously in string-structure",
-		Run:  stringMGet,
-		Args: func(a *grumble.Args) {
-			a.StringList("key", "key", grumble.Default(""))
+			a.String("field", "field", grumble.Default(""))
 		},
 	})
 
