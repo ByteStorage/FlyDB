@@ -33,6 +33,30 @@ func NewStringService(options config.Options) (StringService, error) {
 	}, nil
 }
 
+func (s *str) NewFlyDBService(ctx context.Context, req *gstring.FlyDBOption) (*gstring.NewFlyDBResponse, error) {
+	option := config.DefaultOptions
+	if req.DirPath != "" {
+		option.DirPath = req.DirPath
+	}
+	if req.DataFileSize != 0 {
+		option.DataFileSize = req.DataFileSize
+	}
+	if req.SyncWrite {
+		option.SyncWrite = req.SyncWrite
+	}
+	fmt.Println("new flydb option: ", req.DirPath)
+	dbs, err := structure.NewStringStructure(option)
+	if err != nil {
+		return &gstring.NewFlyDBResponse{
+			ResponseMsg: err.Error(),
+		}, nil
+	}
+	s.dbs = dbs
+	return &gstring.NewFlyDBResponse{
+		ResponseMsg: "start success!",
+	}, nil
+}
+
 // Put is a grpc s for put
 func (s *str) Put(ctx context.Context, req *gstring.SetRequest) (*gstring.SetResponse, error) {
 	fmt.Println("receive put request: key: ", req.Key, " value: ", req.GetValue(), " duration: ", time.Duration(req.Expire))
