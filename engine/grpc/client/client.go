@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
+	"github.com/ByteStorage/FlyDB/lib/proto/glist"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,7 +19,6 @@ func newGrpcClient(addr string) (gstring.GStringServiceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	//client := gstring.NewGStringServiceClient(conn)
 	client := gstring.NewGStringServiceClient(conn)
 	return client, nil
 }
@@ -28,7 +28,15 @@ func newHashGrpcClient(addr string) (ghash.GHashServiceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	//client := gstring.NewGStringServiceClient(conn)
 	client := ghash.NewGHashServiceClient(conn)
+	return client, nil
+}
+
+func newListGrpcClient(addr string) (glist.GListServiceClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	client := glist.NewGListServiceClient(conn)
 	return client, nil
 }
