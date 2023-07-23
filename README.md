@@ -15,7 +15,7 @@ English | [中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md
 You can install FlyDB using the Go command line tool:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.6
+go get github.com/ByteStorage/FlyDB@v1.0.10
 ```
 
 Or clone this project from github:
@@ -171,6 +171,10 @@ V1.0.6: Short-term support version v1.0.6 supports data structures of Hash type.
 V1.0.7: Short-term support version v1.0.7 supports data structures of BitMap type. Some codes are optimized.
 
 V1.0.8: Short-term support version v1.0.8 Support for a new in-memory index, SkipList. Some codes are optimized.
+
+V1.0.9: Short-term support version v1.0.9 supports data structures of Sort Set type. Some codes are optimized.
+
+V1.0.10: Short-term support version v1.0.10 supports data structures of Set type. Some codes are optimized.
 
 ## 👀 Contributor
 
