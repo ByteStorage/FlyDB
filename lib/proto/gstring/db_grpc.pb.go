@@ -18,29 +18,11 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-const (
-	GStringService_Get_FullMethodName         = "/gstring.GStringService/Get"
-	GStringService_Put_FullMethodName         = "/gstring.GStringService/Put"
-	GStringService_Del_FullMethodName         = "/gstring.GStringService/Del"
-	GStringService_Type_FullMethodName        = "/gstring.GStringService/Type"
-	GStringService_StrLen_FullMethodName      = "/gstring.GStringService/StrLen"
-	GStringService_GetSet_FullMethodName      = "/gstring.GStringService/GetSet"
-	GStringService_Append_FullMethodName      = "/gstring.GStringService/Append"
-	GStringService_Incr_FullMethodName        = "/gstring.GStringService/Incr"
-	GStringService_IncrBy_FullMethodName      = "/gstring.GStringService/IncrBy"
-	GStringService_IncrByFloat_FullMethodName = "/gstring.GStringService/IncrByFloat"
-	GStringService_Decr_FullMethodName        = "/gstring.GStringService/Decr"
-	GStringService_DecrBy_FullMethodName      = "/gstring.GStringService/DecrBy"
-	GStringService_Exists_FullMethodName      = "/gstring.GStringService/Exists"
-	GStringService_Expire_FullMethodName      = "/gstring.GStringService/Expire"
-	GStringService_Persist_FullMethodName     = "/gstring.GStringService/Persist"
-	GStringService_MGet_FullMethodName        = "/gstring.GStringService/MGet"
-)
-
 // GStringServiceClient is the client API for GStringService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GStringServiceClient interface {
+	NewFlyDBService(ctx context.Context, in *FlyDBOption, opts ...grpc.CallOption) (*NewFlyDBResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Put(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
 	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*DelResponse, error)
@@ -67,9 +49,18 @@ func NewGStringServiceClient(cc grpc.ClientConnInterface) GStringServiceClient {
 	return &gStringServiceClient{cc}
 }
 
+func (c *gStringServiceClient) NewFlyDBService(ctx context.Context, in *FlyDBOption, opts ...grpc.CallOption) (*NewFlyDBResponse, error) {
+	out := new(NewFlyDBResponse)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/NewFlyDBService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gStringServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, GStringService_Get_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +69,7 @@ func (c *gStringServiceClient) Get(ctx context.Context, in *GetRequest, opts ...
 
 func (c *gStringServiceClient) Put(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error) {
 	out := new(SetResponse)
-	err := c.cc.Invoke(ctx, GStringService_Put_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Put", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +78,7 @@ func (c *gStringServiceClient) Put(ctx context.Context, in *SetRequest, opts ...
 
 func (c *gStringServiceClient) Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*DelResponse, error) {
 	out := new(DelResponse)
-	err := c.cc.Invoke(ctx, GStringService_Del_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Del", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +87,7 @@ func (c *gStringServiceClient) Del(ctx context.Context, in *DelRequest, opts ...
 
 func (c *gStringServiceClient) Type(ctx context.Context, in *TypeRequest, opts ...grpc.CallOption) (*TypeResponse, error) {
 	out := new(TypeResponse)
-	err := c.cc.Invoke(ctx, GStringService_Type_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Type", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +96,7 @@ func (c *gStringServiceClient) Type(ctx context.Context, in *TypeRequest, opts .
 
 func (c *gStringServiceClient) StrLen(ctx context.Context, in *StrLenRequest, opts ...grpc.CallOption) (*StrLenResponse, error) {
 	out := new(StrLenResponse)
-	err := c.cc.Invoke(ctx, GStringService_StrLen_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/StrLen", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +105,7 @@ func (c *gStringServiceClient) StrLen(ctx context.Context, in *StrLenRequest, op
 
 func (c *gStringServiceClient) GetSet(ctx context.Context, in *GetSetRequest, opts ...grpc.CallOption) (*GetSetResponse, error) {
 	out := new(GetSetResponse)
-	err := c.cc.Invoke(ctx, GStringService_GetSet_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/GetSet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +114,7 @@ func (c *gStringServiceClient) GetSet(ctx context.Context, in *GetSetRequest, op
 
 func (c *gStringServiceClient) Append(ctx context.Context, in *AppendRequest, opts ...grpc.CallOption) (*AppendResponse, error) {
 	out := new(AppendResponse)
-	err := c.cc.Invoke(ctx, GStringService_Append_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Append", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +123,7 @@ func (c *gStringServiceClient) Append(ctx context.Context, in *AppendRequest, op
 
 func (c *gStringServiceClient) Incr(ctx context.Context, in *IncrRequest, opts ...grpc.CallOption) (*IncrResponse, error) {
 	out := new(IncrResponse)
-	err := c.cc.Invoke(ctx, GStringService_Incr_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Incr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +132,7 @@ func (c *gStringServiceClient) Incr(ctx context.Context, in *IncrRequest, opts .
 
 func (c *gStringServiceClient) IncrBy(ctx context.Context, in *IncrByRequest, opts ...grpc.CallOption) (*IncrByResponse, error) {
 	out := new(IncrByResponse)
-	err := c.cc.Invoke(ctx, GStringService_IncrBy_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/IncrBy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +141,7 @@ func (c *gStringServiceClient) IncrBy(ctx context.Context, in *IncrByRequest, op
 
 func (c *gStringServiceClient) IncrByFloat(ctx context.Context, in *IncrByFloatRequest, opts ...grpc.CallOption) (*IncrByFloatResponse, error) {
 	out := new(IncrByFloatResponse)
-	err := c.cc.Invoke(ctx, GStringService_IncrByFloat_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/IncrByFloat", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +150,7 @@ func (c *gStringServiceClient) IncrByFloat(ctx context.Context, in *IncrByFloatR
 
 func (c *gStringServiceClient) Decr(ctx context.Context, in *DecrRequest, opts ...grpc.CallOption) (*DecrResponse, error) {
 	out := new(DecrResponse)
-	err := c.cc.Invoke(ctx, GStringService_Decr_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Decr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +159,7 @@ func (c *gStringServiceClient) Decr(ctx context.Context, in *DecrRequest, opts .
 
 func (c *gStringServiceClient) DecrBy(ctx context.Context, in *DecrByRequest, opts ...grpc.CallOption) (*DecrByResponse, error) {
 	out := new(DecrByResponse)
-	err := c.cc.Invoke(ctx, GStringService_DecrBy_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/DecrBy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +168,7 @@ func (c *gStringServiceClient) DecrBy(ctx context.Context, in *DecrByRequest, op
 
 func (c *gStringServiceClient) Exists(ctx context.Context, in *ExistsRequest, opts ...grpc.CallOption) (*ExistsResponse, error) {
 	out := new(ExistsResponse)
-	err := c.cc.Invoke(ctx, GStringService_Exists_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Exists", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +177,7 @@ func (c *gStringServiceClient) Exists(ctx context.Context, in *ExistsRequest, op
 
 func (c *gStringServiceClient) Expire(ctx context.Context, in *ExpireRequest, opts ...grpc.CallOption) (*ExpireResponse, error) {
 	out := new(ExpireResponse)
-	err := c.cc.Invoke(ctx, GStringService_Expire_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Expire", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +186,7 @@ func (c *gStringServiceClient) Expire(ctx context.Context, in *ExpireRequest, op
 
 func (c *gStringServiceClient) Persist(ctx context.Context, in *PersistRequest, opts ...grpc.CallOption) (*PersistResponse, error) {
 	out := new(PersistResponse)
-	err := c.cc.Invoke(ctx, GStringService_Persist_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/Persist", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +195,7 @@ func (c *gStringServiceClient) Persist(ctx context.Context, in *PersistRequest, 
 
 func (c *gStringServiceClient) MGet(ctx context.Context, in *MGetRequest, opts ...grpc.CallOption) (*MGetResponse, error) {
 	out := new(MGetResponse)
-	err := c.cc.Invoke(ctx, GStringService_MGet_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gstring.GStringService/MGet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -215,6 +206,7 @@ func (c *gStringServiceClient) MGet(ctx context.Context, in *MGetRequest, opts .
 // All implementations must embed UnimplementedGStringServiceServer
 // for forward compatibility
 type GStringServiceServer interface {
+	NewFlyDBService(context.Context, *FlyDBOption) (*NewFlyDBResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Put(context.Context, *SetRequest) (*SetResponse, error)
 	Del(context.Context, *DelRequest) (*DelResponse, error)
@@ -238,6 +230,9 @@ type GStringServiceServer interface {
 type UnimplementedGStringServiceServer struct {
 }
 
+func (UnimplementedGStringServiceServer) NewFlyDBService(context.Context, *FlyDBOption) (*NewFlyDBResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewFlyDBService not implemented")
+}
 func (UnimplementedGStringServiceServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
@@ -299,6 +294,24 @@ func RegisterGStringServiceServer(s grpc.ServiceRegistrar, srv GStringServiceSer
 	s.RegisterService(&GStringService_ServiceDesc, srv)
 }
 
+func _GStringService_NewFlyDBService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FlyDBOption)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GStringServiceServer).NewFlyDBService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gstring.GStringService/NewFlyDBService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GStringServiceServer).NewFlyDBService(ctx, req.(*FlyDBOption))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GStringService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetRequest)
 	if err := dec(in); err != nil {
@@ -309,7 +322,7 @@ func _GStringService_Get_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Get_FullMethodName,
+		FullMethod: "/gstring.GStringService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Get(ctx, req.(*GetRequest))
@@ -327,7 +340,7 @@ func _GStringService_Put_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Put_FullMethodName,
+		FullMethod: "/gstring.GStringService/Put",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Put(ctx, req.(*SetRequest))
@@ -345,7 +358,7 @@ func _GStringService_Del_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Del_FullMethodName,
+		FullMethod: "/gstring.GStringService/Del",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Del(ctx, req.(*DelRequest))
@@ -363,7 +376,7 @@ func _GStringService_Type_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Type_FullMethodName,
+		FullMethod: "/gstring.GStringService/Type",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Type(ctx, req.(*TypeRequest))
@@ -381,7 +394,7 @@ func _GStringService_StrLen_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_StrLen_FullMethodName,
+		FullMethod: "/gstring.GStringService/StrLen",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).StrLen(ctx, req.(*StrLenRequest))
@@ -399,7 +412,7 @@ func _GStringService_GetSet_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_GetSet_FullMethodName,
+		FullMethod: "/gstring.GStringService/GetSet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).GetSet(ctx, req.(*GetSetRequest))
@@ -417,7 +430,7 @@ func _GStringService_Append_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Append_FullMethodName,
+		FullMethod: "/gstring.GStringService/Append",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Append(ctx, req.(*AppendRequest))
@@ -435,7 +448,7 @@ func _GStringService_Incr_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Incr_FullMethodName,
+		FullMethod: "/gstring.GStringService/Incr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Incr(ctx, req.(*IncrRequest))
@@ -453,7 +466,7 @@ func _GStringService_IncrBy_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_IncrBy_FullMethodName,
+		FullMethod: "/gstring.GStringService/IncrBy",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).IncrBy(ctx, req.(*IncrByRequest))
@@ -471,7 +484,7 @@ func _GStringService_IncrByFloat_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_IncrByFloat_FullMethodName,
+		FullMethod: "/gstring.GStringService/IncrByFloat",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).IncrByFloat(ctx, req.(*IncrByFloatRequest))
@@ -489,7 +502,7 @@ func _GStringService_Decr_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Decr_FullMethodName,
+		FullMethod: "/gstring.GStringService/Decr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Decr(ctx, req.(*DecrRequest))
@@ -507,7 +520,7 @@ func _GStringService_DecrBy_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_DecrBy_FullMethodName,
+		FullMethod: "/gstring.GStringService/DecrBy",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).DecrBy(ctx, req.(*DecrByRequest))
@@ -525,7 +538,7 @@ func _GStringService_Exists_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Exists_FullMethodName,
+		FullMethod: "/gstring.GStringService/Exists",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Exists(ctx, req.(*ExistsRequest))
@@ -543,7 +556,7 @@ func _GStringService_Expire_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Expire_FullMethodName,
+		FullMethod: "/gstring.GStringService/Expire",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Expire(ctx, req.(*ExpireRequest))
@@ -561,7 +574,7 @@ func _GStringService_Persist_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_Persist_FullMethodName,
+		FullMethod: "/gstring.GStringService/Persist",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).Persist(ctx, req.(*PersistRequest))
@@ -579,7 +592,7 @@ func _GStringService_MGet_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GStringService_MGet_FullMethodName,
+		FullMethod: "/gstring.GStringService/MGet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GStringServiceServer).MGet(ctx, req.(*MGetRequest))
@@ -594,6 +607,10 @@ var GStringService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "gstring.GStringService",
 	HandlerType: (*GStringServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "NewFlyDBService",
+			Handler:    _GStringService_NewFlyDBService_Handler,
+		},
 		{
 			MethodName: "Get",
 			Handler:    _GStringService_Get_Handler,

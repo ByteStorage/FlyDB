@@ -1,9 +1,10 @@
 syntax = "proto3";
 
 package gstring;
-option go_package = 	"flydb/lib/proto/gstring";
+option go_package = 	"lib/proto/gstring";
 
 service GStringService {
+  rpc NewFlyDBService(FlyDBOption) returns (NewFlyDBResponse) {}
   rpc Get(GetRequest) returns (GetResponse) {}
   rpc Put(SetRequest) returns (SetResponse) {}
   rpc Del(DelRequest) returns (DelResponse) {}
@@ -20,6 +21,16 @@ service GStringService {
   rpc Expire(ExpireRequest) returns (ExpireResponse) {}
   rpc Persist(PersistRequest) returns (PersistResponse) {}
   rpc MGet(MGetRequest) returns (MGetResponse) {}
+}
+
+message FlyDBOption {
+  string DirPath = 1;
+  int64 DataFileSize = 2;
+  bool SyncWrite = 3;
+}
+
+message NewFlyDBResponse {
+  string ResponseMsg = 1;
 }
 
 message GetRequest {

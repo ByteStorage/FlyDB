@@ -622,3 +622,8 @@ func (l *ListStructure) decodeList(value []byte) (*list, error) {
 
 	return &lst, nil
 }
+
+func (s *ListStructure) Stop() error {
+	err := s.db.Close()
+	return err
+}
