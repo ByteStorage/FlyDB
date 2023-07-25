@@ -18,6 +18,21 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+const (
+	GListService_LPush_FullMethodName  = "/glist.GListService/LPush"
+	GListService_LPushs_FullMethodName = "/glist.GListService/LPushs"
+	GListService_RPush_FullMethodName  = "/glist.GListService/RPush"
+	GListService_RPushs_FullMethodName = "/glist.GListService/RPushs"
+	GListService_LPop_FullMethodName   = "/glist.GListService/LPop"
+	GListService_RPop_FullMethodName   = "/glist.GListService/RPop"
+	GListService_LRange_FullMethodName = "/glist.GListService/LRange"
+	GListService_LLen_FullMethodName   = "/glist.GListService/LLen"
+	GListService_LRem_FullMethodName   = "/glist.GListService/LRem"
+	GListService_LIndex_FullMethodName = "/glist.GListService/LIndex"
+	GListService_LSet_FullMethodName   = "/glist.GListService/LSet"
+	GListService_LTrim_FullMethodName  = "/glist.GListService/LTrim"
+)
+
 // GListServiceClient is the client API for GListService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
@@ -47,7 +62,7 @@ func NewGListServiceClient(cc grpc.ClientConnInterface) GListServiceClient {
 
 func (c *gListServiceClient) LPush(ctx context.Context, in *GListLPushRequest, opts ...grpc.CallOption) (*GListLPushResponse, error) {
 	out := new(GListLPushResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LPush", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LPush_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +71,7 @@ func (c *gListServiceClient) LPush(ctx context.Context, in *GListLPushRequest, o
 
 func (c *gListServiceClient) LPushs(ctx context.Context, in *GListLPushsRequest, opts ...grpc.CallOption) (*GListLPushsResponse, error) {
 	out := new(GListLPushsResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LPushs", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LPushs_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +80,7 @@ func (c *gListServiceClient) LPushs(ctx context.Context, in *GListLPushsRequest,
 
 func (c *gListServiceClient) RPush(ctx context.Context, in *GListRPushRequest, opts ...grpc.CallOption) (*GListRPushResponse, error) {
 	out := new(GListRPushResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/RPush", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_RPush_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +89,7 @@ func (c *gListServiceClient) RPush(ctx context.Context, in *GListRPushRequest, o
 
 func (c *gListServiceClient) RPushs(ctx context.Context, in *GListRPushsRequest, opts ...grpc.CallOption) (*GListRPushsResponse, error) {
 	out := new(GListRPushsResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/RPushs", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_RPushs_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +98,7 @@ func (c *gListServiceClient) RPushs(ctx context.Context, in *GListRPushsRequest,
 
 func (c *gListServiceClient) LPop(ctx context.Context, in *GListLPopRequest, opts ...grpc.CallOption) (*GListLPopResponse, error) {
 	out := new(GListLPopResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LPop", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LPop_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +107,7 @@ func (c *gListServiceClient) LPop(ctx context.Context, in *GListLPopRequest, opt
 
 func (c *gListServiceClient) RPop(ctx context.Context, in *GListRPopRequest, opts ...grpc.CallOption) (*GListRPopResponse, error) {
 	out := new(GListRPopResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/RPop", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_RPop_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +116,7 @@ func (c *gListServiceClient) RPop(ctx context.Context, in *GListRPopRequest, opt
 
 func (c *gListServiceClient) LRange(ctx context.Context, in *GListLRangeRequest, opts ...grpc.CallOption) (*GListLRangeResponse, error) {
 	out := new(GListLRangeResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LRange", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LRange_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +125,7 @@ func (c *gListServiceClient) LRange(ctx context.Context, in *GListLRangeRequest,
 
 func (c *gListServiceClient) LLen(ctx context.Context, in *GListLLenRequest, opts ...grpc.CallOption) (*GListLLenResponse, error) {
 	out := new(GListLLenResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LLen", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LLen_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +134,7 @@ func (c *gListServiceClient) LLen(ctx context.Context, in *GListLLenRequest, opt
 
 func (c *gListServiceClient) LRem(ctx context.Context, in *GListLRemRequest, opts ...grpc.CallOption) (*GListLRemResponse, error) {
 	out := new(GListLRemResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LRem", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LRem_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +143,7 @@ func (c *gListServiceClient) LRem(ctx context.Context, in *GListLRemRequest, opt
 
 func (c *gListServiceClient) LIndex(ctx context.Context, in *GListLIndexRequest, opts ...grpc.CallOption) (*GListLIndexResponse, error) {
 	out := new(GListLIndexResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LIndex", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LIndex_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +152,7 @@ func (c *gListServiceClient) LIndex(ctx context.Context, in *GListLIndexRequest,
 
 func (c *gListServiceClient) LSet(ctx context.Context, in *GListLSetRequest, opts ...grpc.CallOption) (*GListLSetResponse, error) {
 	out := new(GListLSetResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LSet", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LSet_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +161,7 @@ func (c *gListServiceClient) LSet(ctx context.Context, in *GListLSetRequest, opt
 
 func (c *gListServiceClient) LTrim(ctx context.Context, in *GListLTrimRequest, opts ...grpc.CallOption) (*GListLTrimResponse, error) {
 	out := new(GListLTrimResponse)
-	err := c.cc.Invoke(ctx, "/glist.GListService/LTrim", in, out, opts...)
+	err := c.cc.Invoke(ctx, GListService_LTrim_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +251,7 @@ func _GListService_LPush_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LPush",
+		FullMethod: GListService_LPush_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LPush(ctx, req.(*GListLPushRequest))
@@ -254,7 +269,7 @@ func _GListService_LPushs_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LPushs",
+		FullMethod: GListService_LPushs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LPushs(ctx, req.(*GListLPushsRequest))
@@ -272,7 +287,7 @@ func _GListService_RPush_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/RPush",
+		FullMethod: GListService_RPush_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).RPush(ctx, req.(*GListRPushRequest))
@@ -290,7 +305,7 @@ func _GListService_RPushs_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/RPushs",
+		FullMethod: GListService_RPushs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).RPushs(ctx, req.(*GListRPushsRequest))
@@ -308,7 +323,7 @@ func _GListService_LPop_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LPop",
+		FullMethod: GListService_LPop_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LPop(ctx, req.(*GListLPopRequest))
@@ -326,7 +341,7 @@ func _GListService_RPop_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/RPop",
+		FullMethod: GListService_RPop_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).RPop(ctx, req.(*GListRPopRequest))
@@ -344,7 +359,7 @@ func _GListService_LRange_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LRange",
+		FullMethod: GListService_LRange_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LRange(ctx, req.(*GListLRangeRequest))
@@ -362,7 +377,7 @@ func _GListService_LLen_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LLen",
+		FullMethod: GListService_LLen_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LLen(ctx, req.(*GListLLenRequest))
@@ -380,7 +395,7 @@ func _GListService_LRem_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LRem",
+		FullMethod: GListService_LRem_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LRem(ctx, req.(*GListLRemRequest))
@@ -398,7 +413,7 @@ func _GListService_LIndex_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LIndex",
+		FullMethod: GListService_LIndex_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LIndex(ctx, req.(*GListLIndexRequest))
@@ -416,7 +431,7 @@ func _GListService_LSet_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LSet",
+		FullMethod: GListService_LSet_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LSet(ctx, req.(*GListLSetRequest))
@@ -434,7 +449,7 @@ func _GListService_LTrim_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/glist.GListService/LTrim",
+		FullMethod: GListService_LTrim_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GListServiceServer).LTrim(ctx, req.(*GListLTrimRequest))
@@ -499,5 +514,5 @@ var GListService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "db.proto",
+	Metadata: "lib/proto/glist/db.proto",
 }
