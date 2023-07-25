@@ -10,12 +10,12 @@ English | [中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md
 
 **FlyDB** is a high-performance key-value (KV) storage engine based on the efficient bitcask model. It offers fast and reliable data retrieval and storage capabilities. By leveraging the simplicity and effectiveness of the bitcask model, **FlyDB** ensures efficient read and write operations, resulting in improved overall performance. It provides a streamlined approach to storing and accessing key-value pairs, making it an excellent choice for scenarios that require fast and responsive data access. **FlyDB's** focus on speed and simplicity makes it a valuable alternative for applications that prioritize performance while balancing storage costs. 
 
-## 🏁  Fast Start: FlyDB 
+## 🏁  Fast Start: FlyDB
 
 You can install FlyDB using the Go command line tool:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.6
+go get github.com/ByteStorage/FlyDB@v1.0.10
 ```
 
 Or clone this project from github:
@@ -172,6 +172,10 @@ V1.0.7: Short-term support version v1.0.7 supports data structures of BitMap typ
 
 V1.0.8: Short-term support version v1.0.8 Support for a new in-memory index, SkipList. Some codes are optimized.
 
+V1.0.9: Short-term support version v1.0.9 supports data structures of Sort Set type. Some codes are optimized.
+
+V1.0.10: Short-term support version v1.0.10 supports data structures of Set type. Some codes are optimized.
+
 ## 👀 Contributor
 
 <a href="https://github.com/ByteStorage/FlyDB/graphs/contributors">
@@ -191,7 +195,7 @@ FlyDB is released under the Apache license. For details, see LICENSE file.
 
 ## Thanks To JetBrains
 
-> Thanks to `JetBrains` for the free open source license.  
+> Thanks to `JetBrains` for the free open source license.
 
 <img src="./assets/thanks-jetbrains.png" alt="FlyDB-logo" style="display: block; margin: 0 auto; width: 30%;" />
 

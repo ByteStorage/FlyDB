@@ -212,7 +212,7 @@ func (l *ListStructure) RPop(key string) (interface{}, error) {
 
 	// Find the new tail
 	newTail := lst.Head
-	for i := 0; i < lst.Length-1; i++ {
+	for i := 0; i < lst.Length-2; i++ {
 		newTail = newTail.Next
 	}
 	popValue := newTail.Next.Value
@@ -621,4 +621,9 @@ func (l *ListStructure) decodeList(value []byte) (*list, error) {
 	}
 
 	return &lst, nil
+}
+
+func (s *ListStructure) Stop() error {
+	err := s.db.Close()
+	return err
 }

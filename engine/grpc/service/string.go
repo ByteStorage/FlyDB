@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
@@ -285,4 +286,80 @@ func (s *str) MGet(ctx context.Context, req *gstring.MGetRequest) (*gstring.MGet
 	}
 
 	return resp, nil
+}
+
+func (s *str) MSet(ctx context.Context, req *gstring.MSetRequest) (*gstring.MSetResponse, error) {
+	// Extract the key-value pairs from the request and populate the `values` slice.
+	var values []interface{}
+	for _, keyValue := range req.GetPairs() {
+		switch v := keyValue.Value.(type) {
+		case *gstring.MSetRequest_KeyValue_StringValue:
+			values = append(values, keyValue.GetKey(), v.StringValue)
+		case *gstring.MSetRequest_KeyValue_Int32Value:
+			values = append(values, keyValue.GetKey(), v.Int32Value)
+		case *gstring.MSetRequest_KeyValue_Int64Value:
+			values = append(values, keyValue.GetKey(), v.Int64Value)
+		case *gstring.MSetRequest_KeyValue_Float32Value:
+			values = append(values, keyValue.GetKey(), v.Float32Value)
+		case *gstring.MSetRequest_KeyValue_Float64Value:
+			values = append(values, keyValue.GetKey(), v.Float64Value)
+		case *gstring.MSetRequest_KeyValue_BoolValue:
+			values = append(values, keyValue.GetKey(), v.BoolValue)
+		case *gstring.MSetRequest_KeyValue_BytesValue:
+			values = append(values, keyValue.GetKey(), v.BytesValue)
+		default:
+			return nil, errors.New("unsupported value type")
+		}
+	}
+	//print(values)
+	// Use the `MSet` method of the store to set the key-value pairs.
+	err := s.dbs.MSet(values...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the response indicating success.
+	response := &gstring.MSetResponse{
+		Success: true,
+	}
+
+	return response, nil
+}
+
+func (s *str) MSetNX(ctx context.Context, req *gstring.MSetNXRequest) (*gstring.MSetNXResponse, error) {
+	// Extract the key-value pairs from the request and populate the `values` slice.
+	var values []interface{}
+	for _, keyValue := range req.GetPairs() {
+		switch v := keyValue.Value.(type) {
+		case *gstring.MSetNXRequest_KeyValue_StringValue:
+			values = append(values, keyValue.GetKey(), v.StringValue)
+		case *gstring.MSetNXRequest_KeyValue_Int32Value:
+			values = append(values, keyValue.GetKey(), v.Int32Value)
+		case *gstring.MSetNXRequest_KeyValue_Int64Value:
+			values = append(values, keyValue.GetKey(), v.Int64Value)
+		case *gstring.MSetNXRequest_KeyValue_Float32Value:
+			values = append(values, keyValue.GetKey(), v.Float32Value)
+		case *gstring.MSetNXRequest_KeyValue_Float64Value:
+			values = append(values, keyValue.GetKey(), v.Float64Value)
+		case *gstring.MSetNXRequest_KeyValue_BoolValue:
+			values = append(values, keyValue.GetKey(), v.BoolValue)
+		case *gstring.MSetNXRequest_KeyValue_BytesValue:
+			values = append(values, keyValue.GetKey(), v.BytesValue)
+		default:
+			return nil, errors.New("unsupported value type")
+		}
+	}
+	//print(values)
+	// Use the `MSet` method of the store to set the key-value pairs.
+	exists, err := s.dbs.MSetNX(values...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the response indicating success.
+	response := &gstring.MSetNXResponse{
+		Success: exists,
+	}
+
+	return response, nil
 }

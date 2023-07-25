@@ -19,7 +19,6 @@ func newGrpcClient(addr string) (gstring.GStringServiceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	//client := gstring.NewGStringServiceClient(conn)
 	client := gstring.NewGStringServiceClient(conn)
 	return client, nil
 }
@@ -29,7 +28,6 @@ func newHashGrpcClient(addr string) (ghash.GHashServiceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	//client := gstring.NewGStringServiceClient(conn)
 	client := ghash.NewGHashServiceClient(conn)
 	return client, nil
 }

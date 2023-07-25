@@ -21,6 +21,8 @@ service GStringService {
   rpc Expire(ExpireRequest) returns (ExpireResponse) {}
   rpc Persist(PersistRequest) returns (PersistResponse) {}
   rpc MGet(MGetRequest) returns (MGetResponse) {}
+  rpc MSet(MSetRequest) returns (MSetResponse) {}
+  rpc MSetNX(MSetNXRequest) returns (MSetNXResponse) {}
 }
 
 message FlyDBOption {
@@ -218,4 +220,43 @@ message MGetValue {
     bool    bool_value    = 6;
     bytes   bytes_value   = 7;
   }
+}
+message MSetRequest {
+  repeated KeyValue pairs = 1;
+
+  message KeyValue {
+    string key = 1;
+    oneof value {
+      string string_value = 2;
+      int32 int32_value = 3;
+      int64 int64_value = 4;
+      float float32_value = 5;
+      double float64_value = 6;
+      bool bool_value = 7;
+      bytes bytes_value = 8;
+    }
+  }
+}
+message MSetResponse {
+  bool success = 1;
+}
+message MSetNXRequest {
+  repeated KeyValue pairs = 1;
+
+  message KeyValue {
+    string key = 1;
+    oneof value {
+      string string_value = 2;
+      int32 int32_value = 3;
+      int64 int64_value = 4;
+      float float32_value = 5;
+      double float64_value = 6;
+      bool bool_value = 7;
+      bytes bytes_value = 8;
+    }
+  }
+}
+
+message MSetNXResponse {
+  bool success = 1;
 }

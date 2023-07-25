@@ -32,6 +32,148 @@ func register(app *grumble.App) {
 	})
 
 	app.AddCommand(&grumble.Command{
+		Name: "strlen",
+		Help: "get the length of the value stored in a key in string-structure",
+		Run:  stringStrLen,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key whose value length to retrieve", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "type",
+		Help: "get the type of the value stored in a key in string-structure",
+		Run:  stringGetType,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key whose value type to retrieve", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "getset",
+		Help: "set the value of a key and return its old value in string-structure",
+		Run:  stringGetSet,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to set", grumble.Default(""))
+			a.String("value", "The new value to set", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "append",
+		Help: "append a value to a key in string-structure",
+		Run:  stringAppend,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to append to", grumble.Default(""))
+			a.String("value", "The value to append", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "incr",
+		Help: "increment the integer value of a key in string-structure",
+		Run:  stringIncr,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to increment", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "incrby",
+		Help: "increment the integer value of a key by a specific amount in string-structure",
+		Run:  stringIncrBy,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to increment", grumble.Default(""))
+			a.Int64("amount", "The amount to increment by", grumble.Default(1))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "incrbyfloat",
+		Help: "increment the float value of a key by a specific amount in string-structure",
+		Run:  stringIncrByFloat,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to increment", grumble.Default(""))
+			a.Float64("amount", "The amount to increment by", grumble.Default(1.0))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "decr",
+		Help: "decrement the integer value of a key in string-structure",
+		Run:  stringDecr,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to decrement", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "decrby",
+		Help: "decrement the integer value of a key by a specific amount in string-structure",
+		Run:  stringDecrBy,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to decrement", grumble.Default(""))
+			a.Int64("amount", "The amount to decrement by", grumble.Default(1))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "exists",
+		Help: "check if a key exists in string-structure",
+		Run:  stringExists,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to check for existence", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "expire",
+		Help: "set a timeout on a key in string-structure",
+		Run:  stringExpire,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to set a timeout on", grumble.Default(""))
+			a.Int64("ttl", "The time-to-live (TTL) in seconds", grumble.Default(0))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "persist",
+		Help: "remove the timeout on a key, making it persist in string-structure",
+		Run:  stringPersist,
+		Args: func(a *grumble.Args) {
+			a.String("key", "The key to make persistent", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "mget",
+		Help: "get the values of multiple keys in string-structure",
+		Run:  stringMGet,
+		Args: func(a *grumble.Args) {
+			a.StringList("key", "The keys to get values for", grumble.Default([]string{}))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "mset",
+		Help: "Set multiple key-value pairs in string-structure",
+		Run:  stringMSet,
+		Args: func(a *grumble.Args) {
+			a.StringList("key-value", "key-value pairs (e.g., key1 value1 key2 value2)", grumble.Default(""))
+		},
+	})
+
+	// Command for stringMSetNX
+	app.AddCommand(&grumble.Command{
+		Name: "msetnx",
+		Help: "Set multiple key-value pairs if the keys do not exist in string-structure",
+		Run:  stringMSetNX,
+		Args: func(a *grumble.Args) {
+			a.StringList("key-value", "key-value pairs (e.g., key1 value1 key2 value2)", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
 		Name: "HSet",
 		Help: "put data in hash-structure",
 		Run:  hashHSetData,
@@ -166,4 +308,126 @@ func register(app *grumble.App) {
 			a.String("field", "field", grumble.Default(""))
 		},
 	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LPush",
+		Help: "Inserts a value at the head of a list in list-structure",
+		Run:  stringLPushData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LPushs",
+		Help: "Inserts multiple values at the head of a list in list-structure",
+		Run:  stringLPushsData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("values", "values", grumble.Default([]string{}))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "RPush",
+		Help: "Inserts a value at the tail of a list in list-structure",
+		Run:  stringRPushData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "RPushs",
+		Help: "Push elements to the end of a list in list-structure",
+		Run:  stringRPushsData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("values", "values", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LPop",
+		Help: "Removes and returns the first element of a list in list-structure",
+		Run:  stringLPopData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "RPop",
+		Help: "Removes and returns the last element of a list in list-structure",
+		Run:  stringRPopData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LRange",
+		Help: "Returns a range of elements from a list in list-structure",
+		Run:  stringLRangeData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("start", "start", grumble.Default(0))
+			a.Int("stop", "stop", grumble.Default(-1))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LLen",
+		Help: "Returns the length of a list in list-structure",
+		Run:  stringLLenData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LRem",
+		Help: "Remove elements from a list in list-structure",
+		Run:  stringLRemData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("count", "count", grumble.Default(0))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LIndex",
+		Help: "Get the element at a specific index in a list in list-structure",
+		Run:  stringLIndexData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("index", "index", grumble.Default(0))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LSet",
+		Help: "Set the value of an element at a specific index in a list in list-structure",
+		Run:  stringLSetData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("index", "index", grumble.Default(0))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "LTrim",
+		Help: "Trim a list to a specified range of elements in list-structure",
+		Run:  stringLTrimData,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("start", "start", grumble.Default(0))
+			a.Int("stop", "stop", grumble.Default(0))
+		},
+	})
+
 }
