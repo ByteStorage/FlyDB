@@ -13,7 +13,8 @@ type MMapIO struct {
 	data     []byte   // the mapping area corresponding to the file
 	offset   int64    // next write location
 	fileSize int64    // max file size
-	count    int
+	fileName string
+	count    int // the count of dbs using this mmap io
 }
 
 type mmapFileController struct {
@@ -36,7 +37,7 @@ func NewMMapIOManager(fileName string, fileSize int64) (*MMapIO, error) {
 		return v, nil
 	}
 
-	mmapIO := &MMapIO{fileSize: fileSize, count: 1}
+	mmapIO := &MMapIO{fileSize: fileSize, fileName: fileName, count: 1}
 	controller.files[fileName] = mmapIO
 
 	fd, err := os.OpenFile(
@@ -94,10 +95,16 @@ func (mio *MMapIO) Sync() error {
 
 // Close file
 func (mio *MMapIO) Close() (err error) {
+	controller.lock.Lock()
+	defer controller.lock.Unlock()
+
 	mio.count--
 	if mio.count > 0 {
 		return nil
 	}
+
+	delete(controller.files, mio.fileName)
+
 	if err = mio.fd.Truncate(mio.offset); err != nil {
 		return err
 	}
