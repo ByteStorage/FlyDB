@@ -5,7 +5,7 @@ import (
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"github.com/hashicorp/raft"
-	"github.com/tecbot/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 	"sync"
 )
 
@@ -13,16 +13,19 @@ import (
 // It uses BoltDB as the underlying storage and a read-write mutex for concurrency control
 type RocksDbStore struct {
 	mux  sync.RWMutex
-	conn *gorocksdb.DB
+	conn *grocksdb.DB
 }
 
 // NewLogRocksDbStorage is a function that creates a new RocksDB store
 // It takes a configuration map as input and returns a raft.LogStore and an error
 func NewLogRocksDbStorage(conf config.Config) (DataStore, error) {
 	filename := conf.LogDataStoragePath
-	options := gorocksdb.NewDefaultOptions()
+	bbto := grocksdb.NewDefaultBlockBasedTableOptions()
+	bbto.SetBlockCache(grocksdb.NewLRUCache(3 << 30))
+	options := grocksdb.NewDefaultOptions()
 	options.SetCreateIfMissing(true)
-	db, err := gorocksdb.OpenDb(options, filename)
+	options.SetBlockBasedTableFactory(bbto)
+	db, err := grocksdb.OpenDb(options, filename)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +38,7 @@ func NewLogRocksDbStorage(conf config.Config) (DataStore, error) {
 
 // FirstIndex is a method on RocksDbStore that returns the first index in the log
 func (rds *RocksDbStore) FirstIndex() (uint64, error) {
-	ro := gorocksdb.NewDefaultReadOptions()
+	ro := grocksdb.NewDefaultReadOptions()
 	defer ro.Destroy()
 	it := rds.conn.NewIterator(ro)
 	it.SeekToFirst()
@@ -44,7 +47,7 @@ func (rds *RocksDbStore) FirstIndex() (uint64, error) {
 
 // LastIndex is a method on RocksDbStore that returns the last index in the log
 func (rds *RocksDbStore) LastIndex() (uint64, error) {
-	ro := gorocksdb.NewDefaultReadOptions()
+	ro := grocksdb.NewDefaultReadOptions()
 	defer ro.Destroy()
 	it := rds.conn.NewIterator(ro)
 	it.SeekToLast()
@@ -53,7 +56,7 @@ func (rds *RocksDbStore) LastIndex() (uint64, error) {
 
 // GetLog is a method on RocksDbStore that retrieves a log entry by its index
 func (rds *RocksDbStore) GetLog(index uint64, log *raft.Log) error {
-	ro := gorocksdb.NewDefaultReadOptions()
+	ro := grocksdb.NewDefaultReadOptions()
 	defer ro.Destroy()
 
 	val, err := rds.conn.Get(ro, uint64ToBytes(index))
@@ -74,8 +77,8 @@ func (rds *RocksDbStore) StoreLog(log *raft.Log) error {
 
 // StoreLogs is a method on RocksDbStore that stores multiple log entries
 func (rds *RocksDbStore) StoreLogs(logs []*raft.Log) error {
-	wo := gorocksdb.NewDefaultWriteOptions()
-	wb := gorocksdb.NewWriteBatch()
+	wo := grocksdb.NewDefaultWriteOptions()
+	wb := grocksdb.NewWriteBatch()
 	wo.SetSync(true)
 	defer func() {
 		wo.Destroy()
@@ -100,9 +103,9 @@ func (rds *RocksDbStore) StoreLogs(logs []*raft.Log) error {
 
 // DeleteRange is a method on RocksDbStore that deletes a range of log entries
 func (rds *RocksDbStore) DeleteRange(min, max uint64) error {
-	ro := gorocksdb.NewDefaultReadOptions()
-	wo := gorocksdb.NewDefaultWriteOptions()
-	wb := gorocksdb.NewWriteBatch()
+	ro := grocksdb.NewDefaultReadOptions()
+	wo := grocksdb.NewDefaultWriteOptions()
+	wb := grocksdb.NewWriteBatch()
 	defer func() {
 		ro.Destroy()
 		wo.Destroy()
@@ -120,7 +123,7 @@ func (rds *RocksDbStore) Set(key []byte, val []byte) error {
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
 	}
-	wo := gorocksdb.NewDefaultWriteOptions()
+	wo := grocksdb.NewDefaultWriteOptions()
 	wo.SetSync(true)
 	defer wo.Destroy()
 	err := rds.conn.Put(wo, key, val)
@@ -134,7 +137,7 @@ func (rds *RocksDbStore) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, _const.ErrKeyIsEmpty
 	}
-	ro := gorocksdb.NewDefaultReadOptions()
+	ro := grocksdb.NewDefaultReadOptions()
 	defer ro.Destroy()
 
 	val, err := rds.conn.Get(ro, key)
@@ -151,7 +154,7 @@ func (rds *RocksDbStore) SetUint64(key []byte, val uint64) error {
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
 	}
-	wo := gorocksdb.NewDefaultWriteOptions()
+	wo := grocksdb.NewDefaultWriteOptions()
 	wo.SetSync(true)
 	defer wo.Destroy()
 	err := rds.conn.Put(wo, key, uint64ToBytes(val))
@@ -165,7 +168,7 @@ func (rds *RocksDbStore) GetUint64(key []byte) (uint64, error) {
 	if len(key) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
-	ro := gorocksdb.NewDefaultReadOptions()
+	ro := grocksdb.NewDefaultReadOptions()
 	defer ro.Destroy()
 
 	val, err := rds.conn.Get(ro, key)

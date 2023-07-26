@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/datastore"
+	"github.com/hashicorp/raft"
 )
 
 // DataStoreFactory is a function type that creates a new instance of a raft.LogStore.
@@ -21,6 +22,10 @@ var datastoreFactories = make(map[string]DataStoreFactory)
 func Init() error {
 	// Register the "memory" DataStoreFactory implementation with the name "memory"
 	_ = Register("memory", datastore.NewLogInMemStorage)
+	// Register the "memory" DataStoreFactory implementation with the name "memory"
+	_ = Register("inMemory", func(conf config.Config) (datastore.DataStore, error) {
+		return raft.NewInmemStore(), nil
+	})
 	// Register the "bolt" DataStoreFactory implementation with the name "boltdb"
 	_ = Register("boltdb", datastore.NewLogBoltDbStorage)
 	// Register the "flydb" DataStoreFactory implementation with the name "flydb"

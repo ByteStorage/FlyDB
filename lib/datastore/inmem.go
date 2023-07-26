@@ -25,8 +25,8 @@ type InMemStore struct {
 func NewLogInMemStorage(conf config.Config) (DataStore, error) {
 	a := &InMemStore{
 		logs:   make(map[uint64]*raft.Log),
-		kv:     map[string][]byte{},
-		kvUint: map[string]uint64{},
+		kv:     make(map[string][]byte),
+		kvUint: make(map[string]uint64),
 	}
 	return a, nil
 }
@@ -145,11 +145,8 @@ func (ds *InMemStore) GetUint64(key []byte) (uint64, error) {
 	if len(key) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
-	val, ok := ds.kvUint[string(key)]
-	if !ok {
-		return 0, _const.ErrKeyNotFound
-	}
-	return val, nil
+
+	return ds.kvUint[string(key)], nil
 }
 
 // min is a helper method on InMemStore that returns the smallest index in the log
