@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package gset;
+
+option go_package = 	"lib/proto/gset";
+
+service GSetService {
+  rpc SAdd(SAddRequest) returns (EmptyResponse);
+  rpc SAdds(SAddsRequest) returns (EmptyResponse);
+  rpc SRem(SRemRequest) returns (EmptyResponse);
+  rpc SRems(SRemsRequest) returns (EmptyResponse);
+  rpc SCard(SCardRequest) returns (SCardResponse);
+  rpc SMembers(SMembersRequest) returns (SMembersResponse);
+  rpc SIsMember(SIsMemberRequest) returns (SIsMemberResponse);
+  rpc SUnion(SUnionRequest) returns (SUnionResponse);
+  rpc SInter(SInterRequest) returns (SInterResponse);
+  rpc SDiff(SDiffRequest) returns (SDiffResponse);
+  rpc SUnionStore(SUnionStoreRequest) returns (EmptyResponse);
+  rpc SInterStore(SInterStoreRequest) returns (EmptyResponse);
+}
+
+message SAddRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message SAddsRequest {
+  string key = 1;
+  repeated string members = 2;
+}
+
+message SRemRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message SRemsRequest {
+  string key = 1;
+  repeated string members = 2;
+}
+
+message SCardRequest {
+  string key = 1;
+}
+
+message SCardResponse {
+  int32 count = 1;
+}
+
+message SMembersRequest {
+  string key = 1;
+}
+
+message SMembersResponse {
+  repeated string members = 1;
+}
+
+message SIsMemberRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message SIsMemberResponse {
+  bool is_member = 1;
+}
+
+message SUnionRequest {
+  repeated string keys = 1;
+}
+
+message SUnionResponse {
+  repeated string members = 1;
+}
+
+message SInterRequest {
+  repeated string keys = 1;
+}
+
+message SInterResponse {
+  repeated string members = 1;
+}
+
+message SDiffRequest {
+  repeated string keys = 1;
+}
+
+message SDiffResponse {
+  repeated string members = 1;
+}
+
+message SUnionStoreRequest {
+  string destination = 1;
+  repeated string keys = 2;
+}
+
+message SInterStoreRequest {
+  string destination = 1;
+  repeated string keys = 2;
+}
+
+message EmptyResponse {}

@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package gzset;
+
+option go_package = 	"lib/proto/gzset";
+
+service GZSetService {
+  rpc ZAdd(ZAddRequest) returns (ZAddResponse);
+  rpc ZAdds(ZAddsRequest) returns (ZAddsResponse);
+  rpc ZRem(ZRemRequest) returns (ZRemResponse);
+  rpc ZRems(ZRemsRequest) returns (ZRemsResponse);
+  rpc ZScore(ZScoreRequest) returns (ZScoreResponse);
+  rpc ZRank(ZRankRequest) returns (ZRankResponse);
+  rpc ZRevRank(ZRevRankRequest) returns (ZRevRankResponse);
+  rpc ZRange(ZRangeRequest) returns (ZRangeResponse);
+  rpc ZCount(ZCountRequest) returns (ZCountResponse);
+  rpc ZRevRange(ZRevRangeRequest) returns (ZRevRangeResponse);
+  rpc ZCard(ZCardRequest) returns (ZCardResponse);
+  rpc ZIncrBy(ZIncrByRequest) returns (ZIncrByResponse);
+}
+
+message ZSetValue {
+  int32 score = 1;
+  string member = 2;
+  google.protobuf.Any value = 3;
+}
+
+message ZAddRequest {
+  string key = 1;
+  ZSetValue member = 2;
+}
+
+message ZAddResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ZAddsRequest {
+  string key = 1;
+  repeated ZSetValue members = 2;
+}
+
+message ZAddsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ZRemRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message ZRemResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ZRemsRequest {
+  string key = 1;
+  repeated string members = 2;
+}
+
+message ZRemsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ZScoreRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message ZScoreResponse {
+  int32 score = 1;
+  bool exists = 2;
+}
+
+message ZRankRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message ZRankResponse {
+  int32 rank = 1;
+  bool exists = 2;
+}
+
+message ZRevRankRequest {
+  string key = 1;
+  string member = 2;
+}
+
+message ZRevRankResponse {
+  int32 rank = 1;
+  bool exists = 2;
+}
+
+message ZRangeRequest {
+  string key = 1;
+  int32 start = 2;
+  int32 end = 3;
+}
+
+message ZRangeResponse {
+  repeated ZSetValue members = 1;
+}
+
+message ZCountRequest {
+  string key = 1;
+  int32 min = 2;
+  int32 max = 3;
+}
+
+message ZCountResponse {
+  int32 count = 1;
+}
+
+message ZRevRangeRequest {
+  string key = 1;
+  int32 startRank = 2;
+  int32 endRank = 3;
+}
+
+message ZRevRangeResponse {
+  repeated ZSetValue members = 1;
+}
+
+message ZCardRequest {
+  string key = 1;
+}
+
+message ZCardResponse {
+  int32 count = 1;
+}
+
+message ZIncrByRequest {
+  string key = 1;
+  string member = 2;
+  int32 incBy = 3;
+}
+
+message ZIncrByResponse {
+  int32 newScore = 1;
+  bool exists = 2;
+}
+
+
