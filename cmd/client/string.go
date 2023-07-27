@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/engine/grpc/client"
 	"github.com/desertbit/grumble"
@@ -232,5 +233,49 @@ func stringMGet(c *grumble.Context) error {
 		return err
 	}
 	fmt.Println(values)
+	return nil
+}
+
+func stringMSet(c *grumble.Context) error {
+	keyValuePairs := c.Args.StringList("key-value")
+	if len(keyValuePairs) == 0 || len(keyValuePairs)%2 != 0 {
+		return errors.New("invalid number of arguments, must provide key-value pairs")
+	}
+
+	var pairs []interface{}
+	for i := 0; i < len(keyValuePairs); i += 2 {
+		key := keyValuePairs[i]
+		value := keyValuePairs[i+1]
+		pairs = append(pairs, key, value)
+	}
+
+	err := newClient().MSet(pairs...)
+	if err != nil {
+		fmt.Println("set data error:", err)
+		return err
+	}
+	fmt.Println("Data successfully set.")
+	return nil
+}
+
+func stringMSetNX(c *grumble.Context) error {
+	keyValuePairs := c.Args.StringList("key-value")
+	if len(keyValuePairs) == 0 || len(keyValuePairs)%2 != 0 {
+		return errors.New("invalid number of arguments, must provide key-value pairs")
+	}
+
+	var pairs []interface{}
+	for i := 0; i < len(keyValuePairs); i += 2 {
+		key := keyValuePairs[i]
+		value := keyValuePairs[i+1]
+		pairs = append(pairs, key, value)
+	}
+
+	err := newClient().MSetNX(pairs...)
+	if err != nil {
+		fmt.Println("set data error:", err)
+		return err
+	}
+	fmt.Println("Data successfully set.")
 	return nil
 }

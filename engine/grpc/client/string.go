@@ -327,3 +327,99 @@ func (c *Client) MGet(keys []string) ([]interface{}, error) {
 	}
 	return values, nil
 }
+
+func (c *Client) MSet(pairs ...interface{}) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+
+	var values []*gstring.MSetRequest_KeyValue
+	// The input should be a map[string]interface{}
+	if len(pairs)%2 != 0 {
+		return errors.New("invalid number of arguments")
+	}
+
+	for i := 0; i < len(pairs); i += 2 {
+		key, ok := pairs[i].(string)
+		if !ok {
+			return errors.New("invalid key type")
+		}
+
+		value := pairs[i+1]
+		switch v := value.(type) {
+		case string:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_StringValue{StringValue: v}})
+		case int32:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_Int32Value{Int32Value: v}})
+		case int64:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_Int64Value{Int64Value: v}})
+		case float32:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_Float32Value{Float32Value: v}})
+		case float64:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_Float64Value{Float64Value: v}})
+		case bool:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_BoolValue{BoolValue: v}})
+		case []byte:
+			values = append(values, &gstring.MSetRequest_KeyValue{Key: key, Value: &gstring.MSetRequest_KeyValue_BytesValue{BytesValue: v}})
+		default:
+			return errors.New("unsupported value type")
+		}
+	}
+
+	_, err = client.MSet(context.Background(), &gstring.MSetRequest{Pairs: values})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) MSetNX(pairs ...interface{}) error {
+	client, err := newGrpcClient(c.Addr)
+	if err != nil {
+		return err
+	}
+
+	if len(pairs)%2 != 0 {
+		return errors.New("invalid number of arguments, must provide key-value pairs")
+	}
+
+	var values []*gstring.MSetNXRequest_KeyValue
+
+	for i := 0; i < len(pairs); i += 2 {
+		key, ok := pairs[i].(string)
+		if !ok {
+			return errors.New("invalid key type")
+		}
+
+		value := pairs[i+1]
+		switch v := value.(type) {
+		case string:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_StringValue{StringValue: v}})
+		case int32:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_Int32Value{Int32Value: v}})
+		case int64:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_Int64Value{Int64Value: v}})
+		case float32:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_Float32Value{Float32Value: v}})
+		case float64:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_Float64Value{Float64Value: v}})
+		case bool:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_BoolValue{BoolValue: v}})
+		case []byte:
+			values = append(values, &gstring.MSetNXRequest_KeyValue{Key: key, Value: &gstring.MSetNXRequest_KeyValue_BytesValue{BytesValue: v}})
+		default:
+			return errors.New("unsupported value type")
+		}
+	}
+
+	resp, err := client.MSetNX(context.Background(), &gstring.MSetNXRequest{Pairs: values})
+	if err != nil {
+		return err
+	}
+	if !resp.Success {
+		return errors.New("MSetNX failed  any key has existed")
+	}
+	return nil
+}
