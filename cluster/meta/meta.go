@@ -40,3 +40,43 @@ type meta struct {
 	scheduler     *Scheduler                // scheduler, to schedule the cluster.
 	raft          *raft.Raft                // raft, to store the raft group.
 }
+
+func (m *meta) GetStore(addr string) (*store.Store, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *meta) AddStore(addr string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *meta) RemoveStore(addr string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *meta) GetAllStores() []*store.Store {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *meta) GetRegionByID(id uint64) (*region.Region, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *meta) GetStoreByID(id uint64) (*store.Store, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func NewMeta(conf config.Config) MetadataManager {
+	return &meta{
+		clusterConfig: &conf,
+		heartbeat:     make(map[string]time.Time),
+		dirTree:       dirtree.NewDirTree(),
+		stores:        make(map[string]*store.Store),
+		regions:       make(map[uint64]*region.Region),
+	}
+}

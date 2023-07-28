@@ -82,6 +82,7 @@ func (s *store) GetRegionByKey(key []byte) (region.Region, error) {
 	return nil, errors.New("the specified region does not exist")
 }
 
+// Split splits the region into two regions.
 func (s *store) Split() error {
 	for _, r := range s.regionList {
 		if r.GetSize() >= Threshold {
