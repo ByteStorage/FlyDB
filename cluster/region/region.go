@@ -59,6 +59,10 @@ func NewRegion(start []byte, end []byte, options config.Options, conf config.Con
 	if err != nil {
 		return nil, errors.New("new db failed")
 	}
+	raftNode, err := newRaftNode(conf)
+	if err != nil {
+		return nil, errors.New("new raft node failed")
+	}
 	return &region{
 		startKey:   start,
 		endKey:     end,
@@ -66,6 +70,7 @@ func NewRegion(start []byte, end []byte, options config.Options, conf config.Con
 		db:         db,
 		mu:         sync.RWMutex{},
 		conf:       conf,
+		raft:       raftNode,
 	}, nil
 }
 
