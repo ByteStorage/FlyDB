@@ -56,22 +56,22 @@ type Region interface {
 	GetID() int64
 }
 
-func NewRegion(start []byte, end []byte, options config.Options, conf config.Config) (Region, error) {
-	db, err := engine.NewDB(options)
+func NewRegion(conf config.RegionConfig) (Region, error) {
+	db, err := engine.NewDB(conf.Options)
 	if err != nil {
 		return nil, errors.New("new db failed")
 	}
-	raftNode, err := newRaftNode(conf)
+	raftNode, err := newRaftNode(conf.Config)
 	if err != nil {
 		return nil, errors.New("new raft node failed")
 	}
 	return &region{
-		startKey:   start,
-		endKey:     end,
+		startKey:   conf.Start,
+		endKey:     conf.End,
 		raftGroups: make(map[uint64]*raft.Raft),
 		db:         db,
 		mu:         sync.RWMutex{},
-		conf:       conf,
+		conf:       conf.Config,
 		raft:       raftNode,
 	}, nil
 }

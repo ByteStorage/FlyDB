@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	MinKey []byte                                           // Min Key of the all regions
-	MaxKey = []byte{255, 255, 255, 255, 255, 255, 255, 255} // Max Key of the all regions
+	MinKey    []byte                                                  // Min Key of the all regions
+	MaxKey           = []byte{255, 255, 255, 255, 255, 255, 255, 255} // Max Key of the all regions
+	Threshold int64  = 256 * 1024 * 1024                              // Threshold of the region size
 )
 
 // The store component is responsible for managing the division and merging of region partitions.
@@ -35,7 +36,7 @@ type Store interface {
 	// GetRegionByID gets region and leader peer by region id from cluster.
 	GetRegionByID(id int64) (region.Region, error)
 	// Split splits the region into two regions.
-	Split(region region.Region, splitKey []byte) error
+	Split() error
 	// Merge merges two adjacent regions into one region.
 	Merge(regionA region.Region, regionB region.Region) error
 	// GetSize gets the total size of the store.
@@ -44,9 +45,16 @@ type Store interface {
 
 // NewStore creates a new store.
 func NewStore(conf config.StoreConfig) (Store, error) {
+	// create a new region config.
+	regionConfig := config.RegionConfig{
+		Options: conf.Options,
+		Config:  conf.Config,
+		Start:   MinKey,
+		End:     MaxKey,
+	}
 	// create a new region, when initialize, a store just has one region.
 	// when the region size exceeds the threshold, the region will be split into two regions.
-	newRegion, err := region.NewRegion(MinKey, MaxKey, conf.Options, conf.Config)
+	newRegion, err := region.NewRegion(regionConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +76,7 @@ func NewStore(conf config.StoreConfig) (Store, error) {
 	}, nil
 }
 
+// GetRegionByKey gets region by region key from store.
 func (s *store) GetRegionByKey(key []byte) (region.Region, error) {
 	for _, r := range s.regionList {
 		if isKeyInRange(key, r.GetStartKey(), r.GetEndKey()) {
@@ -77,6 +86,7 @@ func (s *store) GetRegionByKey(key []byte) (region.Region, error) {
 	return nil, errors.New("the specified region does not exist")
 }
 
+// GetRegionByID gets region by region id from store.
 func (s *store) GetRegionByID(id int64) (region.Region, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -86,8 +96,36 @@ func (s *store) GetRegionByID(id int64) (region.Region, error) {
 	return s.regionList[id], nil
 }
 
-func (s *store) Split(region region.Region, splitKey []byte) error {
-	panic("implement me")
+func (s *store) Split() error {
+	for _, r := range s.regionList {
+		if r.GetSize() >= Threshold {
+			// define the middle key
+			end := r.GetEndKey()
+			start := r.GetStartKey()
+			middle := make([]byte, len(end))
+			for i := 0; i < len(end); i++ {
+				middle[i] = (end[i] + start[i]) / 2
+			}
+			// create a new region config
+			regionConfig := config.RegionConfig{
+				Options: s.opts,
+				Config:  s.conf,
+				Start:   middle,
+				End:     end,
+			}
+			// create a new region
+			newRegion, err := region.NewRegion(regionConfig)
+			if err != nil {
+				return err
+			}
+			// move the data to the new region
+			err = moveDataToNewRegion(newRegion, start, middle, r, end)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (s *store) Merge(regionA region.Region, regionB region.Region) error {
@@ -114,4 +152,14 @@ func isKeyInRange(key, startRange, endRange []byte) bool {
 
 	// If neither of the above, the key is in range
 	return true
+}
+
+// moveDataToNewRegion moves the data from the old region to the new region.
+// new: the new region
+// start: the start key of the new region
+// end: the end key of the new region
+// old: the old region
+func moveDataToNewRegion(new region.Region, start []byte, end []byte, old region.Region, oldEnd []byte) error {
+	// modify the start key and the end key of the old region
+	panic("implement me")
 }
