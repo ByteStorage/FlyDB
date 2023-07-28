@@ -5,8 +5,13 @@ import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/cluster/region"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/hashicorp/raft"
+	"github.com/bwmarrin/snowflake"
 	"sync"
+)
+
+var (
+	MinKey []byte                                           // Min Key of the all regions
+	MaxKey = []byte{255, 255, 255, 255, 255, 255, 255, 255} // Max Key of the all regions
 )
 
 // The store component is responsible for managing the division and merging of region partitions.
@@ -14,14 +19,13 @@ import (
 // Each region under the store is in a raftGroups, and the region clusters in the raftGroups communicate through grpc
 // store stores the data of a store.
 type store struct {
-	id         string // store id
+	id         int64 // store id
 	conf       config.Config
 	opts       config.Options
-	addr       string                   // store address
-	regionList map[uint64]region.Region // region list, to store the regions in the store.
-	size       int64                    // size
-	mu         sync.RWMutex             // mutex, to protect the store.
-	raft       *raft.Raft               // raft, to store the raft group.
+	addr       string                  // store address
+	regionList map[int64]region.Region // region list, to store the regions in the store.
+	mu         sync.RWMutex            // mutex, to protect the store.
+	node       *snowflake.Node         // snowflake node, to generate the id.
 }
 
 // Store is the interface of store.
@@ -29,17 +33,39 @@ type Store interface {
 	// GetRegionByKey gets region and leader peer by region key from cluster.
 	GetRegionByKey(key []byte) (region.Region, error)
 	// GetRegionByID gets region and leader peer by region id from cluster.
-	GetRegionByID(id uint64) (region.Region, error)
-	// AddRegion adds a new region to cluster.
-	AddRegion(region region.Region) error
-	// RemoveRegion removes a region from cluster.
-	RemoveRegion(id uint64) error
+	GetRegionByID(id int64) (region.Region, error)
 	// Split splits the region into two regions.
 	Split(region region.Region, splitKey []byte) error
 	// Merge merges two adjacent regions into one region.
 	Merge(regionA region.Region, regionB region.Region) error
 	// GetSize gets the total size of the store.
 	GetSize() int64
+}
+
+// NewStore creates a new store.
+func NewStore(conf config.StoreConfig) (Store, error) {
+	// create a new region, when initialize, a store just has one region.
+	// when the region size exceeds the threshold, the region will be split into two regions.
+	newRegion, err := region.NewRegion(MinKey, MaxKey, conf.Options, conf.Config)
+	if err != nil {
+		return nil, err
+	}
+	// create a new snowflake node.
+	node, err := snowflake.NewNode(conf.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &store{
+		id:   conf.Id,
+		node: node,
+		regionList: map[int64]region.Region{
+			newRegion.GetID(): newRegion,
+		},
+		addr: conf.Addr,
+		conf: conf.Config,
+		opts: conf.Options,
+		mu:   sync.RWMutex{},
+	}, nil
 }
 
 func (s *store) GetRegionByKey(key []byte) (region.Region, error) {
@@ -51,21 +77,13 @@ func (s *store) GetRegionByKey(key []byte) (region.Region, error) {
 	return nil, errors.New("the specified region does not exist")
 }
 
-func (s *store) GetRegionByID(id uint64) (region.Region, error) {
+func (s *store) GetRegionByID(id int64) (region.Region, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if _, ok := s.regionList[id]; !ok {
 		return nil, errors.New("the specified region does not exist")
 	}
 	return s.regionList[id], nil
-}
-
-func (s *store) AddRegion(region region.Region) error {
-	panic("implement me")
-}
-
-func (s *store) RemoveRegion(id uint64) error {
-	panic("implement me")
 }
 
 func (s *store) Split(region region.Region, splitKey []byte) error {
