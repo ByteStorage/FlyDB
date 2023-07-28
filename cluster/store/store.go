@@ -23,24 +23,20 @@ type store struct {
 	id         int64 // store id
 	conf       config.Config
 	opts       config.Options
-	addr       string                  // store address
-	regionList map[int64]region.Region // region list, to store the regions in the store.
-	mu         sync.RWMutex            // mutex, to protect the store.
-	node       *snowflake.Node         // snowflake node, to generate the id.
+	addr       string          // store address
+	regionList []region.Region // region list, to store the regions in the store.
+	mu         sync.RWMutex    // mutex, to protect the store.
+	node       *snowflake.Node // snowflake node, to generate the id.
 }
 
 // Store is the interface of store.
 type Store interface {
 	// GetRegionByKey gets region and leader peer by region key from cluster.
 	GetRegionByKey(key []byte) (region.Region, error)
-	// GetRegionByID gets region and leader peer by region id from cluster.
-	GetRegionByID(id int64) (region.Region, error)
 	// Split splits the region into two regions.
 	Split() error
 	// Merge merges two adjacent regions into one region.
-	Merge(regionA region.Region, regionB region.Region) error
-	// GetSize gets the total size of the store.
-	GetSize() int64
+	Merge() error
 }
 
 // NewStore creates a new store.
@@ -66,8 +62,8 @@ func NewStore(conf config.StoreConfig) (Store, error) {
 	return &store{
 		id:   conf.Id,
 		node: node,
-		regionList: map[int64]region.Region{
-			newRegion.GetID(): newRegion,
+		regionList: []region.Region{
+			newRegion,
 		},
 		addr: conf.Addr,
 		conf: conf.Config,
@@ -84,16 +80,6 @@ func (s *store) GetRegionByKey(key []byte) (region.Region, error) {
 		}
 	}
 	return nil, errors.New("the specified region does not exist")
-}
-
-// GetRegionByID gets region by region id from store.
-func (s *store) GetRegionByID(id int64) (region.Region, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	if _, ok := s.regionList[id]; !ok {
-		return nil, errors.New("the specified region does not exist")
-	}
-	return s.regionList[id], nil
 }
 
 func (s *store) Split() error {
@@ -119,21 +105,36 @@ func (s *store) Split() error {
 				return err
 			}
 			// move the data to the new region
-			err = moveDataToNewRegion(newRegion, start, middle, r, end)
+			err = moveDataToNewRegion(newRegion, middle, end, r, start, end)
 			if err != nil {
 				return err
 			}
+			// add the new region to the region list
+			s.regionList = append(s.regionList, newRegion)
 		}
 	}
 	return nil
 }
 
-func (s *store) Merge(regionA region.Region, regionB region.Region) error {
-	panic("implement me")
-}
-
-func (s *store) GetSize() int64 {
-	panic("implement me")
+// Merge merges two adjacent regions into one region.
+func (s *store) Merge() error {
+	// find the two adjacent regions which have the smallest size
+	for i, r := range s.regionList {
+		if i == len(s.regionList)-1 {
+			break
+		}
+		// regionList[i] and regionList[i+1] are adjacent
+		// and if the size of them is smaller than the threshold / 2, merge them
+		if r.GetSize()+s.regionList[i+1].GetSize() < Threshold/2 {
+			err := mergeTwoRegions(r, s.regionList[i+1])
+			if err != nil {
+				return err
+			}
+			// delete the second region
+			s.regionList = append(s.regionList[:i+1], s.regionList[i+2:]...)
+		}
+	}
+	return nil
 }
 
 // isKeyInRange checks if the key is in the range of the region.
@@ -156,10 +157,16 @@ func isKeyInRange(key, startRange, endRange []byte) bool {
 
 // moveDataToNewRegion moves the data from the old region to the new region.
 // new: the new region
-// start: the start key of the new region
-// end: the end key of the new region
+// newStartKey: the start key of the new region
+// newEndKey: the end key of the new region
 // old: the old region
-func moveDataToNewRegion(new region.Region, start []byte, end []byte, old region.Region, oldEnd []byte) error {
+// oldStartKey: the start key of the old region
+// oldEndKey: the end key of the old region
+func moveDataToNewRegion(new region.Region, newStartKey []byte, newEndKey []byte, old region.Region, oldStartKey []byte, oldEndKey []byte) error {
 	// modify the start key and the end key of the old region
+	panic("implement me")
+}
+
+func mergeTwoRegions(r1 region.Region, r2 region.Region) error {
 	panic("implement me")
 }
