@@ -74,7 +74,7 @@ func (s *set) SCard(ctx context.Context, req *gset.SCardRequest) (*gset.SCardRes
 func (s *set) SMembers(ctx context.Context, req *gset.SMembersRequest) (*gset.SMembersResponse, error) {
 	members, err := s.dbs.SMembers(req.Key)
 	if err != nil {
-		return nil, err
+		return &gset.SMembersResponse{}, err
 	}
 	return &gset.SMembersResponse{Members: members}, nil
 }
@@ -82,7 +82,7 @@ func (s *set) SMembers(ctx context.Context, req *gset.SMembersRequest) (*gset.SM
 func (s *set) SIsMember(ctx context.Context, req *gset.SIsMemberRequest) (*gset.SIsMemberResponse, error) {
 	isMember, err := s.dbs.SIsMember(req.Key, req.Member)
 	if err != nil {
-		return nil, err
+		return &gset.SIsMemberResponse{}, err
 	}
 	return &gset.SIsMemberResponse{IsMember: isMember}, nil
 }
@@ -90,7 +90,7 @@ func (s *set) SIsMember(ctx context.Context, req *gset.SIsMemberRequest) (*gset.
 func (s *set) SUnion(ctx context.Context, req *gset.SUnionRequest) (*gset.SUnionResponse, error) {
 	union, err := s.dbs.SUnion(req.Keys...)
 	if err != nil {
-		return nil, err
+		return &gset.SUnionResponse{}, err
 	}
 	return &gset.SUnionResponse{Members: union}, nil
 }
@@ -98,7 +98,7 @@ func (s *set) SUnion(ctx context.Context, req *gset.SUnionRequest) (*gset.SUnion
 func (s *set) SInter(ctx context.Context, req *gset.SInterRequest) (*gset.SInterResponse, error) {
 	inter, err := s.dbs.SInter(req.Keys...)
 	if err != nil {
-		return nil, err
+		return &gset.SInterResponse{}, err
 	}
 	return &gset.SInterResponse{Members: inter}, nil
 }
@@ -106,7 +106,7 @@ func (s *set) SInter(ctx context.Context, req *gset.SInterRequest) (*gset.SInter
 func (s *set) SDiff(ctx context.Context, req *gset.SDiffRequest) (*gset.SDiffResponse, error) {
 	diff, err := s.dbs.SDiff(req.Keys...)
 	if err != nil {
-		return nil, err
+		return &gset.SDiffResponse{}, err
 	}
 	return &gset.SDiffResponse{Members: diff}, nil
 }
