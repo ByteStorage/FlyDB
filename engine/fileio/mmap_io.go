@@ -2,17 +2,16 @@ package fileio
 
 import (
 	"errors"
+	"github.com/edsrzf/mmap-go"
 	"os"
-	"syscall"
-	"unsafe"
 )
 
 type MMapIO struct {
-	fd       *os.File // system file descriptor
-	data     []byte   // the mapping area corresponding to the file
-	dirty    bool     // has changed
-	offset   int64    // next write location
-	fileSize int64    // max file size
+	fd       *os.File  // system file descriptor
+	data     mmap.MMap // the mapping area corresponding to the file
+	dirty    bool      // has changed
+	offset   int64     // next write location
+	fileSize int64     // max file size
 }
 
 // NewMMapIOManager Initialize Mmap IO
@@ -35,7 +34,7 @@ func NewMMapIOManager(fileName string, fileSize int64) (*MMapIO, error) {
 	}
 
 	// Building mappings between memory and disk files
-	b, err := syscall.Mmap(int(fd.Fd()), 0, int(fileSize), syscall.PROT_WRITE|syscall.PROT_READ, syscall.MAP_SHARED)
+	b, err := mmap.Map(fd, mmap.RDWR, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +69,7 @@ func (mio *MMapIO) Sync() error {
 		return nil
 	}
 
-	_, _, err := syscall.Syscall(syscall.SYS_MSYNC, uintptr(unsafe.Pointer(&mio.data[0])), uintptr(mio.offset), uintptr(syscall.MS_SYNC))
-	if err != 0 {
+	if err := mio.data.Flush(); err != nil {
 		return err
 	}
 
@@ -103,7 +101,7 @@ func (mio *MMapIO) UnMap() error {
 	if mio.data == nil {
 		return nil
 	}
-	err := syscall.Munmap(mio.data)
+	err := mio.data.Unmap()
 	mio.data = nil
 	return err
 }
