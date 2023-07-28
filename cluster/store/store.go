@@ -80,46 +80,6 @@ func (s *store) GetSize() int64 {
 	panic("implement me")
 }
 
-// newRaftNode creates a new raft node for the store.
-func (s *store) newRaftNode() error {
-	// All new methods below can add other return values as needed, such as err
-
-	// setup Raft configuration
-	conf := s.newDefaultConfig()
-
-	// setup Raft communication
-	t := newTransport()
-
-	// create the snapshot store. This allows the Raft to truncate the log.
-	snapshots, err := newSnapshotStore(s.conf)
-	if err != nil {
-		return err
-	}
-
-	// create the log store and stable store
-	logStore, err := newRaftLog(s.conf)
-	if err != nil {
-		return err
-	}
-	stableStore, err := newStableLog(s.conf)
-	if err != nil {
-		return err
-	}
-
-	// create a new finite state machine
-	f := newFSM()
-
-	// instantiate the Raft system
-	r, err := raft.NewRaft(conf, f, logStore, stableStore, snapshots, t)
-	if err != nil {
-		return err
-	}
-
-	s.raft = r
-
-	return nil
-}
-
 // isKeyInRange checks if the key is in the range of the region.
 func isKeyInRange(key, startRange, endRange []byte) bool {
 	// Compare the key to the start of the range

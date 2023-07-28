@@ -69,6 +69,44 @@ func NewRegion(start []byte, end []byte, options config.Options, conf config.Con
 	}, nil
 }
 
+// newRaftNode creates a new raft node for the store.
+func newRaftNode(conf config.Config) (*raft.Raft, error) {
+	// All new methods below can add other return values as needed, such as err
+
+	// create default config for raft
+	raftConfig := newDefaultConfig()
+
+	// setup Raft communication
+	t := newTransport()
+
+	// create the snapshot store. This allows the Raft to truncate the log.
+	snapshots, err := newSnapshotStore(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	// create the log store and stable store
+	logStore, err := newRaftLog(conf)
+	if err != nil {
+		return nil, err
+	}
+	stableStore, err := newStableLog(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	// create a new finite state machine
+	f := newFSM()
+
+	// instantiate the Raft system
+	r, err := raft.NewRaft(raftConfig, f, logStore, stableStore, snapshots, t)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
 func (r *region) Put(key []byte, value []byte) error {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
