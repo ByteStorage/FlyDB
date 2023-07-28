@@ -167,6 +167,10 @@ func moveDataToNewRegion(new region.Region, newStartKey []byte, newEndKey []byte
 	panic("implement me")
 }
 
+// mergeTwoRegions merges two adjacent regions into one region.
+// r1: the first region
+// r2: the second region
+// move the data from the second region to the first region
 func mergeTwoRegions(r1 region.Region, r2 region.Region) error {
 	panic("implement me")
 }
