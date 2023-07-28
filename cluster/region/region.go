@@ -2,6 +2,7 @@ package region
 
 import (
 	"errors"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	"github.com/hashicorp/raft"
 	"sync"
@@ -24,6 +25,7 @@ type region struct {
 	peers      []string              // peers
 	size       int64                 // size
 	mu         sync.RWMutex          // mutex, to protect the region.
+	conf       config.Config         // config
 }
 
 // Region is the interface of region.
@@ -50,6 +52,21 @@ type Region interface {
 	RemovePeer(peer string) error
 	// GetSize gets the total size of the region.
 	GetSize() int64
+}
+
+func NewRegion(start []byte, end []byte, options config.Options, conf config.Config) (Region, error) {
+	db, err := engine.NewDB(options)
+	if err != nil {
+		return nil, errors.New("new db failed")
+	}
+	return &region{
+		startKey:   start,
+		endKey:     end,
+		raftGroups: make(map[uint64]*raft.Raft),
+		db:         db,
+		mu:         sync.RWMutex{},
+		conf:       conf,
+	}, nil
 }
 
 func (r *region) Put(key []byte, value []byte) error {
