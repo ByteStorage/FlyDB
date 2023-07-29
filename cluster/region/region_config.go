@@ -1,4 +1,4 @@
-package store
+package region
 
 import (
 	"github.com/hashicorp/raft"
@@ -7,7 +7,7 @@ import (
 )
 
 // newDefaultConfig returns a new default raft config
-func (s *store) newDefaultConfig() *raft.Config {
+func newDefaultConfig() *raft.Config {
 	return &raft.Config{
 		ProtocolVersion:          raft.ProtocolVersionMax, // using latest protocol version
 		HeartbeatTimeout:         1000 * time.Millisecond,
