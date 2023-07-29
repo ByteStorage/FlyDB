@@ -244,7 +244,9 @@ func (db *DB) setActiveDataFile() error {
 		return err
 	}
 	db.activeFile = dataFile
-	SingleOffset().AddNew(initialFileID, 0)
+
+	size, _ := dataFile.IoManager.Size()
+	SingleOffset().AddNew(initialFileID, size)
 	return nil
 }
 
@@ -468,7 +470,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 	var currentSeqNo = nonTransactionSeqNo
 
 	// Iterate through all file ids, processing records in the file
-	for i, fid := range db.fileIds {
+	for _, fid := range db.fileIds {
 		var fileID = uint32(fid)
 		// If the id is smaller than that of the file that did not participate in the merge recently,
 		// the hint file has been loaded
@@ -533,10 +535,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 			offset += size
 		}
 
-		// If it is a current active file, update writeOff for this file
-		if i == len(db.fileIds)-1 {
-			db.activeFile.WriteOff = offset
-		}
+		SingleOffset().AddNew(fileID, offset)
 	}
 
 	// Update the transaction sequence number to the database field

@@ -8,7 +8,7 @@ import (
 	"github.com/ByteStorage/FlyDB/flydb"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"math/rand"
-	"path/filepath"
+	"os"
 	"testing"
 	"time"
 )
@@ -34,18 +34,17 @@ func GetValue() []byte {
 	return str.Bytes()
 }
 
-func init() {
+func Benchmark_PutValue_FlyDB(b *testing.B) {
 	opts := config.DefaultOptions
-	opts.DirPath = filepath.Join("benchmark", "flydbtest")
+	dir, _ := os.MkdirTemp("", "flydbtest")
+	opts.DirPath = dir
 
 	FlyDB, err = flydb.NewFlyDB(opts)
 	defer FlyDB.Clean()
 	if err != nil {
 		panic(err)
 	}
-}
 
-func Benchmark_PutValue_FlyDB(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
@@ -58,6 +57,15 @@ func Benchmark_PutValue_FlyDB(b *testing.B) {
 }
 
 func Benchmark_GetValue_FlyDB(b *testing.B) {
+	opts := config.DefaultOptions
+	opts.DirPath = "/tmp/FlyDB"
+
+	FlyDB, err = flydb.NewFlyDB(opts)
+	defer FlyDB.Close()
+	if err != nil {
+		panic(err)
+	}
+
 	for i := 0; i < 500000; i++ {
 		err = FlyDB.Put(GetKey(i), GetValue())
 		if err != nil {
@@ -74,5 +82,4 @@ func Benchmark_GetValue_FlyDB(b *testing.B) {
 			panic(err)
 		}
 	}
-
 }
