@@ -42,7 +42,6 @@ type meta struct {
 	mu            sync.RWMutex              // mutex, to protect the metadata.
 	scheduler     *Scheduler                // scheduler, to schedule the cluster.
 	raft          *raft.Raft                // raft, to store the raft group.
-	addr          string                    // address, to store the address of the meta node.
 }
 
 // GetStore gets a store by address.
