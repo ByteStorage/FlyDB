@@ -66,7 +66,7 @@ func (s *set) SRems(ctx context.Context, req *gset.SRemsRequest) (*gset.EmptyRes
 func (s *set) SCard(ctx context.Context, req *gset.SCardRequest) (*gset.SCardResponse, error) {
 	count, err := s.dbs.SCard(req.Key)
 	if err != nil {
-		return nil, err
+		return &gset.SCardResponse{}, err
 	}
 	return &gset.SCardResponse{Count: int32(count)}, nil
 }
