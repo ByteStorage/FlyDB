@@ -1,6 +1,8 @@
 package store
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestStore_GetRegionByID(t *testing.T) {
 }
