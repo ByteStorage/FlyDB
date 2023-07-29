@@ -1,6 +1,8 @@
 package client
 
-import "github.com/desertbit/grumble"
+import (
+	"github.com/desertbit/grumble"
+)
 
 func register(app *grumble.App) {
 	app.AddCommand(&grumble.Command{
@@ -150,7 +152,7 @@ func register(app *grumble.App) {
 		Help: "get the values of multiple keys in string-structure",
 		Run:  stringMGet,
 		Args: func(a *grumble.Args) {
-			a.StringList("key", "The keys to get values for", grumble.Default([]string{}))
+			a.StringList("key", "The keys to get values for", grumble.Default(""))
 		},
 	})
 
@@ -325,7 +327,7 @@ func register(app *grumble.App) {
 		Run:  stringLPushsData,
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
-			a.StringList("values", "values", grumble.Default([]string{}))
+			a.StringList("values", "values", grumble.Default(""))
 		},
 	})
 
@@ -430,4 +432,118 @@ func register(app *grumble.App) {
 		},
 	})
 
+	app.AddCommand(&grumble.Command{
+		Name: "Sadd",
+		Help: "Set the value in a set in set-structure",
+		Run:  SetAdd,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sadds",
+		Help: "Set multiple values from a set in set-structure",
+		Run:  SetAdds,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("members", "members", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Srem",
+		Help: "Remove the value from a set in set-structure",
+		Run:  SetRem,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Srems",
+		Help: "Remove multiple values from a set in set-structure",
+		Run:  SetRems,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("members", "members", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Scard",
+		Help: "Get the number of elements in a set in set-structure",
+		Run:  SetCard,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Smembers",
+		Help: "Get all members of a set in set-structure",
+		Run:  SetMembers,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sismember",
+		Help: "Check if a value exists in a set in set-structure",
+		Run:  SetIsMember,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sunion",
+		Help: "Get the union of multiple sets in set-structure",
+		Run:  SetUnion,
+		Args: func(a *grumble.Args) {
+			a.StringList("keys", "keys", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sinter",
+		Help: "Get the intersection of multiple sets in set-structure",
+		Run:  SetInter,
+		Args: func(a *grumble.Args) {
+			a.StringList("keys", "keys", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sdiff",
+		Help: "Get the difference between multiple sets in set-structure",
+		Run:  SetDiff,
+		Args: func(a *grumble.Args) {
+			a.StringList("keys", "keys", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sunionstore",
+		Help: "Store the union of multiple sets in set-structure to a new set",
+		Run:  SetUnionStore,
+		Args: func(a *grumble.Args) {
+			a.String("destinationKey", "destinationKey", grumble.Default(""))
+			a.StringList("keys", "keys", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Sinterstore",
+		Help: "Store the intersection of multiple sets in set-structure to a new set",
+		Run:  SetInterStore,
+		Args: func(a *grumble.Args) {
+			a.String("destinationKey", "destinationKey", grumble.Default(""))
+			a.StringList("keys", "keys", grumble.Default(""))
+		},
+	})
 }

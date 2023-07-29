@@ -111,13 +111,13 @@ type SkipListNode struct {
 // - 'value' which is an interface{}, meaning it can hold any data type. This represents the actual value of the node in the skip list.
 type ZSetValue struct {
 	// Score is typically used for sorting purposes. Nodes with higher scores will be placed higher in the skip list.
-	score int
+	Score int
 
-	// member represents the unique identifier for each node.
-	member string
+	// Member represents the unique identifier for each node.
+	Member string
 
-	// value is the actual content/data that is being stored in the node.
-	value interface{}
+	// Value is the actual content/data that is being stored in the node.
+	Value interface{}
 }
 
 // randomLevel is a function that generates a probabilistic level for a node in a SkipList data structure.
@@ -211,9 +211,9 @@ func newSkipListNode(level int, score int, key string, value interface{}) *SkipL
 func newSkipListNodeValue(score int, member string, value interface{}) *ZSetValue {
 	// Create a new instance of a ZSetValue with the provided score, key, and value.
 	node := &ZSetValue{
-		score:  score,
-		member: member,
-		value:  value,
+		Score:  score,
+		Member: member,
+		Value:  value,
 	}
 
 	// Return the newly created ZSetValue.
@@ -239,9 +239,9 @@ func (sl *SkipList) insert(score int, key string, value interface{}) *ZSetValue 
 		}
 		if node.level[i] != nil {
 			for node.level[i].next != nil &&
-				(node.level[i].next.value.score < score ||
-					(node.level[i].next.value.score == score && // score is the same but the key is different
-						node.level[i].next.value.member < key)) {
+				(node.level[i].next.value.Score < score ||
+					(node.level[i].next.value.Score == score && // score is the same but the key is different
+						node.level[i].next.value.Member < key)) {
 				rank[i] += node.level[i].span
 				node = node.level[i].next
 			}
@@ -310,9 +310,9 @@ func (sl *SkipList) delete(score int, member string) {
 		// This loop is traversing the SkipList horizontally until it finds a node with a score greater
 		// than or equal to our target score or if the scores are equal it also checks the member.
 		for node.level[i].next != nil &&
-			(node.level[i].next.value.score < score ||
-				(node.level[i].next.value.score == score &&
-					node.level[i].next.value.member < member)) {
+			(node.level[i].next.value.Score < score ||
+				(node.level[i].next.value.Score == score &&
+					node.level[i].next.value.Member < member)) {
 			node = node.level[i].next
 		}
 		update[i] = node
@@ -322,7 +322,7 @@ func (sl *SkipList) delete(score int, member string) {
 	node = node.level[0].next
 
 	// If the possibly deleted node is the target node (it has the same score and member), then remove it.
-	if node != nil && node.value.score == score && node.value.member == member {
+	if node != nil && node.value.Score == score && node.value.Member == member {
 		sl.deleteNode(node, update)
 	}
 }
@@ -411,9 +411,9 @@ func (sl *SkipList) getRank(score int, key string) int {
 	for i := sl.level; i >= 0; i-- {
 		// While loop advances the 'h' pointer as long as the next node exists and the conditions are fulfilled
 		for h.level[i].next != nil &&
-			(h.level[i].next.value.score < score ||
-				(h.level[i].next.value.score == score &&
-					h.level[i].next.value.member <= key)) {
+			(h.level[i].next.value.Score < score ||
+				(h.level[i].next.value.Score == score &&
+					h.level[i].next.value.Member <= key)) {
 
 			// Increase the rank by the span of the current level
 			rank += h.level[i].span
@@ -421,7 +421,7 @@ func (sl *SkipList) getRank(score int, key string) int {
 			h = h.level[i].next
 		}
 		// If the key of the current node is equal to the provided key, return the rank
-		if h.value.member == key {
+		if h.value.Member == key {
 			return rank
 		}
 	}
@@ -484,7 +484,7 @@ func (sl *SkipList) getNodeByRank(rank int) *SkipListNode {
 //
 // If the key is an empty string, an error will be returned
 func (zs *ZSetStructure) ZAdd(key string, score int, member string, value string) error {
-	return zs.ZAdds(key, []ZSetValue{{score: score, member: member, value: value}}...)
+	return zs.ZAdds(key, []ZSetValue{{Score: score, Member: member, Value: value}}...)
 }
 
 // ZAdds adds a value with its given score and member to a sorted set (ZSet), associated with
@@ -504,10 +504,10 @@ func (zs *ZSetStructure) ZAdds(key string, vals ...ZSetValue) error {
 
 	for _, val := range vals {
 		// if values didn't change, do nothing
-		if zs.valuesDidntChange(zSet, val.score, val.member, val.value) {
+		if zs.valuesDidntChange(zSet, val.Score, val.Member, val.Value) {
 			continue
 		}
-		if err := zs.updateZSet(zSet, key, val.score, val.member, val.value); err != nil {
+		if err := zs.updateZSet(zSet, key, val.Score, val.Member, val.Value); err != nil {
 			return fmt.Errorf("failed to set ZSet to DB with key '%v': %w", key, err)
 		}
 	}
@@ -617,7 +617,7 @@ func (zs *ZSetStructure) ZScore(key string, member string) (int, error) {
 	}
 	// if the member in the sorted set is found, return the score associated with it
 	if v, ok := zSet.dict[member]; ok {
-		return v.score, nil
+		return v.Score, nil
 	}
 
 	// if the member doesn't exist in the set, return score of zero and an error
@@ -663,7 +663,7 @@ func (zs *ZSetStructure) ZRank(key string, member string) (int, error) {
 		return 0, fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
 	}
 	if v, ok := zSet.dict[member]; ok {
-		return zSet.skipList.getRank(v.score, member), nil
+		return zSet.skipList.getRank(v.Score, member), nil
 	}
 
 	// rank zero means no rank found
@@ -699,7 +699,7 @@ func (zs *ZSetStructure) ZRevRank(key string, member string) (int, error) {
 		return 0, fmt.Errorf("failed to get or create ZSet from DB with key '%v': %w", key, err)
 	}
 	if v, ok := zSet.dict[member]; ok {
-		rank := zSet.skipList.getRank(v.score, member)
+		rank := zSet.skipList.getRank(v.Score, member)
 		return (zSet.size) - rank + 1, nil
 	}
 
@@ -789,7 +789,7 @@ func (zs *ZSetStructure) ZCount(key string, min int, max int) (count int, err er
 	// Node traversal loop. We keep moving to the next node at current level
 	// as long as the score of the next node's value is less than 'min'.
 	for i := zSet.skipList.level - 1; i >= 0; i-- {
-		for x.level[i].next != nil && x.level[i].next.value.score < min {
+		for x.level[i].next != nil && x.level[i].next.value.Score < min {
 			x = x.level[i].next
 		}
 	}
@@ -798,7 +798,7 @@ func (zs *ZSetStructure) ZCount(key string, min int, max int) (count int, err er
 	// Score range check loop. We traverse nodes and increment 'count'
 	// as long as node value's score is in the range ['min', 'max']
 	for x != nil {
-		if x.value.score > max {
+		if x.value.Score > max {
 			break
 		}
 		count++
@@ -876,7 +876,7 @@ func (zs *ZSetStructure) ZIncrBy(key string, member string, incBy int) error {
 	}
 
 	if v, ok := zSet.dict[member]; ok {
-		if err = zSet.InsertNode(v.score+incBy, member, v.value); err != nil {
+		if err = zSet.InsertNode(v.Score+incBy, member, v.Value); err != nil {
 			return err
 		}
 		if err = zs.setZSetToDB(keyBytes, zSet); err != nil {
@@ -903,7 +903,7 @@ func (zs *ZSetStructure) getOrCreateZSet(key string) (*FZSet, error) {
 // valuesDidntChange checks if the data of a specific member in a sorted set remained the same.
 func (zs *ZSetStructure) valuesDidntChange(zSet *FZSet, score int, member string, value interface{}) bool {
 	if v, ok := zSet.dict[member]; ok {
-		return v.score == score && v.member == member && v.value == value
+		return v.Score == score && v.Member == member && v.Value == value
 	}
 
 	return false
@@ -939,13 +939,13 @@ func (fzs *FZSet) InsertNode(score int, member string, value interface{}) error 
 
 	// Check if key exists in dictionary
 	if v, ok := fzs.dict[member]; ok {
-		if v.score != score {
+		if v.Score != score {
 			// Update value and score as the score remains the same
 			fzs.skipList.delete(score, member)
 			fzs.dict[member] = fzs.skipList.insert(score, member, value)
 		} else {
 			// Ranking isn't altered, only update value
-			v.value = value
+			v.Value = value
 		}
 	} else { // Key doesn't exist, create new key
 		fzs.dict[member] = fzs.skipList.insert(score, member, value)
@@ -971,8 +971,8 @@ func (fzs *FZSet) getMinMaxScore() (minScore int, maxScore int) {
 	if fzs.skipList.head.level[0].next.value == nil || fzs.skipList.tail.value == nil {
 		return 0, 0
 	}
-	return fzs.skipList.head.level[0].next.value.score,
-		fzs.skipList.tail.value.score
+	return fzs.skipList.head.level[0].next.value.Score,
+		fzs.skipList.tail.value.Score
 }
 func (fzs *FZSet) min(a, b int) int {
 	if a < b {
@@ -1015,7 +1015,7 @@ func (fzs *FZSet) RemoveNode(member string) error {
 	}
 
 	// Delete Node from the skip list and dictionary
-	fzs.skipList.delete(v.score, member)
+	fzs.skipList.delete(v.Score, member)
 	delete(fzs.dict, member)
 	fzs.size--
 
@@ -1025,7 +1025,7 @@ func (fzs *FZSet) RemoveNode(member string) error {
 func (fzs *FZSet) exists(score int, member string) bool {
 	v, ok := fzs.dict[member]
 
-	return ok && v.score == score
+	return ok && v.Score == score
 }
 
 // Bytes encodes the FZSet instance into bytes using MessagePack
@@ -1137,7 +1137,7 @@ func (fzs *FZSet) UnmarshalBinary(data []byte) (err error) {
 		}
 
 		// Insert the decoded node into the FZSet instance
-		if err = fzs.InsertNode(slValue.score, slValue.member, slValue.value); err != nil {
+		if err = fzs.InsertNode(slValue.Score, slValue.Member, slValue.Value); err != nil {
 			return err
 		}
 	}
@@ -1191,13 +1191,13 @@ func (fzs *FZSet) MarshalBinary() (_ []byte, err error) {
 // Returns an error if the decoding of Key, Score, or Value fails.
 func (p *ZSetValue) UnmarshalBinary(data []byte) (err error) {
 	dec := encoding.NewMessagePackDecoder(data)
-	if err = dec.Decode(&p.member); err != nil {
+	if err = dec.Decode(&p.Member); err != nil {
 		return
 	}
-	if err = dec.Decode(&p.score); err != nil {
+	if err = dec.Decode(&p.Score); err != nil {
 		return err
 	}
-	if err = dec.Decode(&p.value); err != nil {
+	if err = dec.Decode(&p.Value); err != nil {
 		return
 	}
 	return
@@ -1214,17 +1214,17 @@ func (d *ZSetValue) MarshalBinary() (_ []byte, err error) {
 	// Then, we try to encode the 'key' field of the ZSetValue
 	// If an error occurs, it is returned immediately along with the
 	// currently encoded byte slice.
-	if err = enc.Encode(d.member); err != nil {
+	if err = enc.Encode(d.Member); err != nil {
 		return enc.Bytes(), err
 	}
 
 	// We do the same for the 'score' field.
-	if err = enc.Encode(d.score); err != nil {
+	if err = enc.Encode(d.Score); err != nil {
 		return enc.Bytes(), err
 	}
 
 	// Lastly, the 'value' field is encoded in the same way.
-	if err = enc.Encode(d.value); err != nil {
+	if err = enc.Encode(d.Value); err != nil {
 		return enc.Bytes(), err
 	}
 
@@ -1232,4 +1232,9 @@ func (d *ZSetValue) MarshalBinary() (_ []byte, err error) {
 	// final byte slice which represents the encoded ZSetValue
 	// and a nil error.
 	return enc.Bytes(), err
+}
+
+func (s *ZSetStructure) Stop() error {
+	err := s.db.Close()
+	return err
 }

@@ -108,7 +108,7 @@ func TestZRem(t *testing.T) {
 		{
 			name: "member empty",
 			setup: func(z *ZSetStructure) {
-				_ = z.ZAdds("key1", []ZSetValue{{score: 1, member: "mem1", value: ""}}...)
+				_ = z.ZAdds("key1", []ZSetValue{{Score: 1, Member: "mem1", Value: ""}}...)
 			},
 			key:     "key1",
 			members: []string{""},
@@ -118,10 +118,10 @@ func TestZRem(t *testing.T) {
 			name: "remove half members",
 			setup: func(z *ZSetStructure) {
 				_ = z.ZAdds("key1", []ZSetValue{
-					{score: 1, member: "mem1", value: ""},
-					{score: 2, member: "mem2", value: ""},
-					{score: 3, member: "mem3", value: ""},
-					{score: 4, member: "mem4", value: ""}}...)
+					{Score: 1, Member: "mem1", Value: ""},
+					{Score: 2, Member: "mem2", Value: ""},
+					{Score: 3, Member: "mem3", Value: ""},
+					{Score: 4, Member: "mem4", Value: ""}}...)
 			},
 		},
 	}
@@ -160,28 +160,28 @@ func TestZRems(t *testing.T) {
 	testCases := []testCase{
 		{"key",
 			[]ZSetValue{
-				{score: 0, member: "mem0", value: ""},
-				{score: 1, member: "mem1", value: ""},
-				{score: 2, member: "mem2", value: ""},
-				{score: 3, member: "mem3", value: ""},
-				{score: 4, member: "mem4", value: ""},
-				{score: 5, member: "mem5", value: ""},
-				{score: 6, member: "mem6", value: ""},
+				{Score: 0, Member: "mem0", Value: ""},
+				{Score: 1, Member: "mem1", Value: ""},
+				{Score: 2, Member: "mem2", Value: ""},
+				{Score: 3, Member: "mem3", Value: ""},
+				{Score: 4, Member: "mem4", Value: ""},
+				{Score: 5, Member: "mem5", Value: ""},
+				{Score: 6, Member: "mem6", Value: ""},
 			},
 			[]string{
 				"mem0",
 				"mem1",
 				"mem6",
 			}, []ZSetValue{
-				{score: 2, member: "mem2", value: ""},
-				{score: 3, member: "mem3", value: ""},
-				{score: 4, member: "mem4", value: ""},
-				{score: 5, member: "mem5", value: ""},
+				{Score: 2, Member: "mem2", Value: ""},
+				{Score: 3, Member: "mem3", Value: ""},
+				{Score: 4, Member: "mem4", Value: ""},
+				{Score: 5, Member: "mem5", Value: ""},
 			}, nil},
 		{"",
 			[]ZSetValue{
-				{score: 0, member: "mem0", value: ""},
-				{score: 1, member: "mem1", value: ""},
+				{Score: 0, Member: "mem0", Value: ""},
+				{Score: 1, Member: "mem1", Value: ""},
 			},
 			[]string{
 				"mem0",
@@ -197,8 +197,8 @@ func TestZRems(t *testing.T) {
 		{
 			"Key1",
 			[]ZSetValue{
-				{score: 0, member: "mem0", value: ""},
-				{score: 1, member: "mem1", value: ""},
+				{Score: 0, Member: "mem0", Value: ""},
+				{Score: 1, Member: "mem1", Value: ""},
 			},
 			[]string{
 				"mem0",
@@ -220,7 +220,7 @@ func TestZRems(t *testing.T) {
 			assert.Equal(t, tc.err, err)
 			//validate
 			for _, value := range tc.want {
-				te := mockZSetStructure.exists(tc.key, value.score, value.member)
+				te := mockZSetStructure.exists(tc.key, value.Score, value.Member)
 				assert.True(t, te)
 			}
 		})
@@ -243,7 +243,7 @@ func TestZAdd(t *testing.T) {
 			10,
 			"member",
 			"value",
-			ZSetValue{member: "member"},
+			ZSetValue{Member: "member"},
 			nil,
 		},
 		{
@@ -251,7 +251,7 @@ func TestZAdd(t *testing.T) {
 			10,
 			"member",
 			"value",
-			ZSetValue{member: ""},
+			ZSetValue{Member: ""},
 			_const.ErrKeyIsEmpty,
 		},
 	}
@@ -290,30 +290,30 @@ func TestZAdds(t *testing.T) {
 	testCases := []testCase{
 		{"key",
 			[]ZSetValue{
-				{score: 0, member: "mem0", value: ""},
-				{score: 1, member: "mem1", value: ""},
-				{score: 2, member: "mem2", value: ""},
-				{score: 3, member: "mem3", value: ""},
-				{score: 3, member: "mem3", value: ""},
-				{score: 4, member: "mem4", value: ""},
-				{score: 5, member: "mem5", value: ""},
-				{score: 6, member: "mem6", value: ""},
+				{Score: 0, Member: "mem0", Value: ""},
+				{Score: 1, Member: "mem1", Value: ""},
+				{Score: 2, Member: "mem2", Value: ""},
+				{Score: 3, Member: "mem3", Value: ""},
+				{Score: 3, Member: "mem3", Value: ""},
+				{Score: 4, Member: "mem4", Value: ""},
+				{Score: 5, Member: "mem5", Value: ""},
+				{Score: 6, Member: "mem6", Value: ""},
 			},
 			[]ZSetValue{
-				{score: 0, member: "mem0", value: ""},
-				{score: 1, member: "mem1", value: ""},
-				{score: 2, member: "mem2", value: ""},
-				{score: 3, member: "mem3", value: ""},
-				{score: 3, member: "mem3", value: ""},
-				{score: 4, member: "mem4", value: ""},
-				{score: 5, member: "mem5", value: ""},
-				{score: 6, member: "mem6", value: ""},
+				{Score: 0, Member: "mem0", Value: ""},
+				{Score: 1, Member: "mem1", Value: ""},
+				{Score: 2, Member: "mem2", Value: ""},
+				{Score: 3, Member: "mem3", Value: ""},
+				{Score: 3, Member: "mem3", Value: ""},
+				{Score: 4, Member: "mem4", Value: ""},
+				{Score: 5, Member: "mem5", Value: ""},
+				{Score: 6, Member: "mem6", Value: ""},
 			},
 			nil},
 		{"",
 			[]ZSetValue{
-				{score: 0, member: "mem0", value: ""},
-				{score: 1, member: "mem1", value: ""},
+				{Score: 0, Member: "mem0", Value: ""},
+				{Score: 1, Member: "mem1", Value: ""},
 			},
 			[]ZSetValue{},
 			_const.ErrKeyIsEmpty,
@@ -326,7 +326,7 @@ func TestZAdds(t *testing.T) {
 			assert.Equal(t, tc.err, err)
 			//validate
 			for _, value := range tc.want {
-				te := zs.exists(tc.key, value.score, value.member)
+				te := zs.exists(tc.key, value.Score, value.Member)
 				assert.True(t, te)
 			}
 		})
@@ -349,7 +349,7 @@ func TestZIncrBy(t *testing.T) {
 	assert.NoError(t, err)
 
 	Zset, err := zs.getZSetFromDB(stringToBytesWithKey("key"))
-	assert.Equal(t, 6, Zset.dict["existingMember"].score)
+	assert.Equal(t, 6, Zset.dict["existingMember"].Score)
 }
 func TestZRank(t *testing.T) {
 	zs, _ := initZSetDB()
@@ -648,8 +648,8 @@ func TestNewSkipList(t *testing.T) {
 	assertions := assert.New(t)
 	assertions.Equal(1, s.level)
 	assertions.Nil(s.head.prev)
-	assertions.Equal(0, s.head.value.score)
-	assertions.Equal("", s.head.value.member)
+	assertions.Equal(0, s.head.value.Score)
+	assertions.Equal("", s.head.value.Member)
 }
 
 func TestNewSkipListNode(t *testing.T) {
@@ -661,7 +661,7 @@ func TestNewSkipListNode(t *testing.T) {
 	node := newSkipListNode(level, score, key, value)
 
 	// Validate node's value
-	if node.value.score != score || node.value.member != key || node.value.value != value {
+	if node.value.Score != score || node.value.Member != key || node.value.Value != value {
 		t.Errorf("Unexpected value in node, got: %v, want: {score: %d, key: %s, val: %s}.\n", node.value, score, key, value)
 	}
 
@@ -765,7 +765,7 @@ func TestZSetNodes_InsertNode(t *testing.T) {
 		t.Error("Failed when updating a score with same value")
 	}
 
-	if v, ok := pq.dict["test"]; !ok || v.value != "newvalue" {
+	if v, ok := pq.dict["test"]; !ok || v.Value != "newvalue" {
 		t.Error("Update node failed, expected value to be updated")
 	}
 
@@ -775,7 +775,7 @@ func TestZSetNodes_InsertNode(t *testing.T) {
 		t.Error("Failed when updating a score with a new value")
 	}
 
-	if v, ok := pq.dict["test"]; !ok || v.score != 2 {
+	if v, ok := pq.dict["test"]; !ok || v.Score != 2 {
 		t.Error("Update node failed, expected score to be updated")
 	}
 }
@@ -944,12 +944,12 @@ func TestZset_getNodeByRank(t *testing.T) {
 		{
 			name: "Case 1: Get Node by Rank 1",
 			rank: 1,
-			want: &ZSetValue{score: 1, member: "mem1", value: ""},
+			want: &ZSetValue{Score: 1, Member: "mem1", Value: ""},
 		},
 		{
 			name: "Case 2: Get Node by Rank 2",
 			rank: 2,
-			want: &ZSetValue{score: 2, member: "mem2", value: ""},
+			want: &ZSetValue{Score: 2, Member: "mem2", Value: ""},
 		},
 		{
 			name: "Case 3: Get Node by Non-existed Rank",
