@@ -5,14 +5,18 @@ go 1.18
 require (
 	github.com/bits-and-blooms/bitset v1.8.0
 	github.com/boltdb/bolt v1.3.1
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/chen3feng/stl4go v0.1.1
 	github.com/desertbit/grumble v1.1.3
+	github.com/edsrzf/mmap-go v1.1.0
 	github.com/fatih/color v1.13.0
+	github.com/golang/protobuf v1.5.3
 	github.com/google/btree v1.1.2
 	github.com/hashicorp/go-msgpack v0.5.5
 	github.com/hashicorp/raft v1.5.0
 	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702
 	github.com/klauspost/reedsolomon v1.11.7
+	github.com/pkg/errors v0.9.1
 	github.com/plar/go-adaptive-radix-tree v1.0.5
 	github.com/stretchr/testify v1.8.2
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
@@ -30,11 +34,9 @@ require (
 	github.com/desertbit/columnize v2.1.0+incompatible // indirect
 	github.com/desertbit/go-shlex v0.1.1 // indirect
 	github.com/desertbit/readline v1.5.1 // indirect
-	github.com/edsrzf/mmap-go v1.1.0 // indirect
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-immutable-radix v1.0.0 // indirect
@@ -44,7 +46,6 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
