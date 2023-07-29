@@ -182,13 +182,13 @@ func (s *StringStructure) Append(key string, v interface{}, ttl time.Duration) e
 	}
 
 	// Convert the old value to a byte slice
-	oldValueType := []byte(oldValue.(string))
+	oldValueType := oldValue.([]byte)
 
 	// Append the value
 	newValue := append(oldValueType, value...)
 
 	// Set the value
-	return s.Set(key, string(newValue), ttl)
+	return s.Set(key, newValue, ttl)
 }
 
 // Incr increments the integer value of a key by 1
