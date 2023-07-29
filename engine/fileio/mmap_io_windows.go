@@ -5,7 +5,6 @@ package fileio
 import (
 	"errors"
 	"os"
-	"sync/atomic"
 	"syscall"
 	"unsafe"
 )
@@ -17,7 +16,7 @@ type MMapIO struct {
 	offset   int64  // next write location
 	fileSize int64  // max file size
 	fileName string
-	count    atomic.Uint32 // the count of dbs using this mmap io
+	count    atomic.Int32 // the count of dbs using this mmap io
 }
 
 func (mio *MMapIO) Init() (*MMapIO, error) {
@@ -118,7 +117,7 @@ func (mio *MMapIO) Close() (err error) {
 	return syscall.CloseHandle(mio.handle)
 }
 
-func (mio *MMapIO) GetCount() uint32 {
+func (mio *MMapIO) GetCount() int32 {
 	return mio.count.Load()
 }
 

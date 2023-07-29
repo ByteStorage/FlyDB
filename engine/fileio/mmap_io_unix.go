@@ -4,8 +4,8 @@ package fileio
 
 import (
 	"errors"
+	atomic2 "go.uber.org/atomic"
 	"os"
-	"sync/atomic"
 	"syscall"
 	"unsafe"
 )
@@ -16,7 +16,7 @@ type MMapIO struct {
 	offset   int64    // next write location
 	fileSize int64    // max file size
 	fileName string
-	count    atomic.Int32 // the count of dbs using this mmap io
+	count    atomic2.Int32 // the count of dbs using this mmap io
 }
 
 func (mio *MMapIO) Init() (*MMapIO, error) {

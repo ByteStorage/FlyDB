@@ -101,11 +101,14 @@ func TestStringStructure_Append(t *testing.T) {
 	str, _ := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", randkv.RandomValue(10), 0)
+	err = str.Set("1", "msg", 0)
 	assert.Nil(t, err)
 
-	err = str.Append("1", randkv.RandomValue(5), 0)
+	err = str.Append("1", "123", 0)
 	assert.Nil(t, err)
+
+	value, _ := str.Get("1")
+	assert.Equal(t, value, "msg123")
 }
 
 func TestStringStructure_Incr(t *testing.T) {

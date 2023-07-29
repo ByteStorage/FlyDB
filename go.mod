@@ -8,7 +8,6 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/chen3feng/stl4go v0.1.1
 	github.com/desertbit/grumble v1.1.3
-	github.com/edsrzf/mmap-go v1.1.0
 	github.com/fatih/color v1.13.0
 	github.com/golang/protobuf v1.5.3
 	github.com/google/btree v1.1.2
