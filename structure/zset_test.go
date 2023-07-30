@@ -504,13 +504,13 @@ func TestZRevRange(t *testing.T) {
 func TestZRange(t *testing.T) {
 	zs, _ := initZSetDB()
 
-	err := zs.ZAdd("myKey", 1, "member1", "w")
+	err := zs.ZAdd("myKey", 1, "member1", "")
 	assert.NoError(t, err)
 
-	err = zs.ZAdd("myKey", 2, "member2", "m")
+	err = zs.ZAdd("myKey", 2, "member2", "")
 	assert.NoError(t, err)
 
-	err = zs.ZAdd("myKey", 3, "member3", "s")
+	err = zs.ZAdd("myKey", 3, "member3", "")
 	assert.NoError(t, err)
 
 	err = zs.ZAdd("myKey", 4, "member4", "")
@@ -521,7 +521,7 @@ func TestZRange(t *testing.T) {
 
 	err = zs.ZAdd("myKey", 6, "member6", "")
 	assert.NoError(t, err)
-	//var n []uint8
+	var n []uint8
 	tests := []struct {
 		key     string
 		start   int
@@ -530,9 +530,9 @@ func TestZRange(t *testing.T) {
 		wantErr error
 	}{
 		{"myKey", 0, 3, []ZSetValue{
-			{1, "member1", "w"},
-			{2, "member2", "m"},
-			{3, "member3", "s"},
+			{1, "member1", n},
+			{2, "member2", n},
+			{3, "member3", n},
 		}, nil},
 		{"", 0, 2, nil, _const.ErrKeyIsEmpty},
 		{"fail", 0, 2, nil, _const.ErrKeyNotFound},
