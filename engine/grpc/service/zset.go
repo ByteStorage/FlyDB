@@ -130,23 +130,25 @@ func (z *zset) ZRange(ctx context.Context, req *gzset.ZRangeRequest) (*gzset.ZRa
 
 	var members []*gzset.ZSetValue
 	for _, rv := range rangeValues {
+		fmt.Println("service", rv.Value)
 		switch v := rv.Value.(type) {
-		case *gzset.ZSetValue_StringValue:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Int32Value:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Int64Value:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Float32Value:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Float64Value:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_BoolValue:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_BytesValue:
-			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: v})
+		case string:
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_StringValue{StringValue: v}})
+		case int32:
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_Int32Value{Int32Value: v}})
+		case int64:
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_Int64Value{Int64Value: v}})
+		case float32:
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_Float32Value{Float32Value: v}})
+		case float64:
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_Float64Value{Float64Value: v}})
+		case bool:
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_BoolValue{BoolValue: v}})
+		case []byte:
+			stringValue := string(v)
+			members = append(members, &gzset.ZSetValue{Score: int32(rv.Score), Member: rv.Member, Value: &gzset.ZSetValue_BytesValue{BytesValue: []byte(stringValue)}})
 		default:
-			return nil, fmt.Errorf("unsupported value type")
+			return nil, fmt.Errorf("servcie unsupported value type")
 		}
 	}
 

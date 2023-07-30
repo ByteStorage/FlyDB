@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/ByteStorage/FlyDB/lib/proto/gzset"
 	"github.com/ByteStorage/FlyDB/structure"
 	"github.com/desertbit/grumble"
 	"strconv"
@@ -43,9 +44,6 @@ func ZSetAdds(c *grumble.Context) error {
 		score := zsetvalues[i]
 		member := zsetvalues[i+1]
 		value := zsetvalues[i+2]
-
-		// Convert score to an appropriate type (assuming it's an int)
-		// You may need to modify this conversion based on the actual data type of Score.
 		scoreInt, err := strconv.Atoi(score)
 		if err != nil {
 			fmt.Printf("Error converting score '%s' to int: %v\n", score, err)
@@ -58,7 +56,6 @@ func ZSetAdds(c *grumble.Context) error {
 			Value:  value,
 		}
 
-		// Append the ZSetValue item to the slice
 		zsetItems = append(zsetItems, zsetItem)
 	}
 	err := newClient().ZAdds(key, zsetItems...)
@@ -169,7 +166,13 @@ func ZSetRange(c *grumble.Context) error {
 		fmt.Println("ZRange data error: ", err)
 		return err
 	}
-	fmt.Println("ZRange:", values)
+	for _, zsetValue := range values {
+		if value, ok := zsetValue.Value.(*gzset.ZSetValue_StringValue); ok {
+			fmt.Printf("aaa Score: %d, Member: %s, Value: %s\n", zsetValue.Score, zsetValue.Member, value)
+		} else {
+			fmt.Printf("bbb Score: %d, Member: %s, Value: %v\n", zsetValue.Score, zsetValue.Member, zsetValue.Value)
+		}
+	}
 	return nil
 }
 
@@ -240,4 +243,24 @@ func ZSetIncrBy(c *grumble.Context) error {
 		return err
 	}
 	return nil
+}
+
+func interfaceToBytes(value interface{}) []byte {
+	switch value := value.(type) {
+
+	case string:
+		return []byte(value)
+	case int:
+		return []byte(strconv.Itoa(value))
+	case int64:
+		return []byte(strconv.FormatInt(value, 10))
+	case float64:
+		return []byte(strconv.FormatFloat(value, 'f', -1, 64))
+	case bool:
+		return []byte(strconv.FormatBool(value))
+	case []byte:
+		return value
+	default:
+		return nil
+	}
 }

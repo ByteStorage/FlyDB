@@ -54,7 +54,7 @@ func (c *Client) ZAdds(key string, vals ...structure.ZSetValue) error {
 		case []byte:
 			zmembers[i] = &gzset.ZSetValue{Score: int32(member.Score), Member: member.Member, Value: &gzset.ZSetValue_BytesValue{BytesValue: v}}
 		default:
-			return errors.New("unknown value type")
+			return errors.New("client unknown value type")
 		}
 	}
 	req := &gzset.ZAddsRequest{Key: key, Members: zmembers}
@@ -151,11 +151,25 @@ func (c *Client) ZRange(key string, start, stop int32) ([]*structure.ZSetValue, 
 	}
 	var members []*structure.ZSetValue
 	for _, rv := range result.GetMembers() {
-		members = append(members, &structure.ZSetValue{
-			Score:  int(rv.Score),
-			Member: rv.Member,
-			Value:  rv.Value,
-		})
+		fmt.Println(rv.Value)
+		switch v := rv.Value.(type) {
+		case *gzset.ZSetValue_StringValue:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		case *gzset.ZSetValue_Int32Value:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		case *gzset.ZSetValue_Int64Value:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		case *gzset.ZSetValue_Float32Value:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		case *gzset.ZSetValue_Float64Value:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		case *gzset.ZSetValue_BoolValue:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		case *gzset.ZSetValue_BytesValue:
+			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
+		default:
+			return nil, fmt.Errorf("client unsupported value type")
+		}
 	}
 	return members, nil
 }

@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/desertbit/grumble"
+	"math"
 )
 
 func register(app *grumble.App) {
@@ -544,6 +545,131 @@ func register(app *grumble.App) {
 		Args: func(a *grumble.Args) {
 			a.String("destinationKey", "destinationKey", grumble.Default(""))
 			a.StringList("keys", "keys", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zadd",
+		Help: "Add the value from a zset in zset-structure",
+		Run:  ZSetAdd,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("score", "score", grumble.Default(0))
+			a.String("member", "member", grumble.Default(""))
+			a.String("value", "value", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zadds",
+		Help: "Add multiple values from a zset in zset-structure",
+		Run:  ZSetAdds,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("members", "members", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zrem",
+		Help: "Remove the value from a zset in zset-structure",
+		Run:  ZSetRem,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zrems",
+		Help: "Remove multiple values from a zset in zset-structure",
+		Run:  ZSetRems,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.StringList("members", "members", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zscore",
+		Help: "Get the score of a member in a zset in zset-structure",
+		Run:  ZSetScore,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zrank",
+		Help: "Get the rank of a member in a zset in zset-structure",
+		Run:  ZSetRank,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zrevrank",
+		Help: "Get the reverse rank of a member in a zset in zset-structure",
+		Run:  ZSetRevRank,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zrange",
+		Help: "Get a range of members from a zset in zset-structure",
+		Run:  ZSetRange,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("start", "start", grumble.Default(0))
+			a.Int("stop", "stop", grumble.Default(-1))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zcount",
+		Help: "Count the number of members in a zset within a score range in zset-structure",
+		Run:  ZSetCount,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("min", "min", grumble.Default(math.MinInt32))
+			a.Int("max", "max", grumble.Default(math.MaxInt32))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zrevrange",
+		Help: "Get a reverse range of members from a zset in zset-structure",
+		Run:  ZSetRevRange,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.Int("start", "start", grumble.Default(0))
+			a.Int("stop", "stop", grumble.Default(-1))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zcard",
+		Help: "Get the number of members in a zset in zset-structure",
+		Run:  ZSetCard,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+		},
+	})
+
+	app.AddCommand(&grumble.Command{
+		Name: "Zincrby",
+		Help: "Increment the score of a member in a zset in zset-structure",
+		Run:  ZSetIncrBy,
+		Args: func(a *grumble.Args) {
+			a.String("key", "key", grumble.Default(""))
+			a.String("member", "member", grumble.Default(""))
+			a.Int("increment", "increment", grumble.Default(0))
 		},
 	})
 }
