@@ -249,23 +249,3 @@ func ZSetIncrBy(c *grumble.Context) error {
 	}
 	return nil
 }
-
-func interfaceToBytes(value interface{}) []byte {
-	switch value := value.(type) {
-
-	case string:
-		return []byte(value)
-	case int:
-		return []byte(strconv.Itoa(value))
-	case int64:
-		return []byte(strconv.FormatInt(value, 10))
-	case float64:
-		return []byte(strconv.FormatFloat(value, 'f', -1, 64))
-	case bool:
-		return []byte(strconv.FormatBool(value))
-	case []byte:
-		return value
-	default:
-		return nil
-	}
-}
