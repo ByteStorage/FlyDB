@@ -2,6 +2,7 @@ package region
 
 import (
 	"errors"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	"github.com/hashicorp/raft"
 	"sync"
@@ -14,7 +15,7 @@ import (
 // region and replicas are a raft group, and the one region is the leader of the raft group.
 // region stores the data of a region.
 type region struct {
-	id         uint64                // region id
+	id         int64                 // region id
 	startKey   []byte                // start key
 	endKey     []byte                // end key
 	db         *engine.DB            // db, to store the data.
@@ -24,6 +25,7 @@ type region struct {
 	peers      []string              // peers
 	size       int64                 // size
 	mu         sync.RWMutex          // mutex, to protect the region.
+	conf       config.Config         // config
 }
 
 // Region is the interface of region.
@@ -50,6 +52,66 @@ type Region interface {
 	RemovePeer(peer string) error
 	// GetSize gets the total size of the region.
 	GetSize() int64
+	// GetID gets the id of the region.
+	GetID() int64
+}
+
+func NewRegion(conf config.RegionConfig) (Region, error) {
+	db, err := engine.NewDB(conf.Options)
+	if err != nil {
+		return nil, errors.New("new db failed")
+	}
+	raftNode, err := newRaftNode(conf.Config)
+	if err != nil {
+		return nil, errors.New("new raft node failed")
+	}
+	return &region{
+		startKey:   conf.Start,
+		endKey:     conf.End,
+		raftGroups: make(map[uint64]*raft.Raft),
+		db:         db,
+		mu:         sync.RWMutex{},
+		conf:       conf.Config,
+		raft:       raftNode,
+	}, nil
+}
+
+// newRaftNode creates a new raft node for the store.
+func newRaftNode(conf config.Config) (*raft.Raft, error) {
+	// All new methods below can add other return values as needed, such as err
+
+	// create default config for raft
+	raftConfig := newDefaultConfig()
+
+	// setup Raft communication
+	t := newTransport()
+
+	// create the snapshot store. This allows the Raft to truncate the log.
+	snapshots, err := newSnapshotStore(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	// create the log store and stable store
+	logStore, err := newRaftLog(conf)
+	if err != nil {
+		return nil, err
+	}
+	stableStore, err := newStableLog(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	// create a new finite state machine
+	f := newFSM()
+
+	// instantiate the Raft system
+	r, err := raft.NewRaft(raftConfig, f, logStore, stableStore, snapshots, t)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 func (r *region) Put(key []byte, value []byte) error {
@@ -144,4 +206,10 @@ func (r *region) GetSize() int64 {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.size
+}
+
+func (r *region) GetID() int64 {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.id
 }
