@@ -63,13 +63,6 @@ func NewService(options config.Options, addr string) (Base, error) {
 	baseService.RegisterService(listService)
 	glist.RegisterGListServiceServer(baseService.server, listService)
 
-	setService, err := service.NewSetService(options)
-	if err != nil {
-		return nil, err
-	}
-	baseService.RegisterService(setService)
-	gset.RegisterGSetServiceServer(baseService.server, setService)
-
 	zsetService, err := service.NewZSetService(options)
 	if err != nil {
 		return nil, err
