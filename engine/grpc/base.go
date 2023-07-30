@@ -6,7 +6,6 @@ import (
 	"github.com/ByteStorage/FlyDB/engine/grpc/service"
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
-	"github.com/ByteStorage/FlyDB/lib/proto/gset"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"github.com/ByteStorage/FlyDB/lib/proto/gzset"
 	"google.golang.org/grpc"
