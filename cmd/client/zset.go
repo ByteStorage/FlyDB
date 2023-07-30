@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/ByteStorage/FlyDB/lib/proto/gzset"
 	"github.com/ByteStorage/FlyDB/structure"
 	"github.com/desertbit/grumble"
 	"strconv"
@@ -19,10 +18,10 @@ func ZSetAdd(c *grumble.Context) error {
 	}
 	err := newClient().ZAdd(key, score, member, value)
 	if err != nil {
-		fmt.Println("SAdd data error: ", err)
+		fmt.Println("ZAdd data error: ", err)
 		return err
 	}
-	fmt.Println("SAdd data success")
+	fmt.Println("ZAdd data success")
 	return nil
 }
 
@@ -60,10 +59,10 @@ func ZSetAdds(c *grumble.Context) error {
 	}
 	err := newClient().ZAdds(key, zsetItems...)
 	if err != nil {
-		fmt.Println("SAdds data error: ", err)
+		fmt.Println("ZAdds data error: ", err)
 		return err
 	}
-	fmt.Println("SAdds data success")
+	fmt.Println("ZAdds data success")
 	return nil
 }
 
@@ -167,10 +166,10 @@ func ZSetRange(c *grumble.Context) error {
 		return err
 	}
 	for _, zsetValue := range values {
-		if value, ok := zsetValue.Value.(*gzset.ZSetValue_StringValue); ok {
-			fmt.Printf("aaa Score: %d, Member: %s, Value: %s\n", zsetValue.Score, zsetValue.Member, value)
+		if value, ok := zsetValue.Value.([]byte); ok {
+			fmt.Printf("Score: %d, Member: %s, Value: %s\n", zsetValue.Score, zsetValue.Member, value)
 		} else {
-			fmt.Printf("bbb Score: %d, Member: %s, Value: %v\n", zsetValue.Score, zsetValue.Member, zsetValue.Value)
+			fmt.Printf("Score: %d, Member: %s, Value: %v\n", zsetValue.Score, zsetValue.Member, zsetValue.Value)
 		}
 	}
 	return nil
@@ -208,7 +207,13 @@ func ZSetRevRange(c *grumble.Context) error {
 		fmt.Println("ZRevRange data error: ", err)
 		return err
 	}
-	fmt.Println("ZRevRange:", values)
+	for _, zsetValue := range values {
+		if value, ok := zsetValue.Value.([]byte); ok {
+			fmt.Printf("Score: %d, Member: %s, Value: %s\n", zsetValue.Score, zsetValue.Member, value)
+		} else {
+			fmt.Printf("Score: %d, Member: %s, Value: %v\n", zsetValue.Score, zsetValue.Member, zsetValue.Value)
+		}
+	}
 	return nil
 }
 

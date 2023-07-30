@@ -150,26 +150,35 @@ func (c *Client) ZRange(key string, start, stop int32) ([]*structure.ZSetValue, 
 		return nil, err
 	}
 	var members []*structure.ZSetValue
-	for _, rv := range result.GetMembers() {
-		fmt.Println(rv.Value)
-		switch v := rv.Value.(type) {
-		case *gzset.ZSetValue_StringValue:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Int32Value:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Int64Value:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Float32Value:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_Float64Value:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_BoolValue:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		case *gzset.ZSetValue_BytesValue:
-			members = append(members, &structure.ZSetValue{Score: int(rv.Score), Member: rv.Member, Value: v})
-		default:
-			return nil, fmt.Errorf("client unsupported value type")
+	for i := 0; i < len(result.Score); i++ {
+		// Create a new structure.ZSetValue instance and populate it with data from the result.
+		member := &structure.ZSetValue{
+			Score:  int(result.Score[i]),
+			Member: result.Members[i],
 		}
+
+		// Extract the value from the protobuf message based on the value type.
+		switch val := result.Values[i].Value.(type) {
+		case *gzset.Value_Int32Value:
+			member.Value = val.Int32Value
+		case *gzset.Value_Int64Value:
+			member.Value = val.Int64Value
+		case *gzset.Value_Float32Value:
+			member.Value = val.Float32Value
+		case *gzset.Value_Float64Value:
+			member.Value = val.Float64Value
+		case *gzset.Value_BoolValue:
+			member.Value = val.BoolValue
+		case *gzset.Value_BytesValue:
+			member.Value = val.BytesValue
+		case *gzset.Value_StringValue:
+			member.Value = val.StringValue
+		default:
+			// Handle the unknown value type case if needed.
+			return nil, errors.New("unknown value type")
+		}
+		// Append the created member to the members slice.
+		members = append(members, member)
 	}
 	return members, nil
 }
@@ -198,12 +207,35 @@ func (c *Client) ZRevRange(key string, start, stop int32) ([]*structure.ZSetValu
 		return nil, err
 	}
 	var members []*structure.ZSetValue
-	for _, rv := range result.GetMembers() {
-		members = append(members, &structure.ZSetValue{
-			Score:  int(rv.Score),
-			Member: rv.Member,
-			Value:  rv.Value,
-		})
+	for i := 0; i < len(result.Score); i++ {
+		// Create a new structure.ZSetValue instance and populate it with data from the result.
+		member := &structure.ZSetValue{
+			Score:  int(result.Score[i]),
+			Member: result.Members[i],
+		}
+
+		// Extract the value from the protobuf message based on the value type.
+		switch val := result.Values[i].Value.(type) {
+		case *gzset.Value_Int32Value:
+			member.Value = val.Int32Value
+		case *gzset.Value_Int64Value:
+			member.Value = val.Int64Value
+		case *gzset.Value_Float32Value:
+			member.Value = val.Float32Value
+		case *gzset.Value_Float64Value:
+			member.Value = val.Float64Value
+		case *gzset.Value_BoolValue:
+			member.Value = val.BoolValue
+		case *gzset.Value_BytesValue:
+			member.Value = val.BytesValue
+		case *gzset.Value_StringValue:
+			member.Value = val.StringValue
+		default:
+			// Handle the unknown value type case if needed.
+			return nil, errors.New("unknown value type")
+		}
+		// Append the created member to the members slice.
+		members = append(members, member)
 	}
 	return members, nil
 }
