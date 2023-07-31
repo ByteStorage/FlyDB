@@ -12,4 +12,6 @@ type Config struct {
 	SnapshotStoragePath string
 	LogDataStorageSize  int64
 	HeartbeatInterval   time.Duration
+	MetaNodes           []string
+	StoreNodes          []string
 }

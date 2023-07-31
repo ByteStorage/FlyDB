@@ -395,3 +395,8 @@ func (s *FSets) exists(member ...string) bool {
 	}
 	return true
 }
+
+func (s *SetStructure) Stop() error {
+	err := s.db.Close()
+	return err
+}

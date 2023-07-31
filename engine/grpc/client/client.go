@@ -4,7 +4,6 @@ import (
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
-	"github.com/ByteStorage/FlyDB/lib/proto/gzset"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -39,6 +38,15 @@ func newListGrpcClient(addr string) (glist.GListServiceClient, error) {
 		return nil, err
 	}
 	client := glist.NewGListServiceClient(conn)
+	return client, nil
+}
+
+func newSetGrpcClient(addr string) (gset.GSetServiceClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	client := gset.NewGSetServiceClient(conn)
 	return client, nil
 }
 
