@@ -1,6 +1,9 @@
 package client
 
-import "github.com/desertbit/grumble"
+import (
+	"github.com/desertbit/grumble"
+	"math"
+)
 
 func register(app *grumble.App) {
 	app.AddCommand(&grumble.Command{
