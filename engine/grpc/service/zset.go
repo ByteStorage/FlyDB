@@ -110,7 +110,7 @@ func (z *zset) ZScore(ctx context.Context, req *gzset.ZScoreRequest) (*gzset.ZSc
 func (z *zset) ZRank(ctx context.Context, req *gzset.ZRankRequest) (*gzset.ZRankResponse, error) {
 	rank, err := z.dbs.ZRank(req.Key, req.Member)
 	if err != nil {
-		return nil, err
+		return &gzset.ZRankResponse{}, err
 	}
 	return &gzset.ZRankResponse{Rank: int32(rank)}, nil
 }
@@ -118,7 +118,7 @@ func (z *zset) ZRank(ctx context.Context, req *gzset.ZRankRequest) (*gzset.ZRank
 func (z *zset) ZRevRank(ctx context.Context, req *gzset.ZRevRankRequest) (*gzset.ZRevRankResponse, error) {
 	rank, err := z.dbs.ZRevRank(req.Key, req.Member)
 	if err != nil {
-		return nil, err
+		return &gzset.ZRevRankResponse{}, err
 	}
 	return &gzset.ZRevRankResponse{Rank: int32(rank)}, nil
 }
@@ -210,7 +210,7 @@ func (z *zset) ZCard(ctx context.Context, req *gzset.ZCardRequest) (*gzset.ZCard
 func (z *zset) ZIncrBy(ctx context.Context, req *gzset.ZIncrByRequest) (*gzset.ZIncrByResponse, error) {
 	err := z.dbs.ZIncrBy(req.Key, req.Member, int(req.IncBy))
 	if err != nil {
-		return nil, err
+		return &gzset.ZIncrByResponse{}, err
 	}
 	return &gzset.ZIncrByResponse{Exists: true}, nil
 }

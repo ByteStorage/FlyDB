@@ -10,10 +10,10 @@ import (
 
 func (c *Client) ZAdd(key string, score int, member string, value interface{}) error {
 	client, err := newZSetGrpcClient(c.Addr)
-	req := &gzset.ZAddRequest{}
+	req := &gzset.ZAddRequest{Key: key}
 	switch v := value.(type) {
 	case string:
-		req = &gzset.ZAddRequest{Key: key, Member: &gzset.ZSetValue{Score: int32(score), Member: member, Value: &gzset.ZSetValue_StringValue{StringValue: v}}}
+		req.Member = &gzset.ZSetValue{Score: int32(score), Member: member, Value: &gzset.ZSetValue_StringValue{StringValue: v}}
 	default:
 		return fmt.Errorf("unsupported value type")
 	}
