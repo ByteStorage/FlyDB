@@ -160,21 +160,9 @@ Or add my wechat, invite you to enter the project community, and code masters to
 - [ ] Data backup
 - [ ] Distributed cluster model.
 
-## 📜 Version update list
+## 📜 Version update doc
 
-V1.0.4: The short-term support version v1.0.4 uses mmap to optimize the index part, significantly improving read and write performance compared to the v1.0.3 version. The 50w data write speed has accelerated from 1.35 seconds to 0.56 seconds, and the read speed has accelerated from 1.06 seconds to 0.355 seconds.
-
-V1.0.5: Short-term support version v1.0.5 supports data structures of type String and List. Some codes are optimized.
-
-V1.0.6: Short-term support version v1.0.6 supports data structures of Hash type. Some codes are optimized.
-
-V1.0.7: Short-term support version v1.0.7 supports data structures of BitMap type. Some codes are optimized.
-
-V1.0.8: Short-term support version v1.0.8 Support for a new in-memory index, SkipList. Some codes are optimized.
-
-V1.0.9: Short-term support version v1.0.9 supports data structures of Sort Set type. Some codes are optimized.
-
-V1.0.10: Short-term support version v1.0.10 supports data structures of Set type. Some codes are optimized.
+> See in detail: [Version-update-document](https://github.com/ByteStorage/FlyDB/blob/master/docs/version_update.md)
 
 ## 👀 Contributor
 
