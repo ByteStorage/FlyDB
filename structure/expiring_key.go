@@ -14,7 +14,7 @@ type ExpireStructure struct {
 }
 
 // NewExpireStructure returns a new ExpireStructure
-// It will return a nil ListStructure if the database cannot be opened
+// It will return a nil ExpireStructure if the database cannot be opened
 // or the database cannot be created
 // The database will be created if it does not exist
 func NewExpireStructure(options config.Options) (*ExpireStructure, error) {

@@ -1057,3 +1057,25 @@ func TestFSets_remove(t *testing.T) {
 		})
 	}
 }
+
+func TestSetStructure_Keys(t *testing.T) {
+	set, _ := initTestSetDb()
+	defer set.db.Clean()
+
+	err = set.SAdd("testKey1", "non1")
+	assert.Nil(t, err)
+
+	err = set.SAdd("testKey2", "non1")
+	assert.Nil(t, err)
+
+	err = set.SAdd("testKey3", "non1")
+	assert.Nil(t, err)
+
+	err = set.SAdd("testKey4", "non1")
+	assert.Nil(t, err)
+
+	keys, err := set.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, 4, len(keys))
+
+}

@@ -328,3 +328,21 @@ func TestListStructure_Integration(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, len(rangeValues), 1)
 }
+
+func TestListStructure_Keys(t *testing.T) {
+	list, _ := initList()
+	defer list.db.Clean()
+
+	listErr = list.LPush("1", randkv.RandomValue(100))
+	assert.Nil(t, listErr)
+
+	listErr = list.LPush("2", randkv.RandomValue(100))
+	assert.Nil(t, listErr)
+
+	listErr = list.LPush("qwe", randkv.RandomValue(100))
+	assert.Nil(t, listErr)
+
+	keys, err := list.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 3)
+}
