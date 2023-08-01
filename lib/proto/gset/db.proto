@@ -98,4 +98,6 @@ message SInterStoreRequest {
   repeated string keys = 2;
 }
 
-message EmptyResponse {}
+message EmptyResponse {
+  bool OK = 1;
+}
