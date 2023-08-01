@@ -420,3 +420,27 @@ func TestStringStructure_MSetNX(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, value3, "value3")
 }
+
+func TestStringStructure_Keys(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err = str.Set("1", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("2", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("3", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("hhh", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("你好", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	keys, err := str.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 5)
+}

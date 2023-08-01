@@ -434,6 +434,16 @@ func (l *ListStructure) LIndex(key string, index int) (interface{}, error) {
 	return nowNode.Value, nil
 }
 
+// Keys returns all the keys of the list structure.
+func (l *ListStructure) Keys() ([]string, error) {
+	var keys []string
+	byte_keys := l.db.GetListKeys()
+	for _, key := range byte_keys {
+		keys = append(keys, string(key))
+	}
+	return keys, nil
+}
+
 // RPOPLPUSH removes the last element from one list and pushes it to another list.
 // If the source list is empty, an error is returned.
 // If the destination list is empty, it is created.
