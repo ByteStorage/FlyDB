@@ -2,13 +2,15 @@ package meta
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/ByteStorage/FlyDB/cluster/region"
 	"github.com/ByteStorage/FlyDB/cluster/store"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/dirtree"
 	"github.com/hashicorp/raft"
-	"sync"
-	"time"
+	"golang.org/x/crypto/ssh"
 )
 
 // MetadataManager manages the metadata of the cluster.
@@ -100,6 +102,7 @@ func (m *meta) ApplyConfig(config *config.Config) error {
 func (m *meta) start() error {
 	for _, metaNode := range m.clusterConfig.MetaNodes {
 		// ssh to the meta node
+
 		// start the meta node
 		fmt.Println(metaNode)
 		panic("implement me")
@@ -121,4 +124,35 @@ func NewMeta(conf config.Config) MetadataManager {
 		stores:        make(map[string]*store.Store),
 		regions:       make(map[uint64]*region.Region),
 	}
+}
+
+// runCommandBySsh
+func runCommandBySsh(cmd string, sshAddr string, sshUser string, sshPassword string, sshType string) (string, error) {
+	config := &ssh.ClientConfig{
+		Timeout:         time.Second,
+		User:            sshUser,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	if sshType == "password" {
+		config.Auth = []ssh.AuthMethod{ssh.Password(sshPassword)}
+	}
+
+	sshClient, err := ssh.Dial("tcp", sshAddr, config)
+	if err != nil {
+		return "", err
+	}
+	defer sshClient.Close()
+
+	//create ssh-session
+	session, err := sshClient.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+	//run command
+	combo, err := session.CombinedOutput(cmd)
+	if err != nil {
+		return "", err
+	}
+	return string(combo), nil
 }
