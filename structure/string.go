@@ -305,6 +305,16 @@ func (s *StringStructure) DecrBy(key string, amount int, ttl time.Duration) erro
 	return s.Set(key, newValue, ttl)
 }
 
+// Keys returns all keys matching pattern
+func (s *StringStructure) Keys() ([]string, error) {
+	var keys []string
+	byte_keys := s.db.GetListKeys()
+	for _, key := range byte_keys {
+		keys = append(keys, string(key))
+	}
+	return keys, nil
+}
+
 // Exists checks if a key exists
 func (s *StringStructure) Exists(key string) (bool, error) {
 	// Get the value

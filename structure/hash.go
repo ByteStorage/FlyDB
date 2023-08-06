@@ -909,6 +909,25 @@ func (hs *HashStructure) HTypes(k string, f interface{}) (string, error) {
 	}
 }
 
+// Keys returns all field names in the hash stored at key.
+func (hs *HashStructure) Keys() ([]string, error) {
+	var keys []string
+	byte_keys := hs.db.GetListKeys()
+	for _, key := range byte_keys {
+		if !isFirstFiveBytesField(key) {
+			keys = append(keys, string(key))
+		}
+	}
+	return keys, nil
+}
+
+func isFirstFiveBytesField(data []byte) bool {
+	if len(data) < 5 {
+		return false
+	}
+	return string(data[:5]) == "field"
+}
+
 // findHashMeta finds the hash metadata by the given key.
 func (hs *HashStructure) findHashMeta(k string, dataType DataStructure) (*HashMetadata, error) {
 	// Convert the parameters to bytes

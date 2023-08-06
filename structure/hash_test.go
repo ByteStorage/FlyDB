@@ -431,3 +431,24 @@ func TestHashStructure_HTypes(t *testing.T) {
 	assert.Equal(t, "", type4)
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 }
+
+func TestHashStructure_Keys(t *testing.T) {
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
+
+	ok1, err := hash.HSet("asd", []byte("field1"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet("asd", []byte("field2"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	ok3, err := hash.HSet("qwe", []byte("field3"), randkv.RandomValue(10))
+	assert.Nil(t, err)
+	assert.True(t, ok3)
+
+	keys, err := hash.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 2)
+}

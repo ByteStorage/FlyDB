@@ -1037,3 +1037,24 @@ func TestNewZSetStructure(t *testing.T) {
 		})
 	}
 }
+
+func TestZSetStructure_Keys(t *testing.T) {
+	zset, _ := initZSetDB()
+	defer zset.db.Clean()
+
+	err = zset.ZAdd("key1", 1, "mem1", "123123123")
+	assert.Nil(t, err)
+
+	err = zset.ZAdd("key2", 1, "mem1", "123123123")
+	assert.Nil(t, err)
+
+	err = zset.ZAdd("key3", 1, "mem1", "123123123")
+	assert.Nil(t, err)
+
+	err = zset.ZAdd("key4", 1, "mem1", "123123123")
+	assert.Nil(t, err)
+
+	keys, err := zset.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, 4, len(keys))
+}
