@@ -3,6 +3,7 @@ package structure
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
@@ -374,6 +375,40 @@ func (s *StringStructure) TTL(key string) (int64, error) {
 	ttl := expire - now
 
 	return ttl, nil
+}
+
+// Size returns the size of a value
+func (s *StringStructure) Size(key string) (string, error) {
+	value, err := s.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	toString, err := interfaceToString(value)
+	if err != nil {
+		return "", err
+	}
+
+	sizeInBytes := len(toString)
+
+	// 将字节数转换成对应的单位（KB、MB等）
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
 }
 
 func (s *StringStructure) MGet(keys ...string) ([]interface{}, error) {

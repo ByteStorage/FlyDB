@@ -461,3 +461,22 @@ func TestStringStructure_TTL(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, ttl, int64(-1))
 }
+
+func TestStringStructure_Size(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("2", []byte("2222222爱上打发生的爱上打的爱上生的阿斯顿发达22222222"), 0)
+	assert.Nil(t, err)
+
+	size1, err := str.Size("1")
+	assert.Nil(t, err)
+	assert.Equal(t, size1, "1B")
+
+	size2, err := str.Size("2")
+	assert.Nil(t, err)
+	assert.True(t, size2 > "1B")
+}

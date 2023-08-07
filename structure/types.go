@@ -47,6 +47,25 @@ func interfaceToBytes(value interface{}) ([]byte, error, string) {
 	}
 }
 
+func interfaceToString(value interface{}) (string, error) {
+	switch value := value.(type) {
+	case string:
+		return value, nil
+	case int:
+		return strconv.Itoa(value), nil
+	case int64:
+		return strconv.FormatInt(value, 10), nil
+	case float64:
+		return strconv.FormatFloat(value, 'f', -1, 64), nil
+	case bool:
+		return strconv.FormatBool(value), nil
+	case []byte:
+		return string(value), nil
+	default:
+		return "", errors.New("unsupported type")
+	}
+}
+
 //func byteToInterface(value []byte, dataType string) (interface{}, error) {
 //	switch dataType {
 //	case "string":
