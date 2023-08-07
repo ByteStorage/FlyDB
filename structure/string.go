@@ -3,6 +3,7 @@ package structure
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
@@ -78,7 +79,7 @@ func (s *StringStructure) Get(k string) (interface{}, error) {
 		return nil, err
 	}
 
-	interValue, err := decodeStringValue(value)
+	interValue, _, err := decodeStringValue(value)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +119,7 @@ func (s *StringStructure) Type(k string) (string, error) {
 	}
 
 	// Decode the value
-	_, err = decodeStringValue(value)
+	_, _, err = decodeStringValue(value)
 	if err != nil {
 		return "", err
 	}
@@ -141,7 +142,7 @@ func (s *StringStructure) StrLen(k string) (int, error) {
 	}
 
 	// Decode the value
-	value, err = decodeStringValue(value)
+	value, _, err = decodeStringValue(value)
 	if err != nil {
 		return 0, err
 	}
@@ -353,6 +354,63 @@ func (s *StringStructure) Persist(key string) error {
 	return s.Set(key, value, 0)
 }
 
+// TTL returns the time to live of a key
+func (s *StringStructure) TTL(key string) (int64, error) {
+	k := stringToBytesWithKey(key)
+
+	// Get the value
+	value, err := s.db.Get(k)
+	if err != nil {
+		return -1, err
+	}
+
+	_, expire, err := decodeStringValue(value)
+	if err != nil {
+		return -1, err
+	}
+
+	// Calculate the remaining time to live
+	now := time.Now().UnixNano() / int64(time.Second)
+	expire = expire / int64(time.Second)
+	ttl := expire - now
+
+	return ttl, nil
+}
+
+// Size returns the size of a value
+func (s *StringStructure) Size(key string) (string, error) {
+	value, err := s.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	toString, err := interfaceToString(value)
+	if err != nil {
+		return "", err
+	}
+
+	sizeInBytes := len(toString)
+
+	// 将字节数转换成对应的单位（KB、MB等）
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
+}
+
 func (s *StringStructure) MGet(keys ...string) ([]interface{}, error) {
 	// Create a slice to store the values
 	values := make([]interface{}, len(keys))
@@ -505,15 +563,15 @@ var (
 // type: 1 byte
 // expire: 8 bytes
 // value: n bytes
-func decodeStringValue(value []byte) ([]byte, error) {
+func decodeStringValue(value []byte) ([]byte, int64, error) {
 	// Check the length of the value
 	if len(value) < 1 {
-		return nil, ErrInvalidValue
+		return nil, -1, ErrInvalidValue
 	}
 
 	// Check the type of the value
 	if value[0] != String {
-		return nil, ErrInvalidType
+		return nil, -1, ErrInvalidType
 	}
 
 	// Use the variable bufIndex to keep track of the current index position in value,
@@ -526,7 +584,7 @@ func decodeStringValue(value []byte) ([]byte, error) {
 
 	// Check the number of bytes read
 	if n <= 0 {
-		return nil, ErrInvalidValue
+		return nil, -1, ErrInvalidValue
 	}
 
 	// Update the current index position bufIndex by adding the number of bytes read n.
@@ -534,11 +592,11 @@ func decodeStringValue(value []byte) ([]byte, error) {
 
 	// Check the expiration time expire
 	if expire != 0 && expire < time.Now().UnixNano() {
-		return nil, ErrKeyExpired
+		return nil, -1, ErrKeyExpired
 	}
 
 	// Return the original value value
-	return value[bufIndex:], nil
+	return value[bufIndex:], expire, nil
 }
 
 func (s *StringStructure) Stop() error {
