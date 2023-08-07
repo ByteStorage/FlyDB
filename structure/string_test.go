@@ -444,3 +444,20 @@ func TestStringStructure_Keys(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, len(keys), 5)
 }
+
+func TestStringStructure_TTL(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err = str.Set("1", []byte("1"), 2*time.Second)
+	assert.Nil(t, err)
+
+	ttl, err := str.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(2))
+
+	time.Sleep(3 * time.Second)
+	ttl, err = str.TTL("1")
+	assert.NotNil(t, err)
+	assert.Equal(t, ttl, int64(-1))
+}
