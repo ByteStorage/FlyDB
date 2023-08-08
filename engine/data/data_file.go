@@ -110,11 +110,10 @@ func (df *DataFile) ReadLogRecord(offset int64) (*LogRecord, int64, error) {
 }
 
 func (df *DataFile) Write(buf []byte) error {
-	size, err := df.IoManager.Write(buf)
+	_, err := df.IoManager.Write(buf)
 	if err != nil {
 		return err
 	}
-	df.WriteOff += int64(size)
 	return nil
 }
 

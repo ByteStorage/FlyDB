@@ -183,7 +183,7 @@ FlyDB is released under the Apache license. For details, see LICENSE file.
 
 ## Thanks To JetBrains
 
-> Thanks to `JetBrains` for the free open source license.  
+> Thanks to `JetBrains` for the free open source license. 
 
 <img src="./assets/thanks-jetbrains.png" alt="FlyDB-logo" style="display: block; margin: 0 auto; width: 30%;" />
 

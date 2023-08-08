@@ -192,7 +192,9 @@ func (db *DB) appendLogRecord(logRecord *data2.LogRecord) (*data2.LogRecordPst, 
 
 	// Write data coding
 	encRecord, size := data2.EncodeLogRecord(logRecord)
-	if db.activeFile.WriteOff+size > db.options.DataFileSize {
+	var writeOff int64
+	var ok bool
+	for writeOff, ok = SingleOffset().CanWrite(db.activeFile.FileID, db.options.DataFileSize, size); !ok; writeOff, ok = SingleOffset().CanWrite(db.activeFile.FileID, db.options.DataFileSize, size) {
 		// Persisting data files to ensure that existing data is persisted to disk
 		if err := db.activeFile.Sync(); err != nil {
 			return nil, err
@@ -207,7 +209,6 @@ func (db *DB) appendLogRecord(logRecord *data2.LogRecord) (*data2.LogRecordPst, 
 		}
 	}
 
-	writeOff := db.activeFile.WriteOff
 	if err := db.activeFile.Write(encRecord); err != nil {
 		return nil, err
 	}
@@ -243,6 +244,9 @@ func (db *DB) setActiveDataFile() error {
 		return err
 	}
 	db.activeFile = dataFile
+
+	size, _ := dataFile.IoManager.Size()
+	SingleOffset().AddNew(initialFileID, size)
 	return nil
 }
 
@@ -466,7 +470,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 	var currentSeqNo = nonTransactionSeqNo
 
 	// Iterate through all file ids, processing records in the file
-	for i, fid := range db.fileIds {
+	for _, fid := range db.fileIds {
 		var fileID = uint32(fid)
 		// If the id is smaller than that of the file that did not participate in the merge recently,
 		// the hint file has been loaded
@@ -531,10 +535,7 @@ func (db *DB) loadIndexFromDataFiles() error {
 			offset += size
 		}
 
-		// If it is a current active file, update writeOff for this file
-		if i == len(db.fileIds)-1 {
-			db.activeFile.WriteOff = offset
-		}
+		SingleOffset().AddNew(fileID, offset)
 	}
 
 	// Update the transaction sequence number to the database field
