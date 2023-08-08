@@ -34,13 +34,17 @@ func stringToBytesWithKey(key string) []byte {
 	return []byte(key)
 }
 
+func integerToDuration(ttl int64) time.Duration {
+	return time.Duration(ttl) * time.Millisecond
+}
+
 // Set sets the value of a key
 // If the key does not exist, it will be created
 // If the key exists, it will be overwritten
 // If the key is expired, it will be deleted
 // If the key is not expired, it will be updated
 // func (s *StringStructure) Set(key, value []byte, ttl time.Duration) error {
-func (s *StringStructure) Set(k string, v interface{}, ttl time.Duration) error {
+func (s *StringStructure) Set(k string, v interface{}, ttl int64) error {
 	key := stringToBytesWithKey(k)
 	value, err, valueType := interfaceToBytes(v)
 
@@ -56,7 +60,7 @@ func (s *StringStructure) Set(k string, v interface{}, ttl time.Duration) error 
 	}
 
 	// Encode the value
-	encValue, err := encodeStringValue(value, ttl)
+	encValue, err := encodeStringValue(value, integerToDuration(ttl))
 	if err != nil {
 		return err
 	}
@@ -152,7 +156,7 @@ func (s *StringStructure) StrLen(k string) (int, error) {
 }
 
 // GetSet sets the value of a key and returns its old value
-func (s *StringStructure) GetSet(key string, value interface{}, ttl time.Duration) (interface{}, error) {
+func (s *StringStructure) GetSet(key string, value interface{}, ttl int64) (interface{}, error) {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -170,7 +174,7 @@ func (s *StringStructure) GetSet(key string, value interface{}, ttl time.Duratio
 }
 
 // Append appends a value to the value of a key
-func (s *StringStructure) Append(key string, v interface{}, ttl time.Duration) error {
+func (s *StringStructure) Append(key string, v interface{}, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -193,7 +197,7 @@ func (s *StringStructure) Append(key string, v interface{}, ttl time.Duration) e
 }
 
 // Incr increments the integer value of a key by 1
-func (s *StringStructure) Incr(key string, ttl time.Duration) error {
+func (s *StringStructure) Incr(key string, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -216,7 +220,7 @@ func (s *StringStructure) Incr(key string, ttl time.Duration) error {
 }
 
 // IncrBy increments the integer value of a key by the given amount
-func (s *StringStructure) IncrBy(key string, amount int, ttl time.Duration) error {
+func (s *StringStructure) IncrBy(key string, amount int, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -237,7 +241,7 @@ func (s *StringStructure) IncrBy(key string, amount int, ttl time.Duration) erro
 }
 
 // IncrByFloat increments the float value of a key by the given amount
-func (s *StringStructure) IncrByFloat(key string, amount float64, ttl time.Duration) error {
+func (s *StringStructure) IncrByFloat(key string, amount float64, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -261,7 +265,7 @@ func (s *StringStructure) IncrByFloat(key string, amount float64, ttl time.Durat
 }
 
 // Decr decrements the integer value of a key by 1
-func (s *StringStructure) Decr(key string, ttl time.Duration) error {
+func (s *StringStructure) Decr(key string, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -284,7 +288,7 @@ func (s *StringStructure) Decr(key string, ttl time.Duration) error {
 }
 
 // DecrBy decrements the integer value of a key by the given amount
-func (s *StringStructure) DecrBy(key string, amount int, ttl time.Duration) error {
+func (s *StringStructure) DecrBy(key string, amount int, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -331,7 +335,7 @@ func (s *StringStructure) Exists(key string) (bool, error) {
 }
 
 // Expire sets the expiration time of a key
-func (s *StringStructure) Expire(key string, ttl time.Duration) error {
+func (s *StringStructure) Expire(key string, ttl int64) error {
 	// Get the value
 	oldValue, err := s.Get(key)
 	if err != nil {
