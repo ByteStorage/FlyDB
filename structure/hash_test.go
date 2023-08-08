@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"time"
 )
 
 func initHashDB() (*HashStructure, *config.Options) {
@@ -21,12 +22,12 @@ func TestHashStructure_HGet(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
 	v1 := randkv.RandomValue(10)
-	ok2, err := hash.HSet("1", []byte("field1"), v1)
+	ok2, err := hash.HSet("1", []byte("field1"), v1, 0)
 	assert.Nil(t, err)
 	assert.False(t, ok2)
 	value1, err := hash.HGet("1", []byte("field1"))
@@ -34,7 +35,7 @@ func TestHashStructure_HGet(t *testing.T) {
 	assert.Equal(t, value1, v1)
 
 	v2 := randkv.RandomValue(10)
-	ok3, err := hash.HSet("1", []byte("field2"), v2)
+	ok3, err := hash.HSet("1", []byte("field2"), v2, 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 	value2, err := hash.HGet("1", []byte("field2"))
@@ -44,23 +45,35 @@ func TestHashStructure_HGet(t *testing.T) {
 	_, err = hash.HGet("1", []byte("field3"))
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 
+	ok4, err := hash.HSet("2", "field1", "123123", 2)
+	assert.Nil(t, err)
+	assert.True(t, ok4)
+
+	v3, err := hash.HGet("2", "field1")
+	assert.Nil(t, err)
+	assert.Equal(t, v3, "123123")
+
+	time.Sleep(3 * time.Second)
+	_, err = hash.HGet("2", "field1")
+	assert.Equal(t, err, _const.ErrKeyIsExpired)
+
 }
 
 func TestHashStructure_HMGet(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
 	v1 := randkv.RandomValue(10)
-	ok2, err := hash.HSet("1", []byte("field1"), v1)
+	ok2, err := hash.HSet("1", []byte("field1"), v1, 0)
 	assert.Nil(t, err)
 	assert.False(t, ok2)
 
 	v2 := randkv.RandomValue(10)
-	ok3, err := hash.HSet("1", []byte("field2"), v2)
+	ok3, err := hash.HSet("1", []byte("field2"), v2, 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -81,7 +94,7 @@ func TestHashStructure_HDel(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, ok)
 
-	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
@@ -93,11 +106,11 @@ func TestHashStructure_HDel(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Nil(t, v)
 
-	ok3, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok3, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
-	ok4, err := hash.HSet("1", []byte("field2"), randkv.RandomValue(10))
+	ok4, err := hash.HSet("1", []byte("field2"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok4)
 
@@ -107,7 +120,7 @@ func TestHashStructure_HExists(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
@@ -125,15 +138,15 @@ func TestHashStructure_HLen(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), randkv.RandomValue(10))
+	ok2, err := hash.HSet("1", []byte("field2"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), randkv.RandomValue(10))
+	ok3, err := hash.HSet("1", []byte("field3"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -146,15 +159,15 @@ func TestHashStructure_HUpdate(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("1", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), randkv.RandomValue(10))
+	ok2, err := hash.HSet("1", []byte("field2"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), randkv.RandomValue(10))
+	ok3, err := hash.HSet("1", []byte("field3"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -179,15 +192,15 @@ func TestHashStructure_HIncrBy(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"))
+	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), []byte("10"))
+	ok2, err := hash.HSet("1", []byte("field2"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"))
+	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -213,15 +226,15 @@ func TestHashStructure_HIncrByFloat(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"))
+	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), []byte("10"))
+	ok2, err := hash.HSet("1", []byte("field2"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"))
+	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -247,15 +260,15 @@ func TestHashStructure_HDecrBy(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"))
+	ok1, err := hash.HSet("1", []byte("field1"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), []byte("10"))
+	ok2, err := hash.HSet("1", []byte("field2"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"))
+	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -281,15 +294,15 @@ func TestHashStructure_HStrLen(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), []byte("1000"))
+	ok1, err := hash.HSet("1", []byte("field1"), []byte("1000"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), []byte("100"))
+	ok2, err := hash.HSet("1", []byte("field2"), []byte("100"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"))
+	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -315,27 +328,27 @@ func TestHashStructure_HMove(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), []byte("111-1000"))
+	ok1, err := hash.HSet("1", []byte("field1"), []byte("111-1000"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), []byte("111-100"))
+	ok2, err := hash.HSet("1", []byte("field2"), []byte("111-100"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), []byte("111-10"))
+	ok3, err := hash.HSet("1", []byte("field3"), []byte("111-10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
-	ok4, err := hash.HSet("2", []byte("field1"), []byte("222-1000"))
+	ok4, err := hash.HSet("2", []byte("field1"), []byte("222-1000"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok4)
 
-	ok5, err := hash.HSet("2", []byte("field2"), []byte("222-100"))
+	ok5, err := hash.HSet("2", []byte("field2"), []byte("222-100"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok5)
 
-	ok6, err := hash.HSet("2", []byte("field3"), []byte("222-10"))
+	ok6, err := hash.HSet("2", []byte("field3"), []byte("222-10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok6)
 
@@ -373,27 +386,27 @@ func TestHashStructure_HSetNX(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSetNX("1", []byte("field1"), []byte("1000"))
+	ok1, err := hash.HSetNX("1", []byte("field1"), []byte("1000"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSetNX("1", []byte("field2"), []byte("100"))
+	ok2, err := hash.HSetNX("1", []byte("field2"), []byte("100"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSetNX("1", []byte("field3"), []byte("10"))
+	ok3, err := hash.HSetNX("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
-	ok4, err := hash.HSetNX("1", []byte("field1"), []byte("1000"))
+	ok4, err := hash.HSetNX("1", []byte("field1"), []byte("1000"), 0)
 	assert.Nil(t, err)
 	assert.False(t, ok4)
 
-	ok5, err := hash.HSetNX("1", []byte("field2"), []byte("100"))
+	ok5, err := hash.HSetNX("1", []byte("field2"), []byte("100"), 0)
 	assert.Nil(t, err)
 	assert.False(t, ok5)
 
-	ok6, err := hash.HSetNX("1", []byte("field3"), []byte("10"))
+	ok6, err := hash.HSetNX("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.False(t, ok6)
 
@@ -403,15 +416,15 @@ func TestHashStructure_HTypes(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("1", []byte("field1"), []byte("1000"))
+	ok1, err := hash.HSet("1", []byte("field1"), []byte("1000"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("1", []byte("field2"), []byte("100"))
+	ok2, err := hash.HSet("1", []byte("field2"), []byte("100"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"))
+	ok3, err := hash.HSet("1", []byte("field3"), []byte("10"), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
@@ -436,19 +449,60 @@ func TestHashStructure_Keys(t *testing.T) {
 	hash, _ := initHashDB()
 	defer hash.db.Clean()
 
-	ok1, err := hash.HSet("asd", []byte("field1"), randkv.RandomValue(10))
+	ok1, err := hash.HSet("asd", []byte("field1"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok1)
 
-	ok2, err := hash.HSet("asd", []byte("field2"), randkv.RandomValue(10))
+	ok2, err := hash.HSet("asd", []byte("field2"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	ok3, err := hash.HSet("qwe", []byte("field3"), randkv.RandomValue(10))
+	ok3, err := hash.HSet("qwe", []byte("field3"), randkv.RandomValue(10), 0)
 	assert.Nil(t, err)
 	assert.True(t, ok3)
 
 	keys, err := hash.Keys()
 	assert.Nil(t, err)
 	assert.Equal(t, len(keys), 2)
+}
+
+func TestHashStructure_TTL(t *testing.T) {
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
+
+	ok1, err := hash.HSet("1", "field1", "123123", 0)
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ttl, err := hash.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(0))
+
+	ok11, err := hash.HSet("2", "field1", "123123", 2)
+	assert.Nil(t, err)
+	assert.True(t, ok11)
+
+	time.Sleep(time.Second * 2)
+
+	ttl, err = hash.TTL("2")
+	assert.NotNil(t, err)
+	assert.Equal(t, ttl, int64(-1))
+}
+
+func TestHashStructure_Size(t *testing.T) {
+	hash, _ := initHashDB()
+	defer hash.db.Clean()
+
+	ok1, err := hash.HSet("1", "field1", "11111", 0)
+	assert.Nil(t, err)
+	assert.True(t, ok1)
+
+	ok2, err := hash.HSet("1", "field2", "22222", 0)
+	assert.Nil(t, err)
+	assert.True(t, ok2)
+
+	value, err := hash.Size("1", "field1", "field2")
+	assert.Nil(t, err)
+	assert.Equal(t, value, "10B")
+
 }

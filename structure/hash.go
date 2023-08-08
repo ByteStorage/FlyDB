@@ -2,6 +2,7 @@ package structure
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
@@ -24,6 +25,7 @@ const maxHashMetaSize = 1 + binary.MaxVarintLen64*6
 type HashStructure struct {
 	db            *engine.DB
 	hashValueType string
+	expire        int64
 }
 
 // NewHashStructure Returns a new NewHashStructure
@@ -56,7 +58,7 @@ func NewHashStructure(options config.Options) (*HashStructure, error) {
 // - The function creates a new HashField containing the field details and encodes it.
 // - The function uses a write batch to efficiently commit changes to the database.
 // - It returns a boolean indicating whether the field was newly created or updated.
-func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
+func (hs *HashStructure) HSet(k string, f, v interface{}, ttl int64) (bool, error) {
 	// Convert the parameters to bytes
 	key := stringToBytesWithKey(k)
 
@@ -114,6 +116,18 @@ func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
 		_ = batch.Put(key, hashMeta.encodeHashMeta())
 	}
 
+	// Check if the provided TTL is greater than 0
+	if ttl > 0 {
+		// Calculate the expiration time in nanoseconds
+		expirationTime := time.Now().Add(time.Duration(ttl) * time.Second).UnixNano()
+
+		// Update the hash metadata with the expiration time
+		hashMeta.expire = expirationTime
+
+		// Put the updated hash metadata in the database
+		_ = batch.Put(key, hashMeta.encodeHashMeta())
+	}
+
 	// Put the field to the database
 	_ = batch.Put(hfBuf, value)
 
@@ -149,6 +163,12 @@ func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
 // - The retrieved byte data is converted back to the corresponding data type.
 // - Returns the value corresponding to the field and any possible error.
 func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
+	// Determine whether the key has expired
+	ttl, _ := hs.TTL(k)
+	if ttl == -1 {
+		return nil, _const.ErrKeyIsExpired
+	}
+
 	// Convert the parameters to bytes
 	key := stringToBytesWithKey(k)
 
@@ -223,6 +243,7 @@ func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error
 		// Convert the parameters to bytes
 		field, err, _ := interfaceToBytes(fi)
 		if err != nil {
+			fmt.Println("err", err)
 			return nil, err
 		}
 
@@ -928,7 +949,7 @@ func (hs *HashStructure) HMove(source, destination string, f interface{}) (bool,
 //
 //	bool: True if the field was set, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HSetNX(k string, f, v interface{}) (bool, error) {
+func (hs *HashStructure) HSetNX(k string, f, v interface{}, ttl int64) (bool, error) {
 	// Convert the parameters to bytes
 	key := stringToBytesWithKey(k)
 
@@ -968,7 +989,7 @@ func (hs *HashStructure) HSetNX(k string, f, v interface{}) (bool, error) {
 	// Get the field from the database
 	_, err = hs.db.Get(hfBuf)
 	if err != nil && err == _const.ErrKeyNotFound {
-		_, err := hs.HSet(k, field, value)
+		_, err := hs.HSet(k, field, value, ttl)
 		if err != nil {
 			return false, err
 		}
@@ -1054,6 +1075,91 @@ func (hs *HashStructure) Keys() ([]string, error) {
 	return keys, nil
 }
 
+// TTL returns the time-to-live (TTL) of a key in the hash.
+// It takes a string key 'k' and returns the remaining TTL in seconds and any possible error.
+//
+// Parameters:
+//
+//	k: The key for which TTL needs to be determined.
+//
+// Returns:
+//
+//	int64: The remaining TTL in seconds. Returns 0 if the key has expired or doesn't exist.
+//	error: An error if occurred during the operation, or nil on success.
+func (hs *HashStructure) TTL(k string) (int64, error) {
+	// Check the parameters
+	if len(k) == 0 {
+		return -1, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(k, Hash)
+	if err != nil {
+		return -1, err
+	}
+
+	ttl := hashMeta.expire/int64(time.Second) - time.Now().UnixNano()/int64(time.Second)
+
+	if hashMeta.expire == 0 {
+		return 0, nil
+	}
+
+	if ttl <= 0 {
+		return -1, _const.ErrKeyIsExpired
+	}
+	return ttl, nil
+}
+
+// Size returns the size of a field in the hash as a formatted string.
+// It takes a string key 'k' and one or more fields 'f' (optional).
+// It returns a formatted string indicating the size of the field and any possible error.
+//
+// Parameters:
+//
+//	k: The key of the hash table.
+//	f: The field(s) whose size needs to be determined (optional).
+//
+// Returns:
+//
+//	string: A formatted string indicating the size of the field.
+//	error: An error if occurred during the operation, or nil on success.
+func (hs *HashStructure) Size(k string, f ...interface{}) (string, error) {
+	value, err := hs.HMGet(k, f...)
+	if err != nil {
+		return "", err
+	}
+
+	var sizeInBytes int
+
+	// Calculate the size of the value
+	for _, v := range value {
+		toString, err := interfaceToString(v)
+		if err != nil {
+			return "", err
+		}
+		sizeInBytes += len(toString)
+	}
+
+	// Convert bytes to corresponding units (KB, MB...)
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
+}
+
 func isFirstFiveBytesField(data []byte) bool {
 	if len(data) < 5 {
 		return false
@@ -1086,10 +1192,6 @@ func (hs *HashStructure) findHashMeta(k string, dataType DataStructure) (*HashMe
 			return nil, ErrInvalidType
 		}
 
-		// Check the expiration time
-		if hashMeta.expire > 0 && hashMeta.expire < time.Now().UnixNano() {
-			exist = false
-		}
 	}
 
 	// If the hash metadata is not found, create a new one
