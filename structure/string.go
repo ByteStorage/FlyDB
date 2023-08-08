@@ -35,7 +35,7 @@ func stringToBytesWithKey(key string) []byte {
 }
 
 func integerToDuration(ttl int64) time.Duration {
-	return time.Duration(ttl) * time.Millisecond
+	return time.Duration(ttl) * time.Second
 }
 
 // Set sets the value of a key
@@ -395,7 +395,7 @@ func (s *StringStructure) Size(key string) (string, error) {
 
 	sizeInBytes := len(toString)
 
-	// 将字节数转换成对应的单位（KB、MB等）
+	// Convert bytes to corresponding units (KB, MB...)
 	const (
 		KB = 1 << 10
 		MB = 1 << 20
@@ -558,8 +558,6 @@ var (
 	ErrInvalidValue = errors.New("Wrong value: invalid value")
 	// ErrInvalidType is returned if the type is invalid.
 	ErrInvalidType = errors.New("Wrong value: invalid type")
-	// ErrKeyExpired is returned if the key is expired.
-	ErrKeyExpired = errors.New("Wrong value: key expired")
 )
 
 // decodeStringValue decodes the value
@@ -596,7 +594,7 @@ func decodeStringValue(value []byte) ([]byte, int64, error) {
 
 	// Check the expiration time expire
 	if expire != 0 && expire < time.Now().UnixNano() {
-		return nil, -1, ErrKeyExpired
+		return nil, -1, _const.ErrKeyIsExpired
 	}
 
 	// Return the original value value
