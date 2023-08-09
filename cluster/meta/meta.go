@@ -1,13 +1,16 @@
 package meta
 
 import (
+	"fmt"
+	"sync"
+	"time"
+
 	"github.com/ByteStorage/FlyDB/cluster/region"
 	"github.com/ByteStorage/FlyDB/cluster/store"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/dirtree"
 	"github.com/hashicorp/raft"
-	"sync"
-	"time"
+	"golang.org/x/crypto/ssh"
 )
 
 // MetadataManager manages the metadata of the cluster.
@@ -24,6 +27,8 @@ type MetadataManager interface {
 	GetRegionByID(id uint64) (*region.Region, error)
 	// GetStoreByID gets a store by id.
 	GetStoreByID(id uint64) (*store.Store, error)
+	// ApplyConfig applies a new config to the cluster.
+	ApplyConfig(config *config.Config) error
 }
 
 // meta stores the metadata of the cluster.
@@ -39,4 +44,115 @@ type meta struct {
 	mu            sync.RWMutex              // mutex, to protect the metadata.
 	scheduler     *Scheduler                // scheduler, to schedule the cluster.
 	raft          *raft.Raft                // raft, to store the raft group.
+}
+
+// GetStore gets a store by address.
+func (m *meta) GetStore(addr string) (*store.Store, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+// AddStore adds a new store to the cluster.
+func (m *meta) AddStore(addr string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+// RemoveStore removes a store from the cluster.
+func (m *meta) RemoveStore(addr string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+// GetAllStores gets all stores in the cluster.
+func (m *meta) GetAllStores() []*store.Store {
+	//TODO implement me
+	panic("implement me")
+}
+
+// GetRegionByID gets a region by id.
+func (m *meta) GetRegionByID(id uint64) (*region.Region, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+// GetStoreByID gets a store by id.
+func (m *meta) GetStoreByID(id uint64) (*store.Store, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+// ApplyConfig applies a new config to the cluster.
+func (m *meta) ApplyConfig(config *config.Config) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m != nil {
+		err := m.stop()
+		if err != nil {
+			// if err = ErrNotStarted, it means the meta node has not started yet.
+		}
+		err = m.start()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *meta) start() error {
+	for _, metaNode := range m.clusterConfig.MetaNodes {
+		// ssh to the meta node
+
+		// start the meta node
+		fmt.Println(metaNode)
+		panic("implement me")
+	}
+	return nil
+}
+
+func (m *meta) stop() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+// NewMeta creates a new meta.
+func NewMeta(conf config.Config) MetadataManager {
+	return &meta{
+		clusterConfig: &conf,
+		heartbeat:     make(map[string]time.Time),
+		dirTree:       dirtree.NewDirTree(),
+		stores:        make(map[string]*store.Store),
+		regions:       make(map[uint64]*region.Region),
+	}
+}
+
+// runCommandBySsh
+func runCommandBySsh(cmd string, sshAddr string, sshUser string, sshPassword string, sshType string) (string, error) {
+	config := &ssh.ClientConfig{
+		Timeout:         time.Second,
+		User:            sshUser,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	if sshType == "password" {
+		config.Auth = []ssh.AuthMethod{ssh.Password(sshPassword)}
+	}
+
+	sshClient, err := ssh.Dial("tcp", sshAddr, config)
+	if err != nil {
+		return "", err
+	}
+	defer sshClient.Close()
+
+	//create ssh-session
+	session, err := sshClient.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+	//run command
+	combo, err := session.CombinedOutput(cmd)
+	if err != nil {
+		return "", err
+	}
+	return string(combo), nil
 }

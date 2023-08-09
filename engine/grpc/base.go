@@ -6,6 +6,7 @@ import (
 	"github.com/ByteStorage/FlyDB/engine/grpc/service"
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
+	"github.com/ByteStorage/FlyDB/lib/proto/gset"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -60,6 +61,13 @@ func NewService(options config.Options, addr string) (Base, error) {
 	}
 	baseService.RegisterService(listService)
 	glist.RegisterGListServiceServer(baseService.server, listService)
+
+	setService, err := service.NewSetService(options)
+	if err != nil {
+		return nil, err
+	}
+	baseService.RegisterService(setService)
+	gset.RegisterGSetServiceServer(baseService.server, setService)
 
 	return baseService, nil
 }

@@ -15,7 +15,7 @@ import (
 // region and replicas are a raft group, and the one region is the leader of the raft group.
 // region stores the data of a region.
 type region struct {
-	id         uint64                // region id
+	id         int64                 // region id
 	startKey   []byte                // start key
 	endKey     []byte                // end key
 	db         *engine.DB            // db, to store the data.
@@ -52,24 +52,26 @@ type Region interface {
 	RemovePeer(peer string) error
 	// GetSize gets the total size of the region.
 	GetSize() int64
+	// GetID gets the id of the region.
+	GetID() int64
 }
 
-func NewRegion(start []byte, end []byte, options config.Options, conf config.Config) (Region, error) {
-	db, err := engine.NewDB(options)
+func NewRegion(conf config.RegionConfig) (Region, error) {
+	db, err := engine.NewDB(conf.Options)
 	if err != nil {
 		return nil, errors.New("new db failed")
 	}
-	raftNode, err := newRaftNode(conf)
+	raftNode, err := newRaftNode(conf.Config)
 	if err != nil {
 		return nil, errors.New("new raft node failed")
 	}
 	return &region{
-		startKey:   start,
-		endKey:     end,
+		startKey:   conf.Start,
+		endKey:     conf.End,
 		raftGroups: make(map[uint64]*raft.Raft),
 		db:         db,
 		mu:         sync.RWMutex{},
-		conf:       conf,
+		conf:       conf.Config,
 		raft:       raftNode,
 	}, nil
 }
@@ -204,4 +206,10 @@ func (r *region) GetSize() int64 {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.size
+}
+
+func (r *region) GetID() int64 {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.id
 }

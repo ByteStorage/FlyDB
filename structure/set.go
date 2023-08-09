@@ -223,6 +223,16 @@ func (s *SetStructure) SDiff(keys ...string) ([]string, error) {
 	return diffMembers, nil
 }
 
+// Keys returns all the keys of the set structure
+func (s *SetStructure) Keys() ([]string, error) {
+	var keys []string
+	byte_keys := s.db.GetListKeys()
+	for _, key := range byte_keys {
+		keys = append(keys, string(key))
+	}
+	return keys, nil
+}
+
 // SUnionStore calculates and stores the union of multiple sets
 // in a destination set.
 //
@@ -394,4 +404,9 @@ func (s *FSets) exists(member ...string) bool {
 		}
 	}
 	return true
+}
+
+func (s *SetStructure) Stop() error {
+	err := s.db.Close()
+	return err
 }

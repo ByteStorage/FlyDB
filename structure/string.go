@@ -3,6 +3,7 @@ package structure
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
@@ -33,13 +34,17 @@ func stringToBytesWithKey(key string) []byte {
 	return []byte(key)
 }
 
+func integerToDuration(ttl int64) time.Duration {
+	return time.Duration(ttl) * time.Second
+}
+
 // Set sets the value of a key
 // If the key does not exist, it will be created
 // If the key exists, it will be overwritten
 // If the key is expired, it will be deleted
 // If the key is not expired, it will be updated
 // func (s *StringStructure) Set(key, value []byte, ttl time.Duration) error {
-func (s *StringStructure) Set(k string, v interface{}, ttl time.Duration) error {
+func (s *StringStructure) Set(k string, v interface{}, ttl int64) error {
 	key := stringToBytesWithKey(k)
 	value, err, valueType := interfaceToBytes(v)
 
@@ -55,7 +60,7 @@ func (s *StringStructure) Set(k string, v interface{}, ttl time.Duration) error 
 	}
 
 	// Encode the value
-	encValue, err := encodeStringValue(value, ttl)
+	encValue, err := encodeStringValue(value, integerToDuration(ttl))
 	if err != nil {
 		return err
 	}
@@ -78,7 +83,7 @@ func (s *StringStructure) Get(k string) (interface{}, error) {
 		return nil, err
 	}
 
-	interValue, err := decodeStringValue(value)
+	interValue, _, err := decodeStringValue(value)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +123,7 @@ func (s *StringStructure) Type(k string) (string, error) {
 	}
 
 	// Decode the value
-	_, err = decodeStringValue(value)
+	_, _, err = decodeStringValue(value)
 	if err != nil {
 		return "", err
 	}
@@ -141,7 +146,7 @@ func (s *StringStructure) StrLen(k string) (int, error) {
 	}
 
 	// Decode the value
-	value, err = decodeStringValue(value)
+	value, _, err = decodeStringValue(value)
 	if err != nil {
 		return 0, err
 	}
@@ -151,7 +156,7 @@ func (s *StringStructure) StrLen(k string) (int, error) {
 }
 
 // GetSet sets the value of a key and returns its old value
-func (s *StringStructure) GetSet(key string, value interface{}, ttl time.Duration) (interface{}, error) {
+func (s *StringStructure) GetSet(key string, value interface{}, ttl int64) (interface{}, error) {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -169,7 +174,7 @@ func (s *StringStructure) GetSet(key string, value interface{}, ttl time.Duratio
 }
 
 // Append appends a value to the value of a key
-func (s *StringStructure) Append(key string, v interface{}, ttl time.Duration) error {
+func (s *StringStructure) Append(key string, v interface{}, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -192,7 +197,7 @@ func (s *StringStructure) Append(key string, v interface{}, ttl time.Duration) e
 }
 
 // Incr increments the integer value of a key by 1
-func (s *StringStructure) Incr(key string, ttl time.Duration) error {
+func (s *StringStructure) Incr(key string, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -215,7 +220,7 @@ func (s *StringStructure) Incr(key string, ttl time.Duration) error {
 }
 
 // IncrBy increments the integer value of a key by the given amount
-func (s *StringStructure) IncrBy(key string, amount int, ttl time.Duration) error {
+func (s *StringStructure) IncrBy(key string, amount int, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -236,7 +241,7 @@ func (s *StringStructure) IncrBy(key string, amount int, ttl time.Duration) erro
 }
 
 // IncrByFloat increments the float value of a key by the given amount
-func (s *StringStructure) IncrByFloat(key string, amount float64, ttl time.Duration) error {
+func (s *StringStructure) IncrByFloat(key string, amount float64, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -260,7 +265,7 @@ func (s *StringStructure) IncrByFloat(key string, amount float64, ttl time.Durat
 }
 
 // Decr decrements the integer value of a key by 1
-func (s *StringStructure) Decr(key string, ttl time.Duration) error {
+func (s *StringStructure) Decr(key string, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -283,7 +288,7 @@ func (s *StringStructure) Decr(key string, ttl time.Duration) error {
 }
 
 // DecrBy decrements the integer value of a key by the given amount
-func (s *StringStructure) DecrBy(key string, amount int, ttl time.Duration) error {
+func (s *StringStructure) DecrBy(key string, amount int, ttl int64) error {
 	// Get the old value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -305,6 +310,16 @@ func (s *StringStructure) DecrBy(key string, amount int, ttl time.Duration) erro
 	return s.Set(key, newValue, ttl)
 }
 
+// Keys returns all keys matching pattern
+func (s *StringStructure) Keys() ([]string, error) {
+	var keys []string
+	byte_keys := s.db.GetListKeys()
+	for _, key := range byte_keys {
+		keys = append(keys, string(key))
+	}
+	return keys, nil
+}
+
 // Exists checks if a key exists
 func (s *StringStructure) Exists(key string) (bool, error) {
 	// Get the value
@@ -320,7 +335,7 @@ func (s *StringStructure) Exists(key string) (bool, error) {
 }
 
 // Expire sets the expiration time of a key
-func (s *StringStructure) Expire(key string, ttl time.Duration) error {
+func (s *StringStructure) Expire(key string, ttl int64) error {
 	// Get the value
 	oldValue, err := s.Get(key)
 	if err != nil {
@@ -341,6 +356,63 @@ func (s *StringStructure) Persist(key string) error {
 
 	// Set the value
 	return s.Set(key, value, 0)
+}
+
+// TTL returns the time to live of a key
+func (s *StringStructure) TTL(key string) (int64, error) {
+	k := stringToBytesWithKey(key)
+
+	// Get the value
+	value, err := s.db.Get(k)
+	if err != nil {
+		return -1, err
+	}
+
+	_, expire, err := decodeStringValue(value)
+	if err != nil {
+		return -1, err
+	}
+
+	// Calculate the remaining time to live
+	now := time.Now().UnixNano() / int64(time.Second)
+	expire = expire / int64(time.Second)
+	ttl := expire - now
+
+	return ttl, nil
+}
+
+// Size returns the size of a value
+func (s *StringStructure) Size(key string) (string, error) {
+	value, err := s.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	toString, err := interfaceToString(value)
+	if err != nil {
+		return "", err
+	}
+
+	sizeInBytes := len(toString)
+
+	// Convert bytes to corresponding units (KB, MB...)
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
 }
 
 func (s *StringStructure) MGet(keys ...string) ([]interface{}, error) {
@@ -486,8 +558,6 @@ var (
 	ErrInvalidValue = errors.New("Wrong value: invalid value")
 	// ErrInvalidType is returned if the type is invalid.
 	ErrInvalidType = errors.New("Wrong value: invalid type")
-	// ErrKeyExpired is returned if the key is expired.
-	ErrKeyExpired = errors.New("Wrong value: key expired")
 )
 
 // decodeStringValue decodes the value
@@ -495,15 +565,15 @@ var (
 // type: 1 byte
 // expire: 8 bytes
 // value: n bytes
-func decodeStringValue(value []byte) ([]byte, error) {
+func decodeStringValue(value []byte) ([]byte, int64, error) {
 	// Check the length of the value
 	if len(value) < 1 {
-		return nil, ErrInvalidValue
+		return nil, -1, ErrInvalidValue
 	}
 
 	// Check the type of the value
 	if value[0] != String {
-		return nil, ErrInvalidType
+		return nil, -1, ErrInvalidType
 	}
 
 	// Use the variable bufIndex to keep track of the current index position in value,
@@ -516,7 +586,7 @@ func decodeStringValue(value []byte) ([]byte, error) {
 
 	// Check the number of bytes read
 	if n <= 0 {
-		return nil, ErrInvalidValue
+		return nil, -1, ErrInvalidValue
 	}
 
 	// Update the current index position bufIndex by adding the number of bytes read n.
@@ -524,11 +594,11 @@ func decodeStringValue(value []byte) ([]byte, error) {
 
 	// Check the expiration time expire
 	if expire != 0 && expire < time.Now().UnixNano() {
-		return nil, ErrKeyExpired
+		return nil, -1, _const.ErrKeyIsExpired
 	}
 
 	// Return the original value value
-	return value[bufIndex:], nil
+	return value[bufIndex:], expire, nil
 }
 
 func (s *StringStructure) Stop() error {

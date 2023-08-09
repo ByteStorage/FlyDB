@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ghash;
 
-option go_package = 	".;ghash";
+option go_package = 	"lib/proto/ghash";
 
 service GHashService {
   rpc HSet(GHashSetRequest) returns (GHashSetResponse) {}
@@ -18,6 +18,9 @@ service GHashService {
   rpc HMove(GHashMoveRequest) returns (GHashMoveResponse) {}
   rpc HSetNX(GHashSetNXRequest) returns (GHashSetNXResponse) {}
   rpc HType(GHashTypeRequest) returns (GHashTypeResponse) {}
+  rpc HKeys(GHashKeysRequest) returns (GHashKeysResponse) {}
+  rpc TTL(GHashTTLRequest) returns (GHashTTLResponse) {}
+  rpc Size(GHashSizeRequest) returns (GHashSizeResponse) {}
 }
 
 message GHashSetRequest {
@@ -32,6 +35,7 @@ message GHashSetRequest {
     bool BoolValue = 8;
     bytes BytesValue = 9;
   };
+  int64 ttl = 10;
 }
 
 message GHashSetResponse {
@@ -160,6 +164,7 @@ message GHashSetNXRequest {
     bool BoolValue = 8;
     bytes BytesValue = 9;
   };
+  int64 ttl = 10;
 }
 
 message GHashSetNXResponse {
@@ -173,4 +178,26 @@ message GHashTypeRequest {
 
 message GHashTypeResponse {
   string type = 1;
+}
+
+message GHashKeysRequest {}
+
+message GHashKeysResponse {
+  repeated string keys = 1;
+}
+
+message GHashTTLRequest {
+  string key = 1;
+}
+
+message GHashTTLResponse {
+  int64 ttl = 1;
+}
+
+message GHashSizeRequest {
+  string key = 1;
+}
+
+message GHashSizeResponse {
+  repeated int64 size = 1;
 }
