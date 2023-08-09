@@ -15,7 +15,7 @@ English | [中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md
 You can install FlyDB using the Go command line tool:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.10
+go get github.com/ByteStorage/FlyDB@v1.0.13
 ```
 
 Or clone this project from github:
@@ -146,7 +146,7 @@ Team Email: bytestoragecommunity@gmail.com
 
 Or add my wechat, invite you to enter the project community, and code masters together to exchange learning.
 
-> Add wechat please comment GIthub
+> Add wechat please comment Github
 
 <img src="./assets/vx.png" alt="vx" style="width: 33%;"  />
 
@@ -154,7 +154,7 @@ Or add my wechat, invite you to enter the project community, and code masters to
 
 - [ ] Extended data structure support: including but not limited to string, list, hash, set, etc.
 - [ ] Compatible with Redis protocols and commands.
-- [ ] Support http services.
+- [x] Support http services.
 - [x] Support tcp services.
 - [x] Log aggregation
 - [ ] Data backup

@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
@@ -25,6 +26,7 @@ const maxHashMetaSize = 1 + binary.MaxVarintLen64*6
 type HashStructure struct {
 	db            *engine.DB
 	hashValueType string
+	HashFieldType string
 	expire        int64
 }
 
@@ -77,6 +79,10 @@ func (hs *HashStructure) HSet(k string, f, v interface{}, ttl int64) (bool, erro
 
 	// Set the hash value type
 	hs.hashValueType = valueType
+
+	// Set the hash field type
+	_, _, fieldType := interfaceToBytes(v)
+	hs.HashFieldType = fieldType
 
 	// Check the parameters
 	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
@@ -1064,15 +1070,93 @@ func (hs *HashStructure) HTypes(k string, f interface{}) (string, error) {
 //
 // []string: A list of field names in the hash.
 // error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) Keys() ([]string, error) {
-	var keys []string
+func (hs *HashStructure) Keys() []string {
+	// Get all the keys from the database
 	byte_keys := hs.db.GetListKeys()
+
+	// Create a new slice of strings
+	keys := make([]string, 0)
+
 	for _, key := range byte_keys {
-		if !isFirstFiveBytesField(key) {
+		// Check if the key has the identifier suffix
+		if !keysIdentify(key) {
 			keys = append(keys, string(key))
 		}
 	}
-	return keys, nil
+
+	return keys
+}
+
+// GetFields returns a list of all field names in the hash stored at the specified key.
+// It takes a string key 'k' and returns a slice of strings representing
+// the field names and any possible error.
+//
+// Parameters:
+//
+//	k: The key of the hash table.
+//
+// Returns:
+//
+// []string: A list of field names in the hash.
+func (hs *HashStructure) GetFields(k string) []string {
+	// Get all the keys from the database
+	byte_keys := hs.db.GetListKeys()
+
+	// Create a new slice of strings
+	fields := make([]string, 0)
+
+	for _, key := range byte_keys {
+		// Check if the key has the identifier suffix
+		if keysIdentify(key) {
+			hf, _ := decodeHashField(key)
+			if string(hf.key) == k {
+				fields = append(fields, string(hf.field))
+			}
+		}
+	}
+
+	return fields
+}
+
+// HGetAllFieldAndValue returns all fields and values of the hash stored at the specified key.
+// It takes a string key 'k' and returns a map of strings representing the field names and
+// their values and any possible error.
+//
+// Parameters:
+//
+//	k: The key of the hash table.
+//
+// Returns:
+//
+// map[string]interface{}: A map of field names and their values.
+// error: An error if occurred during the operation, or nil on success.
+func (hs *HashStructure) HGetAllFieldAndValue(k string) (map[string]interface{}, error) {
+	fields := hs.GetFields(k)
+
+	filedAndValue := make(map[string]interface{}, 0)
+
+	for _, field := range fields {
+		v, err := hs.HGet(k, field)
+		if err != nil {
+			return nil, err
+		}
+		filedAndValue[field] = v
+	}
+
+	return filedAndValue, nil
+}
+
+// keysIdentify checks if the key has the identifier suffix
+//
+// Parameters:
+//
+//	key: The key to check.
+//
+// Returns:
+//
+//	bool: True if the key has the identifier suffix, false otherwise.
+func keysIdentify(key []byte) bool {
+	return bytes.HasSuffix(key, []byte("notk"))
 }
 
 // TTL returns the time-to-live (TTL) of a key in the hash.
@@ -1160,13 +1244,6 @@ func (hs *HashStructure) Size(k string, f ...interface{}) (string, error) {
 	return size, nil
 }
 
-func isFirstFiveBytesField(data []byte) bool {
-	if len(data) < 5 {
-		return false
-	}
-	return string(data[:5]) == "field"
-}
-
 // findHashMeta finds the hash metadata by the given key.
 func (hs *HashStructure) findHashMeta(k string, dataType DataStructure) (*HashMetadata, error) {
 	// Convert the parameters to bytes
@@ -1219,55 +1296,87 @@ func (hs *HashStructure) Clean() {
 }
 
 type HashField struct {
-	field   []byte
 	key     []byte
+	field   []byte
 	version int64
 }
 
 // encodeHashField encodes a HashField and returns the byte array and length.
-// +-------------+------------+------------+
-// |  field      |  key       |  version   |
-// +-------------+------------+------------+
-// |  variable   |  variable  |  8 bytes   |
-// +-------------+------------+------------+
+// +-------------+------------+------------+------------+
+// |    key      |  field     |  version   | identifier |
+// +-------------+------------+------------+------------+
+// |  variable   |  variable  |  8 bytes   |   4 byte   |
+// +-------------+------------+------------+------------+
 func (hf *HashField) encodeHashField() []byte {
-	buf := make([]byte, len(hf.field)+len(hf.key)+8)
+	keyLen := int32(len(hf.key))
+	fieldLen := int32(len(hf.field))
 
-	// offset is the offset of the buf
-	var offset = 0
+	// Prepare a buffer to hold the encoded data
+	buf := new(bytes.Buffer)
 
-	// copy the field to buf
-	offset += copy(buf[offset:], hf.field)
+	// Write the key length, key, field length, field, and version to the buffer
+	if err := binary.Write(buf, binary.BigEndian, keyLen); err != nil {
+		return nil
+	}
+	if _, err := buf.Write(hf.key); err != nil {
+		return nil
+	}
+	if err := binary.Write(buf, binary.BigEndian, fieldLen); err != nil {
+		return nil
+	}
+	if _, err := buf.Write(hf.field); err != nil {
+		return nil
+	}
+	if err := binary.Write(buf, binary.BigEndian, hf.version); err != nil {
+		return nil
+	}
 
-	// copy the key to buf
-	offset += copy(buf[offset:], hf.key)
+	// Write the identifier
+	if err := binary.Write(buf, binary.BigEndian, []byte("notk")); err != nil {
+		return nil
+	}
 
-	// copy the version to buf
-	binary.BigEndian.PutUint64(buf[offset:], uint64(hf.version))
+	return buf.Bytes()
 
-	return buf[:offset+8]
 }
 
 // decodeHashField decodes the HashField from a byte buffer.
-func decodeHashField(buf []byte) *HashField {
-	var offset = 0
+func decodeHashField(data []byte) (*HashField, error) {
+	hf := &HashField{}
 
-	// get the field from buf
-	field := buf[offset:]
+	// Create a buffer to hold the data
+	buf := bytes.NewBuffer(data)
 
-	// get the key from buf
-	offset += len(field)
-	key := buf[offset:]
+	var keyLen int32
+	if err := binary.Read(buf, binary.BigEndian, &keyLen); err != nil {
+		return nil, err
+	}
 
-	// get the version from buf
-	offset += len(key)
-	version := int64(binary.BigEndian.Uint64(buf[offset:]))
+	hf.key = make([]byte, keyLen)
+	if _, err := buf.Read(hf.key); err != nil {
+		return nil, err
+	}
+
+	var fieldLen int32
+	if err := binary.Read(buf, binary.BigEndian, &fieldLen); err != nil {
+		return nil, err
+	}
+
+	hf.field = make([]byte, fieldLen)
+	if _, err := buf.Read(hf.field); err != nil {
+		return nil, err
+	}
+
+	if err := binary.Read(buf, binary.BigEndian, &hf.version); err != nil {
+		return nil, err
+	}
 
 	return &HashField{
-		field:   field,
-		key:     key,
-		version: version,
-	}
+		key:     hf.key,
+		field:   hf.field,
+		version: hf.version,
+	}, nil
+
 }
 
 // EncodeHashMeta encodes a HashMetadata and returns the byte array and length.
