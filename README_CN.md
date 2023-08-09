@@ -16,7 +16,7 @@
 您可以使用Go命令行工具安装FlyDB:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.10
+go get github.com/ByteStorage/FlyDB@v1.0.13
 ```
 
 或者从github克隆这个项目:
@@ -155,7 +155,7 @@ PASS
 
 - [ ] 扩展数据结构支持:包括但不限于字符串、列表、散列、集合等。
 - [ ] 兼容Redis协议和命令。
-- [ ] 支持http服务。
+- [x] 支持http服务。
 - [x] 支持tcp服务。
 - [x] 集成日志。
 - [ ] 数据备份
