@@ -313,8 +313,17 @@ func (s *StringStructure) DecrBy(key string, amount int, ttl int64) error {
 // Keys returns all keys matching pattern
 func (s *StringStructure) Keys() ([]string, error) {
 	var keys []string
-	byte_keys := s.db.GetListKeys()
-	for _, key := range byte_keys {
+	byteKeys := s.db.GetListKeys()
+	for _, key := range byteKeys {
+		// check if key is expired
+		_, err := s.Get(string(key))
+		if err != nil {
+			if errors.Is(err, _const.ErrKeyIsExpired) {
+				continue
+			} else {
+				return nil, err
+			}
+		}
 		keys = append(keys, string(key))
 	}
 	return keys, nil
