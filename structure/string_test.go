@@ -467,6 +467,14 @@ func TestStringStructure_TTL(t *testing.T) {
 	ttl, err = str.TTL("1")
 	assert.NotNil(t, err)
 	assert.Equal(t, ttl, int64(-1))
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	ttl, err = str.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(0))
+
 }
 
 func TestStringStructure_Size(t *testing.T) {
