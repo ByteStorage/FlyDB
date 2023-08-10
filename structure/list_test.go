@@ -369,7 +369,7 @@ func TestListStructure_Keys(t *testing.T) {
 	listErr = list.LPush("2", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
-	listErr = list.LPush("qwe", randkv.RandomValue(100), 0)
+	listErr = list.LPush("q", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
 	keys, err := list.Keys()
