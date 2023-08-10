@@ -373,6 +373,10 @@ func (s *StringStructure) TTL(key string) (int64, error) {
 		return -1, err
 	}
 
+	if expire == 0 {
+		return 0, nil
+	}
+
 	// Calculate the remaining time to live
 	now := time.Now().UnixNano() / int64(time.Second)
 	expire = expire / int64(time.Second)
