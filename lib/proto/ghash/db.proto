@@ -21,6 +21,7 @@ service GHashService {
   rpc HKeys(GHashKeysRequest) returns (GHashKeysResponse) {}
   rpc TTL(GHashTTLRequest) returns (GHashTTLResponse) {}
   rpc Size(GHashSizeRequest) returns (GHashSizeResponse) {}
+  rpc HExpire(GHashExpireRequest) returns (GHashExpireResponse) {}
 }
 
 message GHashSetRequest {
@@ -35,7 +36,6 @@ message GHashSetRequest {
     bool BoolValue = 8;
     bytes BytesValue = 9;
   };
-  int64 ttl = 10;
 }
 
 message GHashSetResponse {
@@ -200,4 +200,13 @@ message GHashSizeRequest {
 
 message GHashSizeResponse {
   repeated int64 size = 1;
+}
+
+message GHashExpireRequest {
+  string key = 1;
+  int64 ttl = 2;
+}
+
+message GHashExpireResponse {
+  bool ok = 1;
 }

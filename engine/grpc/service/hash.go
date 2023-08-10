@@ -34,7 +34,7 @@ func (s *hash) CloseDb() error {
 func (s *hash) HSet(ctx context.Context, req *ghash.GHashSetRequest) (*ghash.GHashSetResponse, error) {
 	fmt.Println("receive put request: key: ", req.Key, " field: ", req.GetField(), " value: ", req.GetValue())
 	var err error
-	result, err := setValue(s, req.Key, req.Field, req.Ttl, req)
+	result, err := setValue(s, req.Key, req.Field, req)
 	if err != nil {
 		return &ghash.GHashSetResponse{Ok: result}, err
 	}
@@ -77,28 +77,28 @@ func (s *hash) HDel(ctx context.Context, req *ghash.GHashDelRequest) (*ghash.GHa
 	return &ghash.GHashDelResponse{Ok: ok}, err
 }
 
-func setValue(s *hash, key string, field interface{}, ttl int64, r *ghash.GHashSetRequest) (bool, error) {
+func setValue(s *hash, key string, field interface{}, r *ghash.GHashSetRequest) (bool, error) {
 	switch r.Value.(type) {
 	case *ghash.GHashSetRequest_StringValue:
-		ok, err := s.dbh.HSet(key, field, r.GetStringValue(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetStringValue())
 		return ok, err
 	case *ghash.GHashSetRequest_Int32Value:
-		ok, err := s.dbh.HSet(key, field, r.GetInt32Value(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetInt32Value())
 		return ok, err
 	case *ghash.GHashSetRequest_Int64Value:
-		ok, err := s.dbh.HSet(key, field, r.GetInt64Value(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetInt64Value())
 		return ok, err
 	case *ghash.GHashSetRequest_Float32Value:
-		ok, err := s.dbh.HSet(key, field, r.GetFloat32Value(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetFloat32Value())
 		return ok, err
 	case *ghash.GHashSetRequest_Float64Value:
-		ok, err := s.dbh.HSet(key, field, r.GetFloat64Value(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetFloat64Value())
 		return ok, err
 	case *ghash.GHashSetRequest_BoolValue:
-		ok, err := s.dbh.HSet(key, field, r.GetBoolValue(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetBoolValue())
 		return ok, err
 	case *ghash.GHashSetRequest_BytesValue:
-		ok, err := s.dbh.HSet(key, field, r.GetBytesValue(), ttl)
+		ok, err := s.dbh.HSet(key, field, r.GetBytesValue())
 		return ok, err
 	default:
 		return false, fmt.Errorf("unknown value type")
@@ -219,35 +219,35 @@ func (s *hash) HMove(ctx context.Context, req *ghash.GHashMoveRequest) (*ghash.G
 
 func (s *hash) HSetNX(ctx context.Context, req *ghash.GHashSetNXRequest) (*ghash.GHashSetNXResponse, error) {
 	// Check if the key already exists
-	ok, err := setNXValue(s, req.Key, req.Field, req.Ttl, req)
+	ok, err := setNXValue(s, req.Key, req.Field, req)
 	if err != nil {
 		return &ghash.GHashSetNXResponse{Ok: ok}, err
 	}
 
 	return &ghash.GHashSetNXResponse{Ok: ok}, nil
 }
-func setNXValue(s *hash, key string, field interface{}, ttl int64, r *ghash.GHashSetNXRequest) (bool, error) {
+func setNXValue(s *hash, key string, field interface{}, r *ghash.GHashSetNXRequest) (bool, error) {
 	switch r.Value.(type) {
 	case *ghash.GHashSetNXRequest_StringValue:
-		ok, err := s.dbh.HSetNX(key, field, r.GetStringValue(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetStringValue())
 		return ok, err
 	case *ghash.GHashSetNXRequest_Int32Value:
-		ok, err := s.dbh.HSetNX(key, field, r.GetInt32Value(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetInt32Value())
 		return ok, err
 	case *ghash.GHashSetNXRequest_Int64Value:
-		ok, err := s.dbh.HSetNX(key, field, r.GetInt64Value(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetInt64Value())
 		return ok, err
 	case *ghash.GHashSetNXRequest_Float32Value:
-		ok, err := s.dbh.HSetNX(key, field, r.GetFloat32Value(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetFloat32Value())
 		return ok, err
 	case *ghash.GHashSetNXRequest_Float64Value:
-		ok, err := s.dbh.HSetNX(key, field, r.GetFloat64Value(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetFloat64Value())
 		return ok, err
 	case *ghash.GHashSetNXRequest_BoolValue:
-		ok, err := s.dbh.HSetNX(key, field, r.GetBoolValue(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetBoolValue())
 		return ok, err
 	case *ghash.GHashSetNXRequest_BytesValue:
-		ok, err := s.dbh.HSetNX(key, field, r.GetBytesValue(), ttl)
+		ok, err := s.dbh.HSetNX(key, field, r.GetBytesValue())
 		return ok, err
 	default:
 		return false, fmt.Errorf("unknown value type")
