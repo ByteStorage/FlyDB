@@ -27,7 +27,6 @@ type HashStructure struct {
 	db            *engine.DB
 	hashValueType string
 	HashFieldType string
-	expire        int64
 }
 
 // NewHashStructure Returns a new NewHashStructure
@@ -60,7 +59,7 @@ func NewHashStructure(options config.Options) (*HashStructure, error) {
 // - The function creates a new HashField containing the field details and encodes it.
 // - The function uses a write batch to efficiently commit changes to the database.
 // - It returns a boolean indicating whether the field was newly created or updated.
-func (hs *HashStructure) HSet(k string, f, v interface{}, ttl int64) (bool, error) {
+func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
 	// Convert the parameters to bytes
 	key := stringToBytesWithKey(k)
 
@@ -97,8 +96,8 @@ func (hs *HashStructure) HSet(k string, f, v interface{}, ttl int64) (bool, erro
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
 		key:     key,
+		field:   field,
 		version: hashMeta.version,
 	}
 
@@ -119,18 +118,6 @@ func (hs *HashStructure) HSet(k string, f, v interface{}, ttl int64) (bool, erro
 	// If the field is not found, increase the counter
 	if !exist {
 		hashMeta.counter++
-		_ = batch.Put(key, hashMeta.encodeHashMeta())
-	}
-
-	// Check if the provided TTL is greater than 0
-	if ttl > 0 {
-		// Calculate the expiration time in nanoseconds
-		expirationTime := time.Now().Add(time.Duration(ttl) * time.Second).UnixNano()
-
-		// Update the hash metadata with the expiration time
-		hashMeta.expire = expirationTime
-
-		// Put the updated hash metadata in the database
 		_ = batch.Put(key, hashMeta.encodeHashMeta())
 	}
 
@@ -169,7 +156,7 @@ func (hs *HashStructure) HSet(k string, f, v interface{}, ttl int64) (bool, erro
 // - The retrieved byte data is converted back to the corresponding data type.
 // - Returns the value corresponding to the field and any possible error.
 func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
-	// Determine whether the key has expired
+	// check the key ttl
 	ttl, _ := hs.TTL(k)
 	if ttl == -1 {
 		return nil, _const.ErrKeyIsExpired
@@ -190,7 +177,7 @@ func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(string(key), Hash)
 	if err != nil {
 		return nil, err
 	}
@@ -241,6 +228,12 @@ func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
 //	[]interface{}: An array of interface{} containing values corresponding to the fields.
 //	error: An error if occurred during the operation, or nil on success.
 func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error) {
+	// check the key ttl
+	ttl, _ := hs.TTL(k)
+	if ttl == -1 {
+		return nil, _const.ErrKeyIsExpired
+	}
+
 	// Convert the parameters to bytes
 	key := stringToBytesWithKey(k)
 	var interfaces []interface{}
@@ -249,7 +242,6 @@ func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error
 		// Convert the parameters to bytes
 		field, err, _ := interfaceToBytes(fi)
 		if err != nil {
-			fmt.Println("err", err)
 			return nil, err
 		}
 
@@ -364,6 +356,102 @@ func (hs *HashStructure) HDel(k string, f interface{}) (bool, error) {
 	hashMeta.counter--
 
 	// Put the updated hash metadata to the database
+	_ = batch.Put(key, hashMeta.encodeHashMeta())
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// HDelAll deletes all fields from a hash.
+// It takes a string key 'k' to be deleted from the hash.
+// It returns a boolean indicating the success of the operation and any possible error.
+//
+// Parameters:
+//
+//	k: The key of the hash table.
+//
+// Returns:
+//
+//	bool: True if the hash was deleted successfully, false otherwise.
+//	error: An error if occurred during the operation, or nil on success.
+func (hs *HashStructure) HDelAll(k string) (bool, error) {
+	// Convert the parameters to bytes
+	key := stringToBytesWithKey(k)
+
+	// Check the parameters
+	if len(key) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(k, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return false
+	if hashMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Create a new write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// Delete the field from the database
+	_ = batch.Delete(key)
+
+	// Commit the write batch
+	err = batch.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// HExpire sets a timeout on a hash.
+// It takes a string key 'k' and a duration 'ttl' to set the timeout.
+// It returns a boolean indicating the success of the operation and any possible error.
+//
+// Parameters:
+//
+//	k: The key of the hash table.
+//	ttl: The duration of the timeout.
+//
+// Returns:
+//
+//	bool: True if the timeout was set successfully, false otherwise.
+//	error: An error if occurred during the operation, or nil on success.
+func (hs *HashStructure) HExpire(k string, ttl int64) (bool, error) {
+	// Convert the parameters to bytes
+	key := stringToBytesWithKey(k)
+
+	// Check the parameters
+	if len(key) == 0 {
+		return false, _const.ErrKeyIsEmpty
+	}
+
+	// Find the hash metadata by the given key
+	hashMeta, err := hs.findHashMeta(k, Hash)
+	if err != nil {
+		return false, err
+	}
+
+	// If the counter is 0, return false
+	if hashMeta.counter == 0 {
+		return false, nil
+	}
+
+	// Create a new write batch
+	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
+
+	// Put the updated hash metadata to the database
+	hashMeta.expire = time.Now().Add(time.Duration(ttl) * time.Second).UnixNano()
 	_ = batch.Put(key, hashMeta.encodeHashMeta())
 
 	// Commit the write batch
@@ -955,7 +1043,7 @@ func (hs *HashStructure) HMove(source, destination string, f interface{}) (bool,
 //
 //	bool: True if the field was set, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HSetNX(k string, f, v interface{}, ttl int64) (bool, error) {
+func (hs *HashStructure) HSetNX(k string, f, v interface{}) (bool, error) {
 	// Convert the parameters to bytes
 	key := stringToBytesWithKey(k)
 
@@ -995,7 +1083,7 @@ func (hs *HashStructure) HSetNX(k string, f, v interface{}, ttl int64) (bool, er
 	// Get the field from the database
 	_, err = hs.db.Get(hfBuf)
 	if err != nil && err == _const.ErrKeyNotFound {
-		_, err := hs.HSet(k, field, value, ttl)
+		_, err := hs.HSet(k, field, value)
 		if err != nil {
 			return false, err
 		}
@@ -1182,12 +1270,20 @@ func (hs *HashStructure) TTL(k string) (int64, error) {
 		return -1, err
 	}
 
+	// If the counter is 0, return empty string
+	if hashMeta.counter == 0 {
+		return 0, _const.ErrKeyNotFound
+	}
+
+	// Calculate the TTL
 	ttl := hashMeta.expire/int64(time.Second) - time.Now().UnixNano()/int64(time.Second)
 
+	// If the TTL is 0, return 0
 	if hashMeta.expire == 0 {
 		return 0, nil
 	}
 
+	// If the TTL is less than 0, return -1
 	if ttl <= 0 {
 		return -1, _const.ErrKeyIsExpired
 	}
@@ -1283,6 +1379,7 @@ func (hs *HashStructure) findHashMeta(k string, dataType DataStructure) (*HashMe
 			lastUpdatedTime: time.Now().UnixNano(),
 		}
 	}
+
 	return hashMeta, nil
 }
 
@@ -1380,11 +1477,11 @@ func decodeHashField(data []byte) (*HashField, error) {
 }
 
 // EncodeHashMeta encodes a HashMetadata and returns the byte array and length.
-// +-------------+------------+------------+--------------+-------+---------+---------+---------+---------+
-// |  data type   |  data size  |    expire  |    version   | counter | created | updated |  field  |  value  |
-// +-------------+------------+------------+--------------+-------+---------+---------+---------+---------+
-// |  1 byte      |  variable   |  variable  |   variable   | variable| variable| variable| variable| variable|
-// +-------------+------------+------------+--------------+-------+---------+---------+---------+---------+
+// +-------------+------------+------------+------------+---------+----------+----------+---------+---------+
+// |  data type  |  data size |   expire   |  version   | counter | created  | updated  |  field  |  value  |
+// +-------------+------------+------------+------------+---------+----------+----------+---------+---------+
+// |  1 byte     |  variable  |  variable  |  variable  | variable| variable | variable | variable| variable|
+// +-------------+------------+------------+------------+---------+----------+----------+---------+---------+
 func (meta *HashMetadata) encodeHashMeta() []byte {
 	buf := make([]byte, maxHashMetaSize)
 
