@@ -515,6 +515,20 @@ func (zs *ZSetStructure) ZAdds(key string, vals ...ZSetValue) error {
 	return zs.setZSetToDB(stringToBytesWithKey(key), zSet)
 }
 
+// Keys returns all keys of the ZSetStructure.
+//
+// Returns:
+//
+//	[]string: all keys of the ZSetStructure.
+func (zs *ZSetStructure) Keys() ([]string, error) {
+	var keys []string
+	byte_keys := zs.db.GetListKeys()
+	for _, key := range byte_keys {
+		keys = append(keys, string(key))
+	}
+	return keys, nil
+}
+
 // exists checks if a given member with a specific score exists in a ZSet. It
 // also verifies if the provided key is valid. The function returns a boolean
 // value indicating whether the member with the specified score exists in the
@@ -1232,4 +1246,9 @@ func (d *ZSetValue) MarshalBinary() (_ []byte, err error) {
 	// final byte slice which represents the encoded ZSetValue
 	// and a nil error.
 	return enc.Bytes(), err
+}
+
+func (d *ZSetStructure) Stop() error {
+	err := d.db.Close()
+	return err
 }

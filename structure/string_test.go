@@ -26,7 +26,7 @@ func TestStringStructure_Get(t *testing.T) {
 
 	err = str.Set("1", randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
-	err = str.Set("1", randkv.RandomValue(100), 2*time.Second)
+	err = str.Set("1", randkv.RandomValue(100), 2)
 	assert.Nil(t, err)
 
 	value1, err := str.Get("1")
@@ -36,7 +36,7 @@ func TestStringStructure_Get(t *testing.T) {
 	time.Sleep(3 * time.Second)
 
 	value2, err := str.Get("1")
-	assert.Equal(t, err, ErrKeyExpired)
+	assert.Equal(t, err, _const.ErrKeyIsExpired)
 	assert.Nil(t, value2)
 
 	_, err = str.Get("3")
@@ -91,7 +91,7 @@ func TestStringStructure_GetSet(t *testing.T) {
 	assert.Nil(t, err)
 	value1, _ := str.Get("1")
 
-	value2, err := str.GetSet("1", randkv.RandomValue(100), 2*time.Second)
+	value2, err := str.GetSet("1", randkv.RandomValue(100), 2000)
 	assert.Nil(t, err)
 	assert.NotNil(t, value2)
 	assert.Equal(t, value1, value2)
@@ -305,7 +305,7 @@ func TestStringStructure_Expire(t *testing.T) {
 	err = str.Set("1", []byte("1"), 0)
 	assert.Nil(t, err)
 
-	err = str.Expire("1", 1*time.Second)
+	err = str.Expire("1", 1)
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
@@ -313,13 +313,13 @@ func TestStringStructure_Expire(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 	v2, err := str.Get("1")
-	assert.Equal(t, err, ErrKeyExpired)
+	assert.Equal(t, err, _const.ErrKeyIsExpired)
 	assert.Equal(t, v2, nil)
 
 	err = str.Set("2", "你好", 0)
 	assert.Nil(t, err)
 
-	err = str.Expire("2", 1*time.Second)
+	err = str.Expire("2", 1)
 	assert.Nil(t, err)
 	v3, err := str.Get("2")
 	assert.Nil(t, err)
@@ -327,7 +327,7 @@ func TestStringStructure_Expire(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 	v4, err := str.Get("2")
-	assert.Equal(t, err, ErrKeyExpired)
+	assert.Equal(t, err, _const.ErrKeyIsExpired)
 	assert.Equal(t, v4, nil)
 }
 
@@ -338,7 +338,7 @@ func TestStringStructure_Persist(t *testing.T) {
 	err = str.Set("1", []byte("1"), 0)
 	assert.Nil(t, err)
 
-	err = str.Expire("1", 1*time.Second)
+	err = str.Expire("1", 1)
 	assert.Nil(t, err)
 	v1, err := str.Get("1")
 	assert.Nil(t, err)
@@ -419,4 +419,79 @@ func TestStringStructure_MSetNX(t *testing.T) {
 	value3, err := str.Get("key3")
 	assert.Nil(t, err)
 	assert.Equal(t, value3, "value3")
+}
+
+func TestStringStructure_Keys(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err = str.Set("1", randkv.RandomValue(100), 1)
+	assert.Nil(t, err)
+
+	err = str.Set("2", randkv.RandomValue(100), 2)
+	assert.Nil(t, err)
+
+	err = str.Set("3", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("hhh", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("你好", randkv.RandomValue(100), 0)
+	assert.Nil(t, err)
+
+	time.Sleep(2 * time.Second)
+
+	keys, err := str.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 3)
+}
+
+func TestStringStructure_TTL(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err = str.Set("1", []byte("1"), 2)
+	assert.Nil(t, err)
+
+	ttl, err := str.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(2))
+
+	time.Sleep(1 * time.Second)
+	ttl, err = str.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(1))
+
+	time.Sleep(2 * time.Second)
+	ttl, err = str.TTL("1")
+	assert.NotNil(t, err)
+	assert.Equal(t, ttl, int64(-1))
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	ttl, err = str.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(0))
+
+}
+
+func TestStringStructure_Size(t *testing.T) {
+	str, _ := initdb()
+	defer str.db.Clean()
+
+	err = str.Set("1", []byte("1"), 0)
+	assert.Nil(t, err)
+
+	err = str.Set("2", []byte("2222222爱上打发生的爱上打的爱上生的阿斯顿发达22222222"), 0)
+	assert.Nil(t, err)
+
+	size1, err := str.Size("1")
+	assert.Nil(t, err)
+	assert.Equal(t, size1, "1B")
+
+	size2, err := str.Size("2")
+	assert.Nil(t, err)
+	assert.True(t, size2 > "1B")
 }

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.6.1
-// source: db.proto
+// source: lib/proto/ghash/db.proto
 
 package ghash
 
@@ -35,6 +35,10 @@ type GHashServiceClient interface {
 	HMove(ctx context.Context, in *GHashMoveRequest, opts ...grpc.CallOption) (*GHashMoveResponse, error)
 	HSetNX(ctx context.Context, in *GHashSetNXRequest, opts ...grpc.CallOption) (*GHashSetNXResponse, error)
 	HType(ctx context.Context, in *GHashTypeRequest, opts ...grpc.CallOption) (*GHashTypeResponse, error)
+	HKeys(ctx context.Context, in *GHashKeysRequest, opts ...grpc.CallOption) (*GHashKeysResponse, error)
+	TTL(ctx context.Context, in *GHashTTLRequest, opts ...grpc.CallOption) (*GHashTTLResponse, error)
+	Size(ctx context.Context, in *GHashSizeRequest, opts ...grpc.CallOption) (*GHashSizeResponse, error)
+	HExpire(ctx context.Context, in *GHashExpireRequest, opts ...grpc.CallOption) (*GHashExpireResponse, error)
 }
 
 type gHashServiceClient struct {
@@ -162,6 +166,42 @@ func (c *gHashServiceClient) HType(ctx context.Context, in *GHashTypeRequest, op
 	return out, nil
 }
 
+func (c *gHashServiceClient) HKeys(ctx context.Context, in *GHashKeysRequest, opts ...grpc.CallOption) (*GHashKeysResponse, error) {
+	out := new(GHashKeysResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) TTL(ctx context.Context, in *GHashTTLRequest, opts ...grpc.CallOption) (*GHashTTLResponse, error) {
+	out := new(GHashTTLResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/TTL", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) Size(ctx context.Context, in *GHashSizeRequest, opts ...grpc.CallOption) (*GHashSizeResponse, error) {
+	out := new(GHashSizeResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/Size", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gHashServiceClient) HExpire(ctx context.Context, in *GHashExpireRequest, opts ...grpc.CallOption) (*GHashExpireResponse, error) {
+	out := new(GHashExpireResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HExpire", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GHashServiceServer is the server API for GHashService service.
 // All implementations must embed UnimplementedGHashServiceServer
 // for forward compatibility
@@ -179,6 +219,10 @@ type GHashServiceServer interface {
 	HMove(context.Context, *GHashMoveRequest) (*GHashMoveResponse, error)
 	HSetNX(context.Context, *GHashSetNXRequest) (*GHashSetNXResponse, error)
 	HType(context.Context, *GHashTypeRequest) (*GHashTypeResponse, error)
+	HKeys(context.Context, *GHashKeysRequest) (*GHashKeysResponse, error)
+	TTL(context.Context, *GHashTTLRequest) (*GHashTTLResponse, error)
+	Size(context.Context, *GHashSizeRequest) (*GHashSizeResponse, error)
+	HExpire(context.Context, *GHashExpireRequest) (*GHashExpireResponse, error)
 	mustEmbedUnimplementedGHashServiceServer()
 }
 
@@ -224,6 +268,18 @@ func (UnimplementedGHashServiceServer) HSetNX(context.Context, *GHashSetNXReques
 }
 func (UnimplementedGHashServiceServer) HType(context.Context, *GHashTypeRequest) (*GHashTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HType not implemented")
+}
+func (UnimplementedGHashServiceServer) HKeys(context.Context, *GHashKeysRequest) (*GHashKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HKeys not implemented")
+}
+func (UnimplementedGHashServiceServer) TTL(context.Context, *GHashTTLRequest) (*GHashTTLResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TTL not implemented")
+}
+func (UnimplementedGHashServiceServer) Size(context.Context, *GHashSizeRequest) (*GHashSizeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Size not implemented")
+}
+func (UnimplementedGHashServiceServer) HExpire(context.Context, *GHashExpireRequest) (*GHashExpireResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HExpire not implemented")
 }
 func (UnimplementedGHashServiceServer) mustEmbedUnimplementedGHashServiceServer() {}
 
@@ -472,6 +528,78 @@ func _GHashService_HType_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GHashService_HKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HKeys(ctx, req.(*GHashKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_TTL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashTTLRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).TTL(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/TTL",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).TTL(ctx, req.(*GHashTTLRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_Size_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashSizeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).Size(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/Size",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).Size(ctx, req.(*GHashSizeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GHashService_HExpire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashExpireRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HExpire(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HExpire",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HExpire(ctx, req.(*GHashExpireRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GHashService_ServiceDesc is the grpc.ServiceDesc for GHashService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -531,7 +659,23 @@ var GHashService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "HType",
 			Handler:    _GHashService_HType_Handler,
 		},
+		{
+			MethodName: "HKeys",
+			Handler:    _GHashService_HKeys_Handler,
+		},
+		{
+			MethodName: "TTL",
+			Handler:    _GHashService_TTL_Handler,
+		},
+		{
+			MethodName: "Size",
+			Handler:    _GHashService_Size_Handler,
+		},
+		{
+			MethodName: "HExpire",
+			Handler:    _GHashService_HExpire_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "db.proto",
+	Metadata: "lib/proto/ghash/db.proto",
 }

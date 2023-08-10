@@ -7,7 +7,6 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 	"github.com/ByteStorage/FlyDB/structure"
-	"time"
 )
 
 type StringService interface {
@@ -60,23 +59,23 @@ func (s *str) NewFlyDBService(ctx context.Context, req *gstring.FlyDBOption) (*g
 
 // Put is a grpc s for put
 func (s *str) Put(ctx context.Context, req *gstring.SetRequest) (*gstring.SetResponse, error) {
-	fmt.Println("receive put request: key: ", req.Key, " value: ", req.GetValue(), " duration: ", time.Duration(req.Expire))
+	fmt.Println("receive put request: key: ", req.Key, " value: ", req.GetValue(), " duration: ", req.Expire*1000)
 	var err error
 	switch req.Value.(type) {
 	case *gstring.SetRequest_StringValue:
-		err = s.dbs.Set(req.Key, req.GetStringValue(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetStringValue(), req.Expire*1000)
 	case *gstring.SetRequest_Int32Value:
-		err = s.dbs.Set(req.Key, req.GetInt32Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetInt32Value(), req.Expire*1000)
 	case *gstring.SetRequest_Int64Value:
-		err = s.dbs.Set(req.Key, req.GetInt64Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetInt64Value(), req.Expire*1000)
 	case *gstring.SetRequest_Float32Value:
-		err = s.dbs.Set(req.Key, req.GetFloat32Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetFloat32Value(), req.Expire*1000)
 	case *gstring.SetRequest_Float64Value:
-		err = s.dbs.Set(req.Key, req.GetFloat64Value(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetFloat64Value(), req.Expire*1000)
 	case *gstring.SetRequest_BoolValue:
-		err = s.dbs.Set(req.Key, req.GetBoolValue(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetBoolValue(), req.Expire*1000)
 	case *gstring.SetRequest_BytesValue:
-		err = s.dbs.Set(req.Key, req.GetBytesValue(), time.Duration(req.Expire))
+		err = s.dbs.Set(req.Key, req.GetBytesValue(), req.Expire*1000)
 	default:
 		err = fmt.Errorf("unknown value type")
 	}
@@ -145,19 +144,19 @@ func (s *str) GetSet(ctx context.Context, req *gstring.GetSetRequest) (*gstring.
 
 	switch v := req.Value.(type) {
 	case *gstring.GetSetRequest_StringValue:
-		previousValue, err = s.dbs.GetSet(req.Key, v.StringValue, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.StringValue, req.Expire*1000)
 	case *gstring.GetSetRequest_Int32Value:
-		previousValue, err = s.dbs.GetSet(req.Key, v.Int32Value, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.Int32Value, req.Expire*1000)
 	case *gstring.GetSetRequest_Int64Value:
-		previousValue, err = s.dbs.GetSet(req.Key, v.Int64Value, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.Int64Value, req.Expire*1000)
 	case *gstring.GetSetRequest_Float32Value:
-		previousValue, err = s.dbs.GetSet(req.Key, v.Float32Value, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.Float32Value, req.Expire*1000)
 	case *gstring.GetSetRequest_Float64Value:
-		previousValue, err = s.dbs.GetSet(req.Key, v.Float64Value, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.Float64Value, req.Expire*1000)
 	case *gstring.GetSetRequest_BoolValue:
-		previousValue, err = s.dbs.GetSet(req.Key, v.BoolValue, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.BoolValue, req.Expire*1000)
 	case *gstring.GetSetRequest_BytesValue:
-		previousValue, err = s.dbs.GetSet(req.Key, v.BytesValue, time.Duration(req.Expire))
+		previousValue, err = s.dbs.GetSet(req.Key, v.BytesValue, req.Expire*1000)
 	default:
 		return nil, fmt.Errorf("unknown value type")
 	}
@@ -186,7 +185,7 @@ func (s *str) GetSet(ctx context.Context, req *gstring.GetSetRequest) (*gstring.
 }
 
 func (s *str) Append(ctx context.Context, req *gstring.AppendRequest) (*gstring.AppendResponse, error) {
-	err := s.dbs.Append(req.Key, req.Value, time.Duration(req.Expire))
+	err := s.dbs.Append(req.Key, req.Value, req.Expire*1000)
 	if err != nil {
 		return &gstring.AppendResponse{}, err
 	}
@@ -194,7 +193,7 @@ func (s *str) Append(ctx context.Context, req *gstring.AppendRequest) (*gstring.
 }
 
 func (s *str) Incr(ctx context.Context, req *gstring.IncrRequest) (*gstring.IncrResponse, error) {
-	err := s.dbs.Incr(req.Key, time.Duration(req.Expire))
+	err := s.dbs.Incr(req.Key, req.Expire*1000)
 	if err != nil {
 		return &gstring.IncrResponse{}, err
 	}
@@ -202,7 +201,7 @@ func (s *str) Incr(ctx context.Context, req *gstring.IncrRequest) (*gstring.Incr
 }
 
 func (s *str) IncrBy(ctx context.Context, req *gstring.IncrByRequest) (*gstring.IncrByResponse, error) {
-	err := s.dbs.IncrBy(req.Key, int(req.Amount), time.Duration(req.Expire))
+	err := s.dbs.IncrBy(req.Key, int(req.Amount), req.Expire*1000)
 	if err != nil {
 		return &gstring.IncrByResponse{}, err
 	}
@@ -210,7 +209,7 @@ func (s *str) IncrBy(ctx context.Context, req *gstring.IncrByRequest) (*gstring.
 }
 
 func (s *str) IncrByFloat(ctx context.Context, req *gstring.IncrByFloatRequest) (*gstring.IncrByFloatResponse, error) {
-	err := s.dbs.IncrByFloat(req.Key, req.Amount, time.Duration(req.Expire))
+	err := s.dbs.IncrByFloat(req.Key, req.Amount, req.Expire*1000)
 	if err != nil {
 		return &gstring.IncrByFloatResponse{Ok: true}, err
 	}
@@ -218,7 +217,7 @@ func (s *str) IncrByFloat(ctx context.Context, req *gstring.IncrByFloatRequest) 
 }
 
 func (s *str) Decr(ctx context.Context, req *gstring.DecrRequest) (*gstring.DecrResponse, error) {
-	err := s.dbs.Decr(req.Key, time.Duration(req.Expire))
+	err := s.dbs.Decr(req.Key, req.Expire*1000)
 	if err != nil {
 		return &gstring.DecrResponse{}, err
 	}
@@ -226,7 +225,7 @@ func (s *str) Decr(ctx context.Context, req *gstring.DecrRequest) (*gstring.Decr
 }
 
 func (s *str) DecrBy(ctx context.Context, req *gstring.DecrByRequest) (*gstring.DecrByResponse, error) {
-	err := s.dbs.DecrBy(req.Key, int(req.Amount), time.Duration(req.Expire))
+	err := s.dbs.DecrBy(req.Key, int(req.Amount), req.Expire*1000)
 	if err != nil {
 		return &gstring.DecrByResponse{}, err
 	}
@@ -243,7 +242,7 @@ func (s *str) Exists(ctx context.Context, req *gstring.ExistsRequest) (*gstring.
 }
 
 func (s *str) Expire(ctx context.Context, req *gstring.ExpireRequest) (*gstring.ExpireResponse, error) {
-	err := s.dbs.Expire(req.Key, time.Duration(req.Expire)*time.Second)
+	err := s.dbs.Expire(req.Key, req.Expire*1000)
 	if err != nil {
 		return &gstring.ExpireResponse{}, err
 	}

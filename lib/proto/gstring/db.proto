@@ -23,6 +23,9 @@ service GStringService {
   rpc MGet(MGetRequest) returns (MGetResponse) {}
   rpc MSet(MSetRequest) returns (MSetResponse) {}
   rpc MSetNX(MSetNXRequest) returns (MSetNXResponse) {}
+  rpc TTL(TTLRequest) returns (TTLResponse) {}
+  rpc Keys(KeysRequest) returns (KeysResponse) {}
+  rpc Size(SizeRequest) returns (SizeResponse) {}
 }
 
 message FlyDBOption {
@@ -259,4 +262,26 @@ message MSetNXRequest {
 
 message MSetNXResponse {
    bool success = 1;
+}
+
+message TTLRequest {
+  string key = 1;
+}
+
+message TTLResponse {
+  int64 ttl = 1;
+}
+
+message KeysRequest {
+  string pattern = 1;
+}
+
+message KeysResponse {}
+
+message SizeRequest {
+  string key = 1;
+}
+
+message SizeResponse {
+  int64 size = 1;
 }

@@ -23,6 +23,7 @@ require (
 	github.com/tidwall/wal v1.1.7
 	go.etcd.io/bbolt v1.3.7
 	go.uber.org/zap v1.24.0
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.31.0
 )
