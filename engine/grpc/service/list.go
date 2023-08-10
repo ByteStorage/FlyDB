@@ -36,17 +36,17 @@ func (l *list) LPush(ctx context.Context, req *glist.GListLPushRequest) (*glist.
 	var err error
 	switch req.Value.(type) {
 	case *glist.GListLPushRequest_StringValue:
-		err = l.dbs.LPush(req.Key, req.GetStringValue())
+		err = l.dbs.LPush(req.Key, req.GetStringValue(), 0)
 	case *glist.GListLPushRequest_Int64Value:
-		err = l.dbs.LPush(req.Key, req.GetInt64Value())
+		err = l.dbs.LPush(req.Key, req.GetInt64Value(), 0)
 	case *glist.GListLPushRequest_Float32Value:
-		err = l.dbs.LPush(req.Key, req.GetFloat32Value())
+		err = l.dbs.LPush(req.Key, req.GetFloat32Value(), 0)
 	case *glist.GListLPushRequest_Float64Value:
-		err = l.dbs.LPush(req.Key, req.GetFloat64Value())
+		err = l.dbs.LPush(req.Key, req.GetFloat64Value(), 0)
 	case *glist.GListLPushRequest_BoolValue:
-		err = l.dbs.LPush(req.Key, req.GetBoolValue())
+		err = l.dbs.LPush(req.Key, req.GetBoolValue(), 0)
 	case *glist.GListLPushRequest_BytesValue:
-		err = l.dbs.LPush(req.Key, req.GetBytesValue())
+		err = l.dbs.LPush(req.Key, req.GetBytesValue(), 0)
 	default:
 		err = fmt.Errorf("unknown value type")
 	}
@@ -80,7 +80,7 @@ func (l *list) LPushs(ctx context.Context, req *glist.GListLPushsRequest) (*glis
 		}
 	}
 
-	err := l.dbs.LPushs(req.Key, values...)
+	err := l.dbs.LPushs(req.Key, 0, values...)
 	if err != nil {
 		return &glist.GListLPushsResponse{}, err
 	}
@@ -94,17 +94,17 @@ func (l *list) RPush(ctx context.Context, req *glist.GListRPushRequest) (*glist.
 	var err error
 	switch req.Value.(type) {
 	case *glist.GListRPushRequest_StringValue:
-		err = l.dbs.RPush(req.Key, req.GetStringValue())
+		err = l.dbs.RPush(req.Key, req.GetStringValue(), 0)
 	case *glist.GListRPushRequest_Int64Value:
-		err = l.dbs.RPush(req.Key, req.GetInt64Value())
+		err = l.dbs.RPush(req.Key, req.GetInt64Value(), 0)
 	case *glist.GListRPushRequest_Float32Value:
-		err = l.dbs.RPush(req.Key, req.GetFloat32Value())
+		err = l.dbs.RPush(req.Key, req.GetFloat32Value(), 0)
 	case *glist.GListRPushRequest_Float64Value:
-		err = l.dbs.RPush(req.Key, req.GetFloat64Value())
+		err = l.dbs.RPush(req.Key, req.GetFloat64Value(), 0)
 	case *glist.GListRPushRequest_BoolValue:
-		err = l.dbs.RPush(req.Key, req.GetBoolValue())
+		err = l.dbs.RPush(req.Key, req.GetBoolValue(), 0)
 	case *glist.GListRPushRequest_BytesValue:
-		err = l.dbs.RPush(req.Key, req.GetBytesValue())
+		err = l.dbs.RPush(req.Key, req.GetBytesValue(), 0)
 	default:
 		err = fmt.Errorf("unknown value type")
 	}
@@ -138,7 +138,7 @@ func (l *list) RPushs(ctx context.Context, req *glist.GListRPushsRequest) (*glis
 		}
 	}
 
-	err := l.dbs.RPushs(req.Key, values...)
+	err := l.dbs.RPushs(req.Key, 0, values...)
 	if err != nil {
 		return &glist.GListRPushsResponse{}, err
 	}
@@ -277,17 +277,17 @@ func (l *list) LSet(ctx context.Context, req *glist.GListLSetRequest) (*glist.GL
 	var err error
 	switch req.Value.(type) {
 	case *glist.GListLSetRequest_StringValue:
-		err = l.dbs.LSet(req.Key, int(req.Index), req.GetStringValue())
+		err = l.dbs.LSet(req.Key, int(req.Index), req.GetStringValue(), 0)
 	case *glist.GListLSetRequest_Int64Value:
-		err = l.dbs.LSet(req.Key, int(req.Index), req.GetInt64Value())
+		err = l.dbs.LSet(req.Key, int(req.Index), req.GetInt64Value(), 0)
 	case *glist.GListLSetRequest_Float32Value:
-		err = l.dbs.LSet(req.Key, int(req.Index), req.GetFloat32Value())
+		err = l.dbs.LSet(req.Key, int(req.Index), req.GetFloat32Value(), 0)
 	case *glist.GListLSetRequest_Float64Value:
-		err = l.dbs.LSet(req.Key, int(req.Index), req.GetFloat64Value())
+		err = l.dbs.LSet(req.Key, int(req.Index), req.GetFloat64Value(), 0)
 	case *glist.GListLSetRequest_BoolValue:
-		err = l.dbs.LSet(req.Key, int(req.Index), req.GetBoolValue())
+		err = l.dbs.LSet(req.Key, int(req.Index), req.GetBoolValue(), 0)
 	case *glist.GListLSetRequest_BytesValue:
-		err = l.dbs.LSet(req.Key, int(req.Index), req.GetBytesValue())
+		err = l.dbs.LSet(req.Key, int(req.Index), req.GetBytesValue(), 0)
 	default:
 		err = fmt.Errorf("unknown value type")
 	}
