@@ -115,7 +115,7 @@ func TestListStructure_LPop(t *testing.T) {
 
 	// Test LPop function when the key does not exist
 	_, err = list.LPop(string(randkv.GetTestKey(2)))
-	assert.Equal(t, listErr, _const.ErrKeyNotFound)
+	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 	// Test LPop function when the list is empty
 	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
@@ -139,7 +139,7 @@ func TestListStructure_RPop(t *testing.T) {
 
 	// Test RPop function when the key does not exist
 	_, err = list.RPop(string(randkv.GetTestKey(2)))
-	assert.Equal(t, listErr, _const.ErrKeyNotFound)
+	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 	// Test RPop function when the list is empty
 	err = list.RPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
