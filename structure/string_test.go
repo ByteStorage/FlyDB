@@ -425,10 +425,10 @@ func TestStringStructure_Keys(t *testing.T) {
 	str, _ := initdb()
 	defer str.db.Clean()
 
-	err = str.Set("1", randkv.RandomValue(100), 0)
+	err = str.Set("1", randkv.RandomValue(100), 1)
 	assert.Nil(t, err)
 
-	err = str.Set("2", randkv.RandomValue(100), 0)
+	err = str.Set("2", randkv.RandomValue(100), 2)
 	assert.Nil(t, err)
 
 	err = str.Set("3", randkv.RandomValue(100), 0)
@@ -440,9 +440,11 @@ func TestStringStructure_Keys(t *testing.T) {
 	err = str.Set("你好", randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
 
+	time.Sleep(2 * time.Second)
+
 	keys, err := str.Keys()
 	assert.Nil(t, err)
-	assert.Equal(t, len(keys), 5)
+	assert.Equal(t, len(keys), 3)
 }
 
 func TestStringStructure_TTL(t *testing.T) {
