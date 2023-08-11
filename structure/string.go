@@ -325,11 +325,7 @@ func (s *StringStructure) Keys(regx string) ([]string, error) {
 			// check if key is expired
 			_, err := s.Get(string(key))
 			if err != nil {
-				if errors.Is(err, _const.ErrKeyIsExpired) || errors.Is(err, _const.ErrKeyNotFound) {
-					continue
-				} else {
-					return nil, err
-				}
+				continue
 			}
 			keys = append(keys, string(key))
 		}

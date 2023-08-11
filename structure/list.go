@@ -447,7 +447,7 @@ func (l *ListStructure) Keys(regx string) ([]string, error) {
 			// check if deleted
 			db, _, err := l.getListFromDB(string(key), true)
 			if err != nil {
-				return nil, err
+				continue
 			}
 			if db.Length == 0 {
 				continue
