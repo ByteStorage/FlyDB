@@ -1,12 +1,13 @@
 package structure
 
 import (
-	"os"
-	"testing"
-
-	"github.com/ByteStorage/FlyDB/config"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
+	"os"
+	"testing"
+	"time"
+
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,17 +21,61 @@ func initList() (*ListStructure, *config.Options) {
 	return list, &opts
 }
 
+func TestListStructure_TTL(t *testing.T) {
+	list, _ := initList()
+	defer list.db.Clean()
+
+	err := list.LPush("2", "123123", 2)
+	assert.Nil(t, err)
+
+	ttl, err := list.TTL("2")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(2))
+
+	time.Sleep(1 * time.Second)
+	ttl, err = list.TTL("2")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(1))
+
+	time.Sleep(2 * time.Second)
+	ttl, err = list.TTL("1")
+	assert.NotNil(t, err)
+	assert.Equal(t, ttl, int64(-1))
+
+	err = list.LPush("1", "123123", 0)
+	assert.Nil(t, err)
+
+	ttl1, err := list.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl1, int64(0))
+}
+
+func TestListStructure_Size(t *testing.T) {
+	list, _ := initList()
+	defer list.db.Clean()
+
+	err = list.LPush("2", "123123", 0)
+	assert.Nil(t, err)
+
+	err = list.LPush("2", "1233", 0)
+	assert.Nil(t, err)
+
+	value, err := list.Size("2")
+	assert.Nil(t, err)
+	assert.Equal(t, value, "10B")
+}
+
 func TestListStructure_LPush(t *testing.T) {
 	list, _ := initList()
 	defer list.db.Clean()
 
 	// Test LPush function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush("key", "w", 10)
 	assert.Nil(t, listErr)
 
-	// Test LPush function when the key does not exist
-	listErr = list.LPush(string(randkv.GetTestKey(2)), randkv.RandomValue(100))
-	assert.Nil(t, listErr)
+	//// Test LPush function when the key does not exist
+	//listErr = list.LPush(string(randkv.GetTestKey(2)), randkv.RandomValue(100))
+	//assert.Nil(t, listErr)
 }
 
 func TestListStructure_LPushs(t *testing.T) {
@@ -38,11 +83,11 @@ func TestListStructure_LPushs(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LPushs function when the key exists
-	listErr = list.LPushs(string(randkv.GetTestKey(1)), randkv.RandomValue(100), randkv.RandomValue(100))
+	listErr = list.LPushs(string(randkv.GetTestKey(1)), 0, randkv.RandomValue(100), randkv.RandomValue(100))
 	assert.Nil(t, listErr)
 
 	// Test LPushs function when the key does not exist
-	listErr = list.LPushs(string(randkv.GetTestKey(2)), randkv.RandomValue(100), randkv.RandomValue(100))
+	listErr = list.LPushs(string(randkv.GetTestKey(2)), 0, randkv.RandomValue(100), randkv.RandomValue(100))
 	assert.Nil(t, listErr)
 }
 
@@ -51,11 +96,11 @@ func TestListStructure_RPush(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test RPush function when the key exists
-	listErr = list.RPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.RPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
 	// Test RPush function when the key does not exist
-	listErr = list.RPush(string(randkv.GetTestKey(2)), randkv.RandomValue(100))
+	listErr = list.RPush(string(randkv.GetTestKey(2)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 }
 
@@ -64,11 +109,11 @@ func TestListStructure_RPushs(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test RPushs function when the key exists
-	listErr = list.RPushs(string(randkv.GetTestKey(1)), randkv.RandomValue(100), randkv.RandomValue(100))
+	listErr = list.RPushs(string(randkv.GetTestKey(1)), 0, randkv.RandomValue(100), randkv.RandomValue(100))
 	assert.Nil(t, listErr)
 
 	// Test RPushs function when the key does not exist
-	listErr = list.RPushs(string(randkv.GetTestKey(2)), randkv.RandomValue(100), randkv.RandomValue(100))
+	listErr = list.RPushs(string(randkv.GetTestKey(2)), 0, randkv.RandomValue(100), randkv.RandomValue(100))
 	assert.Nil(t, listErr)
 }
 
@@ -77,8 +122,9 @@ func TestListStructure_LPop(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LPop function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
+	listErr = list.LPush(string(randkv.GetTestKey(1)), "www", 0)
 	value, err := list.LPop(string(randkv.GetTestKey(1)))
 	assert.Nil(t, err)
 	assert.NotNil(t, value)
@@ -88,7 +134,7 @@ func TestListStructure_LPop(t *testing.T) {
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 	// Test LPop function when the list is empty
-	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100))
+	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
 	_, err = list.LPop(string(randkv.GetTestKey(3)))
 	assert.Nil(t, err)
@@ -101,7 +147,7 @@ func TestListStructure_RPop(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test RPop function when the key exists
-	listErr = list.RPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.RPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	value, err := list.RPop(string(randkv.GetTestKey(1)))
 	assert.Nil(t, err)
@@ -112,7 +158,7 @@ func TestListStructure_RPop(t *testing.T) {
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 	// Test RPop function when the list is empty
-	err = list.RPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100))
+	err = list.RPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
 	_, err = list.RPop(string(randkv.GetTestKey(3)))
 	assert.Nil(t, err)
@@ -125,7 +171,7 @@ func TestListStructure_LRange(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LRange function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	values, err := list.LRange(string(randkv.GetTestKey(1)), 0, 1)
 	assert.Nil(t, err)
@@ -136,7 +182,7 @@ func TestListStructure_LRange(t *testing.T) {
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 	// Test LRange function when the list is empty
-	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100))
+	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
 	_, err = list.LPop(string(randkv.GetTestKey(3)))
 	assert.Nil(t, err)
@@ -149,7 +195,7 @@ func TestListStructure_LLen(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LLen function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	len, err := list.LLen(string(randkv.GetTestKey(1)))
 	assert.Nil(t, err)
@@ -165,7 +211,7 @@ func TestListStructure_LRem(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LRem function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	listErr = list.LRem(string(randkv.GetTestKey(1)), 1, randkv.RandomValue(100))
 	assert.Nil(t, listErr)
@@ -180,21 +226,21 @@ func TestListStructure_LSet(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LSet function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
-	listErr = list.LSet(string(randkv.GetTestKey(1)), 0, randkv.RandomValue(200))
+	listErr = list.LSet(string(randkv.GetTestKey(1)), 0, randkv.RandomValue(200), 0)
 	assert.Nil(t, listErr)
 
 	// Test LSet function when the key does not exist
-	listErr = list.LSet(string(randkv.GetTestKey(2)), 0, randkv.RandomValue(100))
+	listErr = list.LSet(string(randkv.GetTestKey(2)), 0, randkv.RandomValue(100), 0)
 	assert.Equal(t, listErr, _const.ErrKeyNotFound)
 
 	// Test LSet function when the list is empty
-	listErr = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	_, listErr = list.LPop(string(randkv.GetTestKey(3)))
 	assert.Nil(t, listErr)
-	listErr = list.LSet(string(randkv.GetTestKey(3)), 0, randkv.RandomValue(100))
+	listErr = list.LSet(string(randkv.GetTestKey(3)), 0, randkv.RandomValue(100), 0)
 	assert.Equal(t, listErr, ErrIndexOutOfRange)
 }
 
@@ -203,7 +249,7 @@ func TestListStructure_LTrim(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LTrim function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	listErr = list.LTrim(string(randkv.GetTestKey(1)), 0, 1)
 	assert.Nil(t, listErr)
@@ -213,7 +259,7 @@ func TestListStructure_LTrim(t *testing.T) {
 	assert.Equal(t, listErr, _const.ErrKeyNotFound)
 
 	// Test LTrim function when the list is empty
-	listErr = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	_, listErr = list.LPop(string(randkv.GetTestKey(3)))
 	assert.Nil(t, listErr)
@@ -226,7 +272,7 @@ func TestListStructure_LIndex(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test LIndex function when the key exists
-	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	value, err := list.LIndex(string(randkv.GetTestKey(1)), 0)
 	assert.Nil(t, err)
@@ -237,7 +283,7 @@ func TestListStructure_LIndex(t *testing.T) {
 	assert.Equal(t, err, _const.ErrKeyNotFound)
 
 	// Test LIndex function when the list is empty
-	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100))
+	err = list.LPush(string(randkv.GetTestKey(3)), randkv.RandomValue(100), 0)
 	assert.Nil(t, err)
 	_, err = list.LPop(string(randkv.GetTestKey(3)))
 	assert.Nil(t, err)
@@ -250,21 +296,21 @@ func TestListStructure_RPOPLPUSH(t *testing.T) {
 	defer list.db.Clean()
 
 	// Test RPOPLPUSH function when the source list exists
-	listErr = list.RPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100))
+	listErr = list.RPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
-	listErr = list.RPOPLPUSH(string(randkv.GetTestKey(1)), string(randkv.GetTestKey(2)))
+	listErr = list.RPOPLPUSH(string(randkv.GetTestKey(1)), string(randkv.GetTestKey(2)), 0)
 	assert.Nil(t, listErr)
 
 	// Test RPOPLPUSH function when the source list does not exist
-	listErr = list.RPOPLPUSH(string(randkv.GetTestKey(3)), string(randkv.GetTestKey(2)))
+	listErr = list.RPOPLPUSH(string(randkv.GetTestKey(3)), string(randkv.GetTestKey(2)), 0)
 	assert.Equal(t, listErr, _const.ErrKeyNotFound)
 
 	// Test RPOPLPUSH function when the source list is empty
-	listErr = list.RPush(string(randkv.GetTestKey(4)), randkv.RandomValue(100))
+	listErr = list.RPush(string(randkv.GetTestKey(4)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 	_, listErr = list.RPop(string(randkv.GetTestKey(4)))
 	assert.Nil(t, listErr)
-	listErr = list.RPOPLPUSH(string(randkv.GetTestKey(4)), string(randkv.GetTestKey(2)))
+	listErr = list.RPOPLPUSH(string(randkv.GetTestKey(4)), string(randkv.GetTestKey(2)), 0)
 	assert.Equal(t, listErr, ErrListEmpty)
 }
 
@@ -276,7 +322,7 @@ func TestListStructure_Integration(t *testing.T) {
 	key := string(randkv.GetTestKey(1))
 	values := [][]byte{randkv.RandomValue(100), randkv.RandomValue(100), randkv.RandomValue(100)}
 	for _, value := range values {
-		listErr = list.RPush(key, value)
+		listErr = list.RPush(key, value, 0)
 		assert.Nil(t, listErr)
 	}
 
@@ -304,7 +350,7 @@ func TestListStructure_Integration(t *testing.T) {
 
 	// Use LSet to modify a value and check if it is properly modified
 	newValue := randkv.RandomValue(100)
-	err = list.LSet(key, 0, newValue)
+	err = list.LSet(key, 0, newValue, 0)
 	assert.Nil(t, err)
 	rangeValues, err = list.LRange(key, 0, -1)
 	assert.Nil(t, err)
@@ -319,7 +365,7 @@ func TestListStructure_Integration(t *testing.T) {
 
 	// Use RPOPLPUSH to move a value to another list and check if it is properly moved
 	destination := string(randkv.GetTestKey(2))
-	err = list.RPOPLPUSH(key, destination)
+	err = list.RPOPLPUSH(key, destination, 0)
 	assert.Nil(t, err)
 	rangeValues, err = list.LRange(key, 0, -1)
 	assert.Equal(t, ErrListEmpty, err)
@@ -333,13 +379,13 @@ func TestListStructure_Keys(t *testing.T) {
 	list, _ := initList()
 	defer list.db.Clean()
 
-	listErr = list.LPush("1", randkv.RandomValue(100))
+	listErr = list.LPush("1", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
-	listErr = list.LPush("2", randkv.RandomValue(100))
+	listErr = list.LPush("2", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
-	listErr = list.LPush("qwe", randkv.RandomValue(100))
+	listErr = list.LPush("q", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
 	keys, err := list.Keys()

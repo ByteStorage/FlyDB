@@ -3,7 +3,9 @@ package structure
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"reflect"
+	"time"
 
 	"encoding/gob"
 
@@ -43,39 +45,35 @@ func NewListStructure(options config.Options) (*ListStructure, error) {
 
 // LPush adds a value to the left of the list corresponding to the key
 // If the key does not exist, it will create the key
-func (l *ListStructure) LPush(key string, value interface{}) error {
+func (l *ListStructure) LPush(key string, value interface{}, ttl int64) error {
 	// Get the list
-	lst, err := l.getListFromDB(key, true)
+	lst, _, err := l.getListFromDB(key, true)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	newNode := &listNode{
 		Value: value,
 		Next:  lst.Head,
 	}
-
 	lst.Head = newNode
 	lst.Length++
-
-	// Store to db
-	return l.setListToDB(key, lst)
+	expirationTime = time.Duration(ttl) * time.Second
+	return l.setListToDB(key, lst, expirationTime)
 }
 
-// LPushs adds one or more values to the left of the list corresponding to the key
-// If the key does not exist, it will create the key
-func (l *ListStructure) LPushs(key string, values ...interface{}) error {
+func (l *ListStructure) LPushs(key string, ttl int64, values ...interface{}) error {
 	// Check if values are valid
 	if len(values) == 0 {
 		return ErrInvalidArgs
 	}
 
 	// Get the list
-	lst, err := l.getListFromDB(key, true)
+	lst, _, err := l.getListFromDB(key, true)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	for i := len(values) - 1; i >= 0; i-- {
 		newNode := &listNode{
 			Value: values[i],
@@ -84,25 +82,26 @@ func (l *ListStructure) LPushs(key string, values ...interface{}) error {
 		lst.Head = newNode
 		lst.Length++
 	}
+	expirationTime = time.Duration(ttl) * time.Second
 
 	// Store to db
-	return l.setListToDB(key, lst)
+	return l.setListToDB(key, lst, expirationTime)
 }
 
 // RPush adds a value to the right of the list corresponding to the key
 // If the key does not exist, it will create the key
-func (l *ListStructure) RPush(key string, value interface{}) error {
+func (l *ListStructure) RPush(key string, value interface{}, ttl int64) error {
 	// Check if value is empty
 	if value == nil {
 		return ErrInvalidValue
 	}
 
 	// Get the list
-	lst, err := l.getListFromDB(key, true)
+	lst, _, err := l.getListFromDB(key, true)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	// Append the new data to the end
 	newNode := &listNode{
 		Value: value,
@@ -119,25 +118,25 @@ func (l *ListStructure) RPush(key string, value interface{}) error {
 		lastNode.Next = newNode
 	}
 	lst.Length++
-
+	expirationTime = time.Duration(ttl) * time.Second
 	// Store to db
-	return l.setListToDB(key, lst)
+	return l.setListToDB(key, lst, expirationTime)
 }
 
 // RPushs appends one or more values to the right side of a list associated with a key.
 // If the key does not exist, it will be created.
-func (l *ListStructure) RPushs(key string, values ...interface{}) error {
+func (l *ListStructure) RPushs(key string, ttl int64, values ...interface{}) error {
 	// Check if values are valid
 	if len(values) == 0 {
 		return ErrInvalidArgs
 	}
 
 	// Get the list
-	lst, err := l.getListFromDB(key, true)
+	lst, _, err := l.getListFromDB(key, true)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	// Find the last node
 	var lastNode *listNode
 	if lst.Length == 0 {
@@ -162,9 +161,9 @@ func (l *ListStructure) RPushs(key string, values ...interface{}) error {
 		lastNode = newNode
 		lst.Length++
 	}
-
+	expirationTime = time.Duration(ttl) * time.Second
 	// Store to db
-	return l.setListToDB(key, lst)
+	return l.setListToDB(key, lst, expirationTime)
 }
 
 // LPop returns and removes the leftmost value of a list associated with a key.
@@ -172,11 +171,10 @@ func (l *ListStructure) RPushs(key string, values ...interface{}) error {
 // If the list is empty, an error is returned.
 func (l *ListStructure) LPop(key string) (interface{}, error) {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return nil, err
 	}
-
 	// Return error if the list is empty
 	if lst.Length == 0 {
 		return nil, ErrListEmpty
@@ -187,7 +185,7 @@ func (l *ListStructure) LPop(key string) (interface{}, error) {
 	lst.Length--
 
 	// Store in the database
-	return popValue, l.setListToDB(key, lst)
+	return popValue, l.setListToDB(key, lst, 0)
 }
 
 // RPop returns and removes the rightmost value of a list associated with a key.
@@ -195,11 +193,10 @@ func (l *ListStructure) LPop(key string) (interface{}, error) {
 // If the list is empty, an error is returned.
 func (l *ListStructure) RPop(key string) (interface{}, error) {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return nil, err
 	}
-
 	// Return error if the list is empty
 	if lst.Length == 0 {
 		return nil, ErrListEmpty
@@ -207,7 +204,7 @@ func (l *ListStructure) RPop(key string) (interface{}, error) {
 		popValue := lst.Head.Value
 		lst.Head = nil
 		lst.Length = 0
-		return popValue, l.setListToDB(key, lst)
+		return popValue, l.setListToDB(key, lst, 0)
 	}
 
 	// Find the new tail
@@ -220,7 +217,7 @@ func (l *ListStructure) RPop(key string) (interface{}, error) {
 	lst.Length--
 
 	// Store in the database
-	return popValue, l.setListToDB(key, lst)
+	return popValue, l.setListToDB(key, lst, 0)
 }
 
 // LRange returns a range of elements from a list associated with a key.
@@ -231,7 +228,7 @@ func (l *ListStructure) RPop(key string) (interface{}, error) {
 // -2 represents the second last element, and so on.
 func (l *ListStructure) LRange(key string, start int, stop int) ([]interface{}, error) {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +265,7 @@ func (l *ListStructure) LRange(key string, start int, stop int) ([]interface{}, 
 // If the key does not exist, an error is returned.
 func (l *ListStructure) LLen(key string) (int, error) {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return 0, err
 	}
@@ -284,11 +281,11 @@ func (l *ListStructure) LLen(key string) (int, error) {
 // If the key does not exist, an error is returned.
 func (l *ListStructure) LRem(key string, count int, value interface{}) error {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	// Process different counts
 	if count != 0 {
 		prev, curr := lst.Head, lst.Head
@@ -324,19 +321,19 @@ func (l *ListStructure) LRem(key string, count int, value interface{}) error {
 	}
 
 	// Store to db
-	return l.setListToDB(key, lst)
+	return l.setListToDB(key, lst, expirationTime)
 }
 
 // LSet sets the value of an element in a list associated with a key based on the index.
 // If the index is out of range, an error is returned.
 // If the list is empty, an error is returned.
-func (l *ListStructure) LSet(key string, index int, value interface{}) error {
+func (l *ListStructure) LSet(key string, index int, value interface{}, ttl int64) error {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	// Check if the index is out of range
 	if index < 0 || index >= lst.Length {
 		return ErrIndexOutOfRange
@@ -349,9 +346,11 @@ func (l *ListStructure) LSet(key string, index int, value interface{}) error {
 	}
 
 	nowNode.Value = value
-
+	if ttl > 0 {
+		expirationTime = time.Duration(ttl) * time.Second
+	}
 	// Store in the database
-	return l.setListToDB(key, lst)
+	return l.setListToDB(key, lst, expirationTime)
 }
 
 // LTrim retains a range of elements in a list associated with a key.
@@ -362,11 +361,10 @@ func (l *ListStructure) LSet(key string, index int, value interface{}) error {
 // -2 represents the second last element, and so on.
 func (l *ListStructure) LTrim(key string, start int, stop int) error {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return err
 	}
-
 	if lst.Length == 0 {
 		return ErrListEmpty
 	}
@@ -402,7 +400,7 @@ func (l *ListStructure) LTrim(key string, start int, stop int) error {
 	}
 
 	// Store in the database
-	return l.setListToDB(key, lst)
+	return l.setListToDB(key, lst, 0)
 }
 
 // LIndex returns the value of an element in a list associated with a key based on the index.
@@ -412,7 +410,7 @@ func (l *ListStructure) LTrim(key string, start int, stop int) error {
 // -2 represents the second last element, and so on.
 func (l *ListStructure) LIndex(key string, index int) (interface{}, error) {
 	// Get the list
-	lst, err := l.getListFromDB(key, false)
+	lst, _, err := l.getListFromDB(key, false)
 	if err != nil {
 		return nil, err
 	}
@@ -448,19 +446,19 @@ func (l *ListStructure) Keys() ([]string, error) {
 // If the source list is empty, an error is returned.
 // If the destination list is empty, it is created.
 // Atomicity is not guaranteed.
-func (l *ListStructure) RPOPLPUSH(source string, destination string) error {
+func (l *ListStructure) RPOPLPUSH(source string, destination string, ttl int64) error {
 	// Get the source list
-	lst1, err := l.getListFromDB(source, false)
+	lst1, _, err := l.getListFromDB(source, false)
 	if err != nil {
 		return err
 	}
 
 	// Get the destination list
-	lst2, err := l.getListFromDB(destination, true)
+	lst2, _, err := l.getListFromDB(destination, true)
 	if err != nil {
 		return err
 	}
-
+	var expirationTime time.Duration
 	// Return error if the source list is empty
 	if lst1.Length == 0 {
 		return ErrListEmpty
@@ -486,13 +484,34 @@ func (l *ListStructure) RPOPLPUSH(source string, destination string) error {
 	lastNode.Next = lst2.Head
 	lst2.Head = lastNode
 	lst2.Length++
-
+	if ttl > 0 {
+		expirationTime = time.Duration(ttl) * time.Second
+	}
 	// Store in the database
-	err = l.setListToDB(source, lst1)
+	err = l.setListToDB(source, lst1, expirationTime)
 	if err != nil {
 		return err
 	}
-	return l.setListToDB(destination, lst2)
+	return l.setListToDB(destination, lst2, expirationTime)
+}
+
+func (l *ListStructure) TTL(k string) (int64, error) {
+	_, expire, err := l.getListFromDB(k, false)
+	if err != nil {
+		return -1, err
+	}
+
+	now := time.Now().UnixNano() / int64(time.Second)
+	expire = expire / int64(time.Second)
+
+	remainingTTL := expire - now
+
+	//println("re",remainingTTL)
+	if remainingTTL <= 0 {
+		return 0, nil // Return 0 TTL for expired keys
+	}
+
+	return remainingTTL, nil
 }
 
 var (
@@ -535,46 +554,47 @@ func (l *ListStructure) valueEqual(value1 interface{}, value2 interface{}) bool 
 }
 
 // getListFromDB retrieves data from the database. When isKeyCanNotExist is true, it returns an empty slice if the key doesn't exist instead of an error.
-func (l *ListStructure) getListFromDB(key string, isKeyCanNotExist bool) (*list, error) {
+func (l *ListStructure) getListFromDB(key string, isKeyCanNotExist bool) (*list, int64, error) {
 	if isKeyCanNotExist {
 		// Get data corresponding to the key from the database
 		dbData, err := l.db.Get([]byte(key))
 
 		// Since the key might not exist, we need to handle ErrKeyNotFound separately as it is a valid case
 		if err != nil && err != _const.ErrKeyNotFound {
-			return nil, err
+			return nil, 0, err
 		}
 
-		// Deserialize the data into a list
-		lst, err := l.decodeList(dbData)
+		// Deserialize the data into a DecodedList
+		decodedList, err := l.decodeList(dbData)
 		if err != nil {
 			if len(dbData) != 0 {
-				return nil, err
+				return nil, 0, err
 			} else {
-				lst = &list{nil, 0}
+				decodedList = &DecodedList{List: &list{nil, 0}, Expiration: 0}
 			}
 		}
-		return lst, nil
+		return decodedList.List, decodedList.Expiration, nil
 	} else {
 		// Get data corresponding to the key from the database
 		dbData, err := l.db.Get([]byte(key))
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
-		// Deserialize the data into a list
-		lst, err := l.decodeList(dbData)
+		// Deserialize the data into a DecodedList
+		decodedList, err := l.decodeList(dbData)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
-		return lst, nil
+
+		return decodedList.List, decodedList.Expiration, nil
 	}
 }
 
 // setListToDB stores the data into the database.
-func (l *ListStructure) setListToDB(key string, lst *list) error {
+func (l *ListStructure) setListToDB(key string, lst *list, ttl time.Duration) error {
 	// Serialize into binary array
-	encValue, err := l.encodeList(lst)
+	encValue, err := l.encodeList(lst, ttl)
 	if err != nil {
 		return err
 	}
@@ -584,27 +604,58 @@ func (l *ListStructure) setListToDB(key string, lst *list) error {
 
 // encodeList encodes the value
 // format: [type][data]
-func (l *ListStructure) encodeList(lst *list) ([]byte, error) {
-	gob.Register(&list{})
-	var buffer bytes.Buffer        // Stand-in for a network connection
-	enc := gob.NewEncoder(&buffer) // Will write to network.
+type ExpiredItem struct {
+	Data       []byte
+	Expiration int64
+}
 
-	// Encode (send) the value.
-	err := enc.Encode(lst)
+func (l *ListStructure) encodeList(lst *list, ttl time.Duration) ([]byte, error) {
+	// Register the list type for gob
+	gob.Register(&list{})
+
+	// Create a bytes.Buffer and a new gob.Encoder for the list's data
+	dataBuffer := new(bytes.Buffer)
+	dataEnc := gob.NewEncoder(dataBuffer)
+
+	// Encode the list's data
+	err := dataEnc.Encode(lst)
+	if err != nil {
+		return nil, err
+	}
+	var expire int64 = 0
+
+	// Calculate the expiration time by adding ttl to the current time,
+	// convert it to nanoseconds, and store it in the expire variable.
+	if ttl != 0 {
+		expire = time.Now().Add(ttl).UnixNano()
+	}
+	// Create an ExpiredItem with the encoded data and expiration time
+	expiredItem := ExpiredItem{
+		Data:       dataBuffer.Bytes(),
+		Expiration: expire, // Set expiration time
+	}
+
+	// Create a bytes.Buffer and a new gob.Encoder for the ExpiredItem
+	itemBuffer := new(bytes.Buffer)
+	itemEnc := gob.NewEncoder(itemBuffer)
+
+	// Encode the ExpiredItem
+	err = itemEnc.Encode(&expiredItem)
 	if err != nil {
 		return nil, err
 	}
 
-	encodedBytes := buffer.Bytes()
+	// Return the encoded bytes, prefixed with the type
+	return append([]byte{List}, itemBuffer.Bytes()...), nil
+}
 
-	// Add a byte to the head of the slice.
-	encodedBytes = append([]byte{List}, encodedBytes...)
-
-	return encodedBytes, nil
+type DecodedList struct {
+	List       *list
+	Expiration int64
 }
 
 // decodeList decodes the value
-func (l *ListStructure) decodeList(value []byte) (*list, error) {
+func (l *ListStructure) decodeList(value []byte) (*DecodedList, error) {
 	// Check the length of the value
 	if len(value) < 1 {
 		return nil, ErrInvalidValue
@@ -621,19 +672,81 @@ func (l *ListStructure) decodeList(value []byte) (*list, error) {
 	// Create a new gob.Decoder
 	dec := gob.NewDecoder(buffer)
 
-	// Create a new list to hold the decoded value
-	var lst list
+	// Create a new ExpiredItem to hold the decoded value and expiration time
+	var expiredItem ExpiredItem
 
-	// Decode the value
-	err := dec.Decode(&lst)
+	// Decode the ExpiredItem
+	err := dec.Decode(&expiredItem)
 	if err != nil {
 		return nil, err
 	}
 
-	return &lst, nil
+	// Create a bytes.Buffer from the ExpiredItem's data
+	dataBuffer := bytes.NewBuffer(expiredItem.Data)
+
+	// Create a new gob.Decoder for the data
+	dataDec := gob.NewDecoder(dataBuffer)
+
+	// Create a new list to hold the decoded data
+	var lst list
+
+	// Decode the data into the list
+	err = dataDec.Decode(&lst)
+	if err != nil {
+		return nil, err
+	}
+
+	expiration := expiredItem.Expiration
+	if expiration != 0 && expiration < time.Now().UnixNano() {
+		return nil, _const.ErrKeyIsExpired
+	}
+
+	decodedList := &DecodedList{
+		List:       &lst,
+		Expiration: expiration, // Calculate remaining time
+	}
+
+	return decodedList, nil
 }
 
 func (s *ListStructure) Stop() error {
 	err := s.db.Close()
 	return err
+}
+
+func (l *ListStructure) Size(key string) (string, error) {
+	Llen, err := l.LLen(key)
+	if err != nil {
+		return "", err
+	}
+	lRange, err := l.LRange(key, 0, Llen-1)
+	if err != nil {
+		return "", err
+	}
+	var sizeInBytes int
+	for _, v := range lRange {
+		toString, err := interfaceToString(v)
+		if err != nil {
+			return "", err
+		}
+		sizeInBytes += len(toString)
+	}
+	// Convert bytes to corresponding units (KB, MB...)
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
 }
