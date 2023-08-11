@@ -2,7 +2,9 @@ package structure
 
 import (
 	"errors"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 type DataStructure = byte
@@ -188,4 +190,16 @@ func convertToFloat(Value interface{}) (float64, error) {
 	default:
 		return 0, errors.New("unsupported type")
 	}
+}
+
+func convertToRegexp(pattern string) string {
+	// 转义正则特殊字符
+	re := regexp.MustCompile(`([\[\]\(\)\{\}\^\$\.\+])`)
+	pattern = re.ReplaceAllString(pattern, `\$1`)
+
+	// 将 * 和 ? 转换为对应的正则表达式
+	pattern = strings.ReplaceAll(pattern, "*", ".*")
+	pattern = strings.ReplaceAll(pattern, "?", ".")
+
+	return "^" + pattern + "$" // 添加 ^ 和 $ 以确保完全匹配
 }
