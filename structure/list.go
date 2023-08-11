@@ -697,6 +697,7 @@ func (l *ListStructure) decodeList(value []byte) (*DecodedList, error) {
 	}
 
 	expiration := expiredItem.Expiration
+
 	if expiration != 0 && expiration < time.Now().UnixNano() {
 		return nil, _const.ErrKeyIsExpired
 	}
