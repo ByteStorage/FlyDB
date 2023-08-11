@@ -38,6 +38,7 @@ type GHashServiceClient interface {
 	HKeys(ctx context.Context, in *GHashKeysRequest, opts ...grpc.CallOption) (*GHashKeysResponse, error)
 	TTL(ctx context.Context, in *GHashTTLRequest, opts ...grpc.CallOption) (*GHashTTLResponse, error)
 	Size(ctx context.Context, in *GHashSizeRequest, opts ...grpc.CallOption) (*GHashSizeResponse, error)
+	HExpire(ctx context.Context, in *GHashExpireRequest, opts ...grpc.CallOption) (*GHashExpireResponse, error)
 }
 
 type gHashServiceClient struct {
@@ -192,6 +193,15 @@ func (c *gHashServiceClient) Size(ctx context.Context, in *GHashSizeRequest, opt
 	return out, nil
 }
 
+func (c *gHashServiceClient) HExpire(ctx context.Context, in *GHashExpireRequest, opts ...grpc.CallOption) (*GHashExpireResponse, error) {
+	out := new(GHashExpireResponse)
+	err := c.cc.Invoke(ctx, "/ghash.GHashService/HExpire", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GHashServiceServer is the server API for GHashService service.
 // All implementations must embed UnimplementedGHashServiceServer
 // for forward compatibility
@@ -212,6 +222,7 @@ type GHashServiceServer interface {
 	HKeys(context.Context, *GHashKeysRequest) (*GHashKeysResponse, error)
 	TTL(context.Context, *GHashTTLRequest) (*GHashTTLResponse, error)
 	Size(context.Context, *GHashSizeRequest) (*GHashSizeResponse, error)
+	HExpire(context.Context, *GHashExpireRequest) (*GHashExpireResponse, error)
 	mustEmbedUnimplementedGHashServiceServer()
 }
 
@@ -266,6 +277,9 @@ func (UnimplementedGHashServiceServer) TTL(context.Context, *GHashTTLRequest) (*
 }
 func (UnimplementedGHashServiceServer) Size(context.Context, *GHashSizeRequest) (*GHashSizeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Size not implemented")
+}
+func (UnimplementedGHashServiceServer) HExpire(context.Context, *GHashExpireRequest) (*GHashExpireResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HExpire not implemented")
 }
 func (UnimplementedGHashServiceServer) mustEmbedUnimplementedGHashServiceServer() {}
 
@@ -568,6 +582,24 @@ func _GHashService_Size_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GHashService_HExpire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GHashExpireRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GHashServiceServer).HExpire(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ghash.GHashService/HExpire",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GHashServiceServer).HExpire(ctx, req.(*GHashExpireRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GHashService_ServiceDesc is the grpc.ServiceDesc for GHashService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -638,6 +670,10 @@ var GHashService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Size",
 			Handler:    _GHashService_Size_Handler,
+		},
+		{
+			MethodName: "HExpire",
+			Handler:    _GHashService_HExpire_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
