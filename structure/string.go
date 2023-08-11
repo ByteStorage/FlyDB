@@ -7,6 +7,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -311,20 +312,28 @@ func (s *StringStructure) DecrBy(key string, amount int, ttl int64) error {
 }
 
 // Keys returns all keys matching pattern
-func (s *StringStructure) Keys() ([]string, error) {
+func (s *StringStructure) Keys(regx string) ([]string, error) {
+	toRegexp := convertToRegexp(regx)
+	compile, err := regexp.Compile(toRegexp)
+	if err != nil {
+		return nil, err
+	}
 	var keys []string
 	byteKeys := s.db.GetListKeys()
 	for _, key := range byteKeys {
-		// check if key is expired
-		_, err := s.Get(string(key))
-		if err != nil {
-			if errors.Is(err, _const.ErrKeyIsExpired) {
-				continue
-			} else {
-				return nil, err
+		if compile.MatchString(string(key)) {
+			// check if key is expired
+			_, err := s.Get(string(key))
+			if err != nil {
+				if errors.Is(err, _const.ErrKeyIsExpired) || errors.Is(err, _const.ErrKeyNotFound) {
+					continue
+				} else {
+					return nil, err
+				}
 			}
+			keys = append(keys, string(key))
 		}
-		keys = append(keys, string(key))
+
 	}
 	return keys, nil
 }
