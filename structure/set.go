@@ -7,8 +7,8 @@ import (
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
-	"time"
 	"regexp"
+	"time"
 )
 
 type SetStructure struct {
@@ -230,7 +230,6 @@ func (s *SetStructure) SDiff(keys ...string) ([]string, error) {
 	return diffMembers, nil
 }
 
-
 // Keys returns all the keys of the set structure
 func (s *SetStructure) Keys(regx string) ([]string, error) {
 	toRegexp := convertToRegexp(regx)
@@ -446,15 +445,6 @@ func (s *FSets) exists(member ...string) bool {
 		}
 	}
 	return true
-}
-
-func (s *SetStructure) Keys() ([]string, error) {
-	var keys []string
-	byte_keys := s.db.GetListKeys()
-	for _, key := range byte_keys {
-		keys = append(keys, string(key))
-	}
-	return keys, nil
 }
 
 func (s *SetStructure) Stop() error {
