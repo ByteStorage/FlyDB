@@ -405,7 +405,7 @@ type FSetWithTTL struct {
 
 // setSetToDB
 func (s *SetStructure) setSetToDB(key []byte, zSetValue *FSets, ttl time.Duration) error {
-	// 创建新的结构体实例，包含zSetValue和TTL值
+	// create a new zSetValueWithTTL struct
 	var expire int64 = 0
 
 	if ttl != 0 {
@@ -418,7 +418,7 @@ func (s *SetStructure) setSetToDB(key []byte, zSetValue *FSets, ttl time.Duratio
 	}
 
 	val := encoding.NewMessagePackEncoder()
-	err := val.Encode(valueWithTTL) // 编码包含zSetValue和TTL的新的结构体
+	err := val.Encode(valueWithTTL) // Encode the value along with TTL
 	if err != nil {
 		return err
 	}
