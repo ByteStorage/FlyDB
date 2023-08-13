@@ -6,6 +6,7 @@ import (
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
+	"regexp"
 )
 
 type SetStructure struct {
@@ -224,11 +225,22 @@ func (s *SetStructure) SDiff(keys ...string) ([]string, error) {
 }
 
 // Keys returns all the keys of the set structure
-func (s *SetStructure) Keys() ([]string, error) {
+func (s *SetStructure) Keys(regx string) ([]string, error) {
+	toRegexp := convertToRegexp(regx)
+	compile, err := regexp.Compile(toRegexp)
+	if err != nil {
+		return nil, err
+	}
 	var keys []string
-	byte_keys := s.db.GetListKeys()
-	for _, key := range byte_keys {
-		keys = append(keys, string(key))
+	byteKeys := s.db.GetListKeys()
+	for _, key := range byteKeys {
+		if compile.MatchString(string(key)) {
+			// check if deleted
+			if !s.exists(string(key)) {
+				continue
+			}
+			keys = append(keys, string(key))
+		}
 	}
 	return keys, nil
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"reflect"
+	"regexp"
 	"time"
 
 	"encoding/gob"
@@ -432,11 +433,27 @@ func (l *ListStructure) LIndex(key string, index int) (interface{}, error) {
 }
 
 // Keys returns all the keys of the list structure.
-func (l *ListStructure) Keys() ([]string, error) {
+func (l *ListStructure) Keys(regx string) ([]string, error) {
+	toRegexp := convertToRegexp(regx)
+	compile, err := regexp.Compile(toRegexp)
+	if err != nil {
+		return nil, err
+	}
 	var keys []string
-	byte_keys := l.db.GetListKeys()
-	for _, key := range byte_keys {
-		keys = append(keys, string(key))
+	byteKeys := l.db.GetListKeys()
+	for _, key := range byteKeys {
+		// match prefix and key
+		if compile.MatchString(string(key)) {
+			// check if deleted
+			db, _, err := l.getListFromDB(string(key), true)
+			if err != nil {
+				continue
+			}
+			if db.Length == 0 {
+				continue
+			}
+			keys = append(keys, string(key))
+		}
 	}
 	return keys, nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -1158,21 +1159,41 @@ func (hs *HashStructure) HTypes(k string, f interface{}) (string, error) {
 //
 // []string: A list of field names in the hash.
 // error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) Keys() []string {
+func (hs *HashStructure) Keys(regx string) ([]string, error) {
+	toRegexp := convertToRegexp(regx)
+	compile, err := regexp.Compile(toRegexp)
+	if err != nil {
+		return nil, err
+	}
 	// Get all the keys from the database
-	byte_keys := hs.db.GetListKeys()
+	byteKeys := hs.db.GetListKeys()
 
 	// Create a new slice of strings
 	keys := make([]string, 0)
 
-	for _, key := range byte_keys {
-		// Check if the key has the identifier suffix
-		if !keysIdentify(key) {
-			keys = append(keys, string(key))
+	for _, key := range byteKeys {
+		if compile.MatchString(string(key)) {
+			// Check if the key has the identifier suffix
+			if !keysIdentify(key) {
+				fields := hs.GetFields(string(key))
+				ok := true
+				for _, field := range fields {
+					_, err := hs.HGet(string(key), field)
+					if err != nil {
+						ok = false
+						break
+					}
+				}
+				if !ok {
+					continue
+				}
+				keys = append(keys, string(key))
+			}
 		}
+
 	}
 
-	return keys
+	return keys, nil
 }
 
 // GetFields returns a list of all field names in the hash stored at the specified key.

@@ -553,6 +553,22 @@ func TestHashStructure_GetFields(t *testing.T) {
 	fields2 := hash.GetFields("qqqqqq")
 	assert.Equal(t, fields2, []string{"!qqq!1", "!qqq!2", "!qqq!3"})
 
+	keys, err := hash.Keys("*")
+	assert.Nil(t, err)
+	assert.Equal(t, keys, []string{"qqqqqq", "qweqwe"})
+
+	keys, err = hash.Keys("q*")
+	assert.Nil(t, err)
+	assert.Equal(t, keys, []string{"qqqqqq", "qweqwe"})
+
+	keys, err = hash.Keys("qq*")
+	assert.Nil(t, err)
+	assert.Equal(t, keys, []string{"qqqqqq"})
+
+	keys, err = hash.Keys("q?*")
+	assert.Nil(t, err)
+	assert.Equal(t, keys, []string{"qqqqqq", "qweqwe"})
+
 }
 
 func TestHashStructure_HGetAllFieldAndValue(t *testing.T) {
