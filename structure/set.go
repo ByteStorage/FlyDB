@@ -2,11 +2,13 @@ package structure
 
 import (
 	"errors"
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"regexp"
+	"time"
 )
 
 type SetStructure struct {
@@ -33,8 +35,8 @@ func NewSetStructure(options config.Options) (*SetStructure, error) {
 //
 // If the set did not exist, a new set will be created
 // and the member will be added to it.
-func (s *SetStructure) SAdd(key, member string) error {
-	return s.SAdds(key, member)
+func (s *SetStructure) SAdd(key, member string, ttl int64) error {
+	return s.SAdds(key, ttl, member)
 }
 
 /*
@@ -57,30 +59,34 @@ Internal logic:
 
 All the methods like 'getZSetFromDB', 'setZSetToDB', and 'add' handle the lower-level logic associated with database interaction and set manipulation.
 */
-func (s *SetStructure) SAdds(key string, members ...string) error {
+func (s *SetStructure) SAdds(key string, ttl int64, members ...string) error {
 	fs, err := s.checkAndGetSet(key, true)
 	if err != nil {
 		return err
 	}
+	var expirationTime time.Duration
 	fs.add(members...)
-	return s.setSetToDB(stringToBytesWithKey(key), fs)
+	expirationTime = time.Duration(ttl) * time.Second
+	return s.setSetToDB(stringToBytesWithKey(key), fs, expirationTime)
 }
 
 // SRem removes a member from a set
 func (s *SetStructure) SRem(key, member string) error {
-	return s.SRems(key, member)
+	return s.SRems(key, 0, member)
 }
 
 // SRems removes multiple members from a set
-func (s *SetStructure) SRems(key string, members ...string) error {
+func (s *SetStructure) SRems(key string, ttl int64, members ...string) error {
 	fs, err := s.checkAndGetSet(key, false)
 	if err != nil {
 		return err
 	}
+	var expirationTime time.Duration
 	if err = fs.remove(members...); err != nil {
 		return err
 	}
-	return s.setSetToDB(stringToBytesWithKey(key), fs)
+	expirationTime = time.Duration(ttl) * time.Second
+	return s.setSetToDB(stringToBytesWithKey(key), fs, expirationTime)
 }
 
 // SCard gets the cardinality (size) of a set
@@ -268,7 +274,7 @@ func (s *SetStructure) SUnionStore(destination string, keys ...string) error {
 	if err != nil {
 		return err
 	}
-	return s.SAdds(destination, union...)
+	return s.SAdds(destination, 0, union...)
 }
 
 /*
@@ -294,7 +300,7 @@ func (s *SetStructure) SInterStore(destination string, keys ...string) error {
 	if err != nil {
 		return err
 	}
-	return s.SAdds(destination, inter...)
+	return s.SAdds(destination, 0, inter...)
 }
 func (s *SetStructure) checkAndGetSet(key string, createIfNotExist bool) (*FSets, error) {
 	// Check if value is empty
@@ -303,7 +309,7 @@ func (s *SetStructure) checkAndGetSet(key string, createIfNotExist bool) (*FSets
 	}
 	keyBytes := stringToBytesWithKey(key)
 	// Get the list
-	set, err := s.getSetFromDB(keyBytes, createIfNotExist)
+	set, _, err := s.getSetFromDB(keyBytes, createIfNotExist)
 	if err != nil {
 		return nil, err
 	}
@@ -364,32 +370,55 @@ func (s *FSets) remove(member ...string) error {
 
 // GetSetFromDB retrieves a set from database given a key. If createIfNotExist is true,
 // a new set will be created if the key is not found. It returns the file sets and any write error encountered.
-func (s *SetStructure) getSetFromDB(key []byte, createIfNotExist bool) (*FSets, error) {
+func (s *SetStructure) getSetFromDB(key []byte, createIfNotExist bool) (*FSets, int64, error) {
 	if s.db == nil {
-		return nil, ErrSetNotInitialized
+		return nil, 0, ErrSetNotInitialized
 	}
+	var zSetValueWithTTL FSetWithTTL
 	dbData, err := s.db.Get(key)
-	var zSetValue FSets
+
 	// If key is not found, return nil for both; otherwise return the error.
 	if err != nil {
 		if errors.Is(err, _const.ErrKeyNotFound) && createIfNotExist {
-			return &FSets{}, nil
+			return &FSets{}, 0, nil
 		}
-		return nil, err
+		return nil, 0, err
 	} else {
-		err = encoding.NewMessagePackDecoder(dbData).Decode(&zSetValue)
+		err = encoding.NewMessagePackDecoder(dbData).Decode(&zSetValueWithTTL) // Decode the value along with TTL
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
-		return &zSetValue, err
+
+		expiration := zSetValueWithTTL.TTL
+		if expiration != 0 && expiration < time.Now().UnixNano() {
+			return nil, -1, _const.ErrKeyIsExpired
+		}
+
+		return zSetValueWithTTL.ZSet, zSetValueWithTTL.TTL, nil // Return the zSetValue and TTL
 	}
-	// return a pointer to the deserialized ZSetNodes, nil for the error
+}
+
+type FSetWithTTL struct {
+	ZSet *FSets
+	TTL  int64
 }
 
 // setSetToDB
-func (s *SetStructure) setSetToDB(key []byte, zSetValue *FSets) error {
+func (s *SetStructure) setSetToDB(key []byte, zSetValue *FSets, ttl time.Duration) error {
+	// create a new zSetValueWithTTL struct
+	var expire int64 = 0
+
+	if ttl != 0 {
+		expire = time.Now().Add(ttl).UnixNano()
+	}
+
+	valueWithTTL := &FSetWithTTL{
+		ZSet: zSetValue,
+		TTL:  expire,
+	}
+
 	val := encoding.NewMessagePackEncoder()
-	err := val.Encode(zSetValue)
+	err := val.Encode(valueWithTTL) // Encode the value along with TTL
 	if err != nil {
 		return err
 	}
@@ -402,7 +431,7 @@ func (s *SetStructure) exists(key string, member ...string) bool {
 	}
 	keyBytes := stringToBytesWithKey(key)
 
-	zSet, err := s.getSetFromDB(keyBytes, false)
+	zSet, _, err := s.getSetFromDB(keyBytes, false)
 
 	if err != nil {
 		return false
@@ -421,4 +450,61 @@ func (s *FSets) exists(member ...string) bool {
 func (s *SetStructure) Stop() error {
 	err := s.db.Close()
 	return err
+}
+
+func (s *SetStructure) TTL(k string) (int64, error) {
+	keyBytes := stringToBytesWithKey(k)
+	_, expire, err := s.getSetFromDB(keyBytes, false)
+	if err != nil {
+		return -1, err
+	}
+
+	now := time.Now().UnixNano() / int64(time.Second)
+	expire = expire / int64(time.Second)
+
+	remainingTTL := expire - now
+
+	//println("re",remainingTTL)
+	if remainingTTL <= 0 {
+		return 0, nil // Return 0 TTL for expired keys
+	}
+
+	return remainingTTL, nil
+}
+
+func (s *SetStructure) Size(key string) (string, error) {
+
+	members, err := s.SMembers(key)
+	if err != nil {
+		return "", err
+	}
+	var sizeInBytes int
+
+	// Calculate the size of the value
+	for _, v := range members {
+		toString, err := interfaceToString(v)
+		if err != nil {
+			return "", err
+		}
+		sizeInBytes += len(toString)
+	}
+
+	// Convert bytes to corresponding units (KB, MB...)
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
 }
