@@ -1128,16 +1128,16 @@ func TestSetStructure_Keys(t *testing.T) {
 	set, _ := initTestSetDb()
 	defer set.db.Clean()
 
-	err = set.SAdd("testKey11", "non1")
+	err = set.SAdd("testKey11", "non1", 0)
 	assert.Nil(t, err)
 
-	err = set.SAdd("testKey12", "non1")
+	err = set.SAdd("testKey12", "non1", 0)
 	assert.Nil(t, err)
 
-	err = set.SAdd("testKey3", "non1")
+	err = set.SAdd("testKey3", "non1", 0)
 	assert.Nil(t, err)
 
-	err = set.SAdd("testKey4", "non1")
+	err = set.SAdd("testKey4", "non1", 0)
 	assert.Nil(t, err)
 
 	keys, err := set.Keys("*")
