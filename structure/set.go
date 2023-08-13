@@ -8,6 +8,7 @@ import (
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"time"
+	"regexp"
 )
 
 type SetStructure struct {
@@ -227,6 +228,28 @@ func (s *SetStructure) SDiff(keys ...string) ([]string, error) {
 	}
 
 	return diffMembers, nil
+}
+
+
+// Keys returns all the keys of the set structure
+func (s *SetStructure) Keys(regx string) ([]string, error) {
+	toRegexp := convertToRegexp(regx)
+	compile, err := regexp.Compile(toRegexp)
+	if err != nil {
+		return nil, err
+	}
+	var keys []string
+	byteKeys := s.db.GetListKeys()
+	for _, key := range byteKeys {
+		if compile.MatchString(string(key)) {
+			// check if deleted
+			if !s.exists(string(key)) {
+				continue
+			}
+			keys = append(keys, string(key))
+		}
+	}
+	return keys, nil
 }
 
 // SUnionStore calculates and stores the union of multiple sets
