@@ -379,16 +379,32 @@ func TestListStructure_Keys(t *testing.T) {
 	list, _ := initList()
 	defer list.db.Clean()
 
-	listErr = list.LPush("1", randkv.RandomValue(100), 0)
+	listErr = list.LPush("111", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
-	listErr = list.LPush("2", randkv.RandomValue(100), 0)
+	listErr = list.LPush("122", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
-	listErr = list.LPush("q", randkv.RandomValue(100), 0)
+	listErr = list.LPush("123", randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
 
-	keys, err := list.Keys()
+	keys, err := list.Keys("*")
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 3)
+
+	keys, err = list.Keys("1*")
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 3)
+
+	keys, err = list.Keys("12*")
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 2)
+
+	keys, err = list.Keys("123")
+	assert.Nil(t, err)
+	assert.Equal(t, len(keys), 1)
+
+	keys, err = list.Keys("1?*")
 	assert.Nil(t, err)
 	assert.Equal(t, len(keys), 3)
 }

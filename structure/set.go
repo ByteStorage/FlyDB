@@ -7,6 +7,7 @@ import (
 	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
+	"regexp"
 	"time"
 )
 
@@ -229,6 +230,27 @@ func (s *SetStructure) SDiff(keys ...string) ([]string, error) {
 	return diffMembers, nil
 }
 
+// Keys returns all the keys of the set structure
+func (s *SetStructure) Keys(regx string) ([]string, error) {
+	toRegexp := convertToRegexp(regx)
+	compile, err := regexp.Compile(toRegexp)
+	if err != nil {
+		return nil, err
+	}
+	var keys []string
+	byteKeys := s.db.GetListKeys()
+	for _, key := range byteKeys {
+		if compile.MatchString(string(key)) {
+			// check if deleted
+			if !s.exists(string(key)) {
+				continue
+			}
+			keys = append(keys, string(key))
+		}
+	}
+	return keys, nil
+}
+
 // SUnionStore calculates and stores the union of multiple sets
 // in a destination set.
 //
@@ -385,7 +407,7 @@ type FSetWithTTL struct {
 
 // setSetToDB
 func (s *SetStructure) setSetToDB(key []byte, zSetValue *FSets, ttl time.Duration) error {
-	// 创建新的结构体实例，包含zSetValue和TTL值
+	// create a new zSetValueWithTTL struct
 	var expire int64 = 0
 
 	if ttl != 0 {
@@ -398,7 +420,7 @@ func (s *SetStructure) setSetToDB(key []byte, zSetValue *FSets, ttl time.Duratio
 	}
 
 	val := encoding.NewMessagePackEncoder()
-	err := val.Encode(valueWithTTL) // 编码包含zSetValue和TTL的新的结构体
+	err := val.Encode(valueWithTTL) // Encode the value along with TTL
 	if err != nil {
 		return err
 	}
@@ -425,15 +447,6 @@ func (s *FSets) exists(member ...string) bool {
 		}
 	}
 	return true
-}
-
-func (s *SetStructure) Keys() ([]string, error) {
-	var keys []string
-	byte_keys := s.db.GetListKeys()
-	for _, key := range byte_keys {
-		keys = append(keys, string(key))
-	}
-	return keys, nil
 }
 
 func (s *SetStructure) Stop() error {
