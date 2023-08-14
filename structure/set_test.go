@@ -70,7 +70,7 @@ func TestSetStructure_Size(t *testing.T) {
 	assert.Equal(t, value, "10B")
 }
 
-func TestSetStructure_DeleteKey(t *testing.T) {
+func TestSetStructure_SDel(t *testing.T) {
 	set, _ := initTestSetDb()
 	defer set.db.Clean()
 
@@ -80,7 +80,7 @@ func TestSetStructure_DeleteKey(t *testing.T) {
 	err = set.SAdd("2", "1233", 0)
 	assert.Nil(t, err)
 
-	err := set.DeleteKey("2")
+	err := set.SDel("2")
 	assert.Nil(t, err)
 
 	_, err = set.SMembers("2")

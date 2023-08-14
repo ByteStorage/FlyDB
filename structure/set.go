@@ -511,7 +511,7 @@ func (s *SetStructure) Size(key string) (string, error) {
 	return size, nil
 }
 
-func (s *SetStructure) DeleteKey(key string) error {
+func (s *SetStructure) SDel(key string) error {
 	byteKey := stringToBytesWithKey(key)
 	err := s.db.Delete(byteKey)
 	if err != nil {
