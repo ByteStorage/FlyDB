@@ -280,6 +280,7 @@ func (s *SetStructure) SInterStore(destination string, keys ...string) error {
 	}
 	return s.SAdds(destination, 0, inter...)
 }
+
 func (s *SetStructure) checkAndGetSet(key string, createIfNotExist bool) (*FSets, error) {
 	// Check if value is empty
 	if err := checkKey(key); err != nil {
@@ -300,6 +301,7 @@ func (s *SetStructure) checkAndGetSet(key string, createIfNotExist bool) (*FSets
 // add adds new elements to the set data structure (FSets).
 // It allows one or more string parameters. If an element already exists, it won't be added again.
 func (s *FSets) add(member ...string) {
+
 	for _, m := range member {
 		// Check if the member to be added already exists in the FSets or not.
 		// existence of the element in the FSets needs to be checked, not the value.
@@ -494,4 +496,13 @@ func (s *SetStructure) Size(key string) (string, error) {
 	}
 
 	return size, nil
+}
+
+func (s *SetStructure) DeleteKey(key string) error {
+	byteKey := stringToBytesWithKey(key)
+	err := s.db.Delete(byteKey)
+	if err != nil {
+		return err
+	}
+	return nil
 }
