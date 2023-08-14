@@ -483,9 +483,9 @@ func TestHashStructure_Size(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, ok2)
 
-	value, err := hash.Size("1", "field1", "field2")
+	value, err := hash.Size("1")
 	assert.Nil(t, err)
-	assert.Equal(t, value, "10B")
+	assert.Equal(t, value, "22B")
 
 }
 
