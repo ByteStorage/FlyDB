@@ -5,6 +5,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
+	_ "net/http/pprof"
 	"os"
 	"testing"
 	"time"
@@ -15,7 +16,7 @@ func TestPutAndGet(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "flydb-benchmark")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := NewDbWal(opts, 100000)
+	db, err := NewDbWal(opts, 10000000)
 	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)

@@ -1,18 +1,21 @@
 package wal
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/engine"
 	"os"
+	"sync"
 )
 
 type DbWal struct {
-	log   *OpLog
+	log   *SequentialLogger
 	db    *engine.DB
 	ch    chan func()
 	cache *Cache // add lru cache
 	dir   string
+	w     *sync.WaitGroup
 }
 
 func NewDbWal(option config.Options, cacheCapacity int) (*DbWal, error) {
@@ -21,7 +24,7 @@ func NewDbWal(option config.Options, cacheCapacity int) (*DbWal, error) {
 		return nil, err
 	}
 
-	log, err := NewOpLog(option.DirPath + "/wal")
+	log, err := NewSequentialLogger(option.DirPath + "/log")
 	if err != nil {
 		return nil, err
 	}
@@ -29,9 +32,10 @@ func NewDbWal(option config.Options, cacheCapacity int) (*DbWal, error) {
 	d := &DbWal{
 		log:   log,
 		db:    db,
-		ch:    make(chan func(), 1000),
+		ch:    make(chan func(), 1000000),
 		cache: NewCache(cacheCapacity),
 		dir:   option.DirPath,
+		w:     &sync.WaitGroup{},
 	}
 
 	go d.asyncWorker()
@@ -45,12 +49,17 @@ func (d *DbWal) asyncWorker() {
 }
 
 func (d *DbWal) PutByWal(key []byte, value []byte) error {
-	logMsg := fmt.Sprintf("put key=%s, value=%s", key, value)
-	err := d.log.WriteEntry(logMsg)
+	keySize := len(key)
+	valueSize := len(value)
+	logMsg := make([]byte, 4+4+keySize+valueSize) // Assuming 4 bytes for each size
+	binary.BigEndian.PutUint32(logMsg[0:4], uint32(keySize))
+	binary.BigEndian.PutUint32(logMsg[4:8], uint32(valueSize))
+	copy(logMsg[8:8+keySize], key)
+	copy(logMsg[8+keySize:], value)
+	err := d.log.Write(string(logMsg))
 	if err != nil {
 		return err
 	}
-
 	// update cache
 	d.cache.Put(key, value)
 
@@ -60,7 +69,7 @@ func (d *DbWal) PutByWal(key []byte, value []byte) error {
 			fmt.Printf("Error updating DB: %v\n", err) // Log the error
 		}
 	}
-	return nil
+	return err
 }
 
 func (d *DbWal) GetByWal(key []byte) ([]byte, error) {
@@ -86,6 +95,10 @@ func (d *DbWal) Clean() {
 	if d.db != nil {
 		_ = d.db.Close()
 		err := os.RemoveAll(d.dir)
+		if err != nil {
+			panic(err)
+		}
+		err = d.log.Flush()
 		if err != nil {
 			panic(err)
 		}

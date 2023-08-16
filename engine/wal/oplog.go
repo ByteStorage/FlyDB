@@ -3,48 +3,30 @@ package wal
 import (
 	"bufio"
 	"os"
-	"sync"
 )
 
-type OpLog struct {
-	fileName string
-	file     *os.File
-	writer   *bufio.Writer
-	mu       sync.Mutex
+type SequentialLogger struct {
+	file   *os.File
+	writer *bufio.Writer
 }
 
-func NewOpLog(fileName string) (*OpLog, error) {
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+func NewSequentialLogger(filepath string) (*SequentialLogger, error) {
+	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
 	}
 
-	return &OpLog{
-		fileName: fileName,
-		file:     file,
-		writer:   bufio.NewWriter(file),
+	return &SequentialLogger{
+		file:   f,
+		writer: bufio.NewWriter(f),
 	}, nil
 }
 
-func (o *OpLog) WriteEntry(entry string) error {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-
-	_, err := o.writer.WriteString(entry + "\n")
-	if err != nil {
-		return err
-	}
-
-	// You can decide when to flush. It can be after every write, or periodically.
-	return o.writer.Flush()
+func (sl *SequentialLogger) Write(data string) error {
+	_, err := sl.writer.WriteString(data + "\n")
+	return err
 }
 
-func (o *OpLog) Close() error {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-
-	if err := o.writer.Flush(); err != nil {
-		return err
-	}
-	return o.file.Close()
+func (sl *SequentialLogger) Flush() error {
+	return sl.writer.Flush()
 }
