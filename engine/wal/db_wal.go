@@ -74,14 +74,16 @@ func (d *DbWal) GetByWal(key []byte) ([]byte, error) {
 	return d.db.Get(key)
 }
 
+func (d *DbWal) Close() error {
+	close(d.ch)
+	d.w.Wait()
+	return d.log.Flush()
+}
+
 func (d *DbWal) Clean() {
 	if d.db != nil {
 		_ = d.db.Close()
 		err := os.RemoveAll(d.dir)
-		if err != nil {
-			panic(err)
-		}
-		err = d.log.Flush()
 		if err != nil {
 			panic(err)
 		}
