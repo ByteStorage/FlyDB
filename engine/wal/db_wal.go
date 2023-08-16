@@ -60,8 +60,6 @@ func (d *DbWal) PutByWal(key []byte, value []byte) error {
 	if err != nil {
 		return err
 	}
-	// update cache
-	d.cache.Put(key, value)
 
 	// sync update db
 	d.ch <- func() {
@@ -73,22 +71,7 @@ func (d *DbWal) PutByWal(key []byte, value []byte) error {
 }
 
 func (d *DbWal) GetByWal(key []byte) ([]byte, error) {
-	// get from cache
-	value, found := d.cache.Get(key)
-	if found {
-		return value, nil
-	}
-
-	// if not found in cache, get from disk
-	valueFromDisk, err := d.db.Get(key)
-	if err != nil {
-		return nil, err
-	}
-
-	// update cache
-	d.cache.Put(key, valueFromDisk)
-
-	return valueFromDisk, nil
+	return d.db.Get(key)
 }
 
 func (d *DbWal) Clean() {
