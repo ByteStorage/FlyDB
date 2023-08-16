@@ -30,7 +30,7 @@ func NewSetService(options config.Options) (SetService, error) {
 }
 
 func (s *set) SAdd(ctx context.Context, req *gset.SAddRequest) (*gset.EmptyResponse, error) {
-	err := s.dbs.SAdd(req.Key, req.Member)
+	err := s.dbs.SAdd(req.Key, req.Member, 0)
 	if err != nil {
 		return &gset.EmptyResponse{}, err
 	}
@@ -39,7 +39,7 @@ func (s *set) SAdd(ctx context.Context, req *gset.SAddRequest) (*gset.EmptyRespo
 
 func (s *set) SAdds(ctx context.Context, req *gset.SAddsRequest) (*gset.EmptyResponse, error) {
 	for _, member := range req.Members {
-		err := s.dbs.SAdd(req.Key, member)
+		err := s.dbs.SAdd(req.Key, member, 0)
 		if err != nil {
 			return &gset.EmptyResponse{}, err
 		}
@@ -56,7 +56,7 @@ func (s *set) SRem(ctx context.Context, req *gset.SRemRequest) (*gset.EmptyRespo
 }
 
 func (s *set) SRems(ctx context.Context, req *gset.SRemsRequest) (*gset.EmptyResponse, error) {
-	err := s.dbs.SRems(req.Key, req.Members...)
+	err := s.dbs.SRems(req.Key, 0, req.Members...)
 	if err != nil {
 		return &gset.EmptyResponse{}, err
 	}

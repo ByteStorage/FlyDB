@@ -25,14 +25,7 @@ func TestListStructure_TTL(t *testing.T) {
 	list, _ := initList()
 	defer list.db.Clean()
 
-	//err := list.LPush("1", "123123", 0)
-	//assert.Nil(t, err)
-	//
-	//ttl, err := list.TTL("1")
-	//assert.Nil(t, err)
-	//assert.Equal(t, ttl, int64(0))
-
-	err = list.LPush("2", "123123", 2)
+	err := list.LPush("2", "123123", 2)
 	assert.Nil(t, err)
 
 	ttl, err := list.TTL("2")
@@ -48,6 +41,28 @@ func TestListStructure_TTL(t *testing.T) {
 	ttl, err = list.TTL("1")
 	assert.NotNil(t, err)
 	assert.Equal(t, ttl, int64(-1))
+
+	err = list.LPush("1", "123123", 0)
+	assert.Nil(t, err)
+
+	ttl1, err := list.TTL("1")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl1, int64(0))
+}
+
+func TestListStructure_Size(t *testing.T) {
+	list, _ := initList()
+	defer list.db.Clean()
+
+	err = list.LPush("2", "123123", 0)
+	assert.Nil(t, err)
+
+	err = list.LPush("2", "1233", 0)
+	assert.Nil(t, err)
+
+	value, err := list.Size("2")
+	assert.Nil(t, err)
+	assert.Equal(t, value, "10B")
 }
 
 func TestListStructure_LPush(t *testing.T) {
@@ -109,6 +124,7 @@ func TestListStructure_LPop(t *testing.T) {
 	// Test LPop function when the key exists
 	listErr = list.LPush(string(randkv.GetTestKey(1)), randkv.RandomValue(100), 0)
 	assert.Nil(t, listErr)
+	listErr = list.LPush(string(randkv.GetTestKey(1)), "www", 0)
 	value, err := list.LPop(string(randkv.GetTestKey(1)))
 	assert.Nil(t, err)
 	assert.NotNil(t, value)

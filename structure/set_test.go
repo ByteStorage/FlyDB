@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 )
 
 func initTestSetDb() (*SetStructure, *config.Options) {
@@ -18,6 +19,72 @@ func initTestSetDb() (*SetStructure, *config.Options) {
 	opts.DirPath = dir
 	str, _ := NewSetStructure(opts)
 	return str, &opts
+}
+
+func TestSetStructure_TTL(t *testing.T) {
+	set, _ := initTestSetDb()
+	defer set.db.Clean()
+
+	//err := set.SAdd("1", "123123", 0)
+	//assert.Nil(t, err)
+	//
+	//ttl, err := set.TTL("1")
+	//assert.Nil(t, err)
+	//assert.Equal(t, ttl, int64(0))
+
+	err = set.SAdd("2", "123123", 2)
+	assert.Nil(t, err)
+
+	ttl, err := set.TTL("2")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(2))
+
+	time.Sleep(1 * time.Second)
+	ttl, err = set.TTL("2")
+	assert.Nil(t, err)
+	assert.Equal(t, ttl, int64(1))
+
+	time.Sleep(2 * time.Second)
+	ttl, err = set.TTL("1")
+	assert.NotNil(t, err)
+	assert.Equal(t, ttl, int64(-1))
+	_, err = set.SIsMember("2", "123123")
+	if err != nil {
+		return
+	}
+	assert.Equal(t, err, _const.ErrKeyIsExpired)
+}
+
+func TestSetStructure_Size(t *testing.T) {
+	set, _ := initTestSetDb()
+	defer set.db.Clean()
+
+	err = set.SAdd("2", "123123", 0)
+	assert.Nil(t, err)
+
+	err = set.SAdd("2", "1233", 0)
+	assert.Nil(t, err)
+
+	value, err := set.Size("2")
+	assert.Nil(t, err)
+	assert.Equal(t, value, "10B")
+}
+
+func TestSetStructure_SDel(t *testing.T) {
+	set, _ := initTestSetDb()
+	defer set.db.Clean()
+
+	err = set.SAdd("2", "123123", 0)
+	assert.Nil(t, err)
+
+	err = set.SAdd("2", "1233", 0)
+	assert.Nil(t, err)
+
+	err := set.SDel("2")
+	assert.Nil(t, err)
+
+	_, err = set.SMembers("2")
+	assert.Equal(t, err, _const.ErrKeyNotFound)
 }
 
 func TestSAdd(t *testing.T) {
@@ -29,6 +96,7 @@ func TestSAdd(t *testing.T) {
 		membersAdd  []string
 		membersWant []string
 		wantErr     error
+		ttl         int64
 	}{
 		{
 			name:        "test when key empty",
@@ -37,6 +105,7 @@ func TestSAdd(t *testing.T) {
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{},
 			wantErr:     _const.ErrKeyIsEmpty,
+			ttl:         0,
 		},
 		{
 			name:        "test add two members",
@@ -45,16 +114,18 @@ func TestSAdd(t *testing.T) {
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{"key1", "key2"},
 			wantErr:     nil,
+			ttl:         0,
 		},
 		{
 			name: "test add three members one duplicate",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key2")
+				_ = s.SAdds("destination", 0, "key2")
 			},
 			key:         "destination",
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{"key1", "key2"},
 			wantErr:     nil,
+			ttl:         0,
 		},
 		{
 			name: "test add db not init",
@@ -65,6 +136,7 @@ func TestSAdd(t *testing.T) {
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{"key1", "key2"},
 			wantErr:     ErrSetNotInitialized,
+			ttl:         0,
 		},
 	}
 
@@ -74,7 +146,7 @@ func TestSAdd(t *testing.T) {
 			tt.setup(s)
 			// Call the method with test case parameters.
 			for _, s2 := range tt.membersAdd {
-				err := s.SAdd(tt.key, s2)
+				err := s.SAdd(tt.key, s2, tt.ttl)
 				if !errors.Is(err, tt.wantErr) {
 					t.Errorf("SRems() error = %v, wantErr %v", err, tt.wantErr)
 				}
@@ -97,6 +169,7 @@ func TestSAdds(t *testing.T) {
 		membersAdd  []string
 		membersWant []string
 		wantErr     error
+		ttl         int64
 	}{
 		{
 			name:        "test when key empty",
@@ -105,6 +178,7 @@ func TestSAdds(t *testing.T) {
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{},
 			wantErr:     _const.ErrKeyIsEmpty,
+			ttl:         0,
 		},
 		{
 			name:        "test add two members",
@@ -113,16 +187,18 @@ func TestSAdds(t *testing.T) {
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{"key1", "key2"},
 			wantErr:     nil,
+			ttl:         0,
 		},
 		{
 			name: "test add three members one duplicate",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key2")
+				_ = s.SAdds("destination", 0, "key2")
 			},
 			key:         "destination",
 			membersAdd:  []string{"key1", "key2"},
 			membersWant: []string{"key1", "key2"},
 			wantErr:     nil,
+			ttl:         0,
 		},
 	}
 
@@ -131,7 +207,7 @@ func TestSAdds(t *testing.T) {
 			s, _ := initTestSetDb()
 			tt.setup(s)
 			// Call the method with test case parameters.
-			err := s.SAdds(tt.key, tt.membersAdd...)
+			err := s.SAdds(tt.key, tt.ttl, tt.membersAdd...)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("SRems() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -152,6 +228,7 @@ func TestSRems(t *testing.T) {
 		membersRem  []string
 		membersWant []string
 		wantErr     error
+		ttl         int64
 	}{
 		{
 			name:        "test empty key ",
@@ -160,6 +237,7 @@ func TestSRems(t *testing.T) {
 			membersRem:  []string{"key1", "key2"},
 			membersWant: []string{},
 			wantErr:     _const.ErrKeyIsEmpty,
+			ttl:         0,
 		},
 		{
 			name:        "test when key not found",
@@ -168,36 +246,40 @@ func TestSRems(t *testing.T) {
 			membersRem:  []string{"key1", "key2"},
 			membersWant: []string{},
 			wantErr:     _const.ErrKeyNotFound,
+			ttl:         0,
 		},
 		{
 			name: "test when remove one key",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key1", "key2")
+				_ = s.SAdds("destination", 0, "key1", "key2")
 			},
 			key:         "destination",
 			membersRem:  []string{"key1"},
 			membersWant: []string{"key2"},
 			wantErr:     nil,
+			ttl:         0,
 		},
 		{
 			name: "test remove all keys",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key1", "key2")
+				_ = s.SAdds("destination", 0, "key1", "key2")
 			},
 			key:         "destination",
 			membersRem:  []string{"key1", "key1"},
 			membersWant: []string{},
 			wantErr:     nil,
+			ttl:         0,
 		},
 		{
 			name: "test remove FSets that don't exist",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key1", "key2")
+				_ = s.SAdds("destination", 0, "key1", "key2")
 			},
 			key:         "destination",
 			membersRem:  []string{"key10", "key11"},
 			membersWant: []string{},
 			wantErr:     ErrMemberNotFound,
+			ttl:         0,
 		},
 	}
 
@@ -206,7 +288,7 @@ func TestSRems(t *testing.T) {
 			s, _ := initTestSetDb()
 			tt.setup(s)
 			// Call the method with test case parameters.
-			err := s.SRems(tt.key, tt.membersRem...)
+			err := s.SRems(tt.key, tt.ttl, tt.membersRem...)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("SRems() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -241,7 +323,7 @@ func TestSRem(t *testing.T) {
 		{
 			name: "test when remove one key",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key1", "key2")
+				_ = s.SAdds("destination", 0, "key1", "key2")
 			},
 			key:         "destination",
 			membersRem:  []string{"key1"},
@@ -251,7 +333,7 @@ func TestSRem(t *testing.T) {
 		{
 			name: "test remove all keys",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "key3", "key4")
+				_ = s.SAdds("destination", 0, "key3", "key4")
 			},
 			key:         "destination",
 			membersRem:  []string{"key3", "key4"},
@@ -300,7 +382,7 @@ func TestSCard(t *testing.T) {
 		{
 			name: "test two members",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "mem1", "mem2")
+				_ = s.SAdds("destination", 0, "mem1", "mem2")
 			},
 			key:     "destination",
 			want:    2,
@@ -309,7 +391,7 @@ func TestSCard(t *testing.T) {
 		{
 			name: "test  three members one duplicate",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "mem1", "mem2", "mem1")
+				_ = s.SAdds("destination", 0, "mem1", "mem2", "mem1")
 			},
 			key:     "destination",
 			want:    2,
@@ -348,7 +430,7 @@ func TestSMembers(t *testing.T) {
 		{
 			name: "test two members",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "mem1", "mem2")
+				_ = s.SAdds("destination", 0, "mem1", "mem2")
 			},
 			key:     "destination",
 			want:    []string{"mem1", "mem2"},
@@ -357,7 +439,7 @@ func TestSMembers(t *testing.T) {
 		{
 			name: "test  three members one duplicate",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "mem1", "mem2", "mem1")
+				_ = s.SAdds("destination", 0, "mem1", "mem2", "mem1")
 			},
 			key:     "destination",
 			want:    []string{"mem1", "mem2"},
@@ -399,7 +481,7 @@ func TestSIsMember(t *testing.T) {
 		{
 			name: "test two members, is member",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "mem1", "mem2")
+				_ = s.SAdds("destination", 0, "mem1", "mem2")
 			},
 			key:     "destination",
 			member:  "mem2",
@@ -409,7 +491,7 @@ func TestSIsMember(t *testing.T) {
 		{
 			name: "test  three members, not member",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("destination", "mem1", "mem2", "mem1")
+				_ = s.SAdds("destination", 0, "mem1", "mem2", "mem1")
 			},
 			key:     "destination",
 			member:  "mem3",
@@ -456,8 +538,8 @@ func TestSUnion(t *testing.T) {
 		{
 			name: "test two members",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1", "mem2")
-				_ = s.SAdds("key2", "mem1", "mem2")
+				_ = s.SAdds("key1", 0, "mem1", "mem2")
+				_ = s.SAdds("key2", 0, "mem1", "mem2")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem1", "mem2"},
@@ -466,8 +548,8 @@ func TestSUnion(t *testing.T) {
 		{
 			name: "test  three members ",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1")
-				_ = s.SAdds("key2", "mem3")
+				_ = s.SAdds("key1", 0, "mem2", "mem1")
+				_ = s.SAdds("key2", 0, "mem3")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem1", "mem2", "mem3"},
@@ -521,7 +603,7 @@ func TestSInter(t *testing.T) {
 		{
 			name: "test when first keys found but second not found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1")
+				_ = s.SAdds("key1", 0, "mem1")
 			},
 			keys:    []string{"key1", "notfound"},
 			want:    nil,
@@ -530,8 +612,8 @@ func TestSInter(t *testing.T) {
 		{
 			name: "test two members",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1", "mem2")
-				_ = s.SAdds("key2", "mem1", "mem2")
+				_ = s.SAdds("key1", 0, "mem1", "mem2")
+				_ = s.SAdds("key2", 0, "mem1", "mem2")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem1", "mem2"},
@@ -540,8 +622,8 @@ func TestSInter(t *testing.T) {
 		{
 			name: "test three members with no intersect",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1")
-				_ = s.SAdds("key2", "mem3")
+				_ = s.SAdds("key1", 0, "mem2", "mem1")
+				_ = s.SAdds("key2", 0, "mem3")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    nil,
@@ -550,9 +632,9 @@ func TestSInter(t *testing.T) {
 		{
 			name: "test three keys  with one intersect",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1", "mem3", "mem4")
-				_ = s.SAdds("key2", "mem3")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2", "mem1", "mem3", "mem4")
+				_ = s.SAdds("key2", 0, "mem3")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key1", "key2", "key3"},
 			want:    []string{"mem3"},
@@ -606,7 +688,7 @@ func TestSDiff(t *testing.T) {
 		{
 			name: "test when first keys found but second not found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1")
+				_ = s.SAdds("key1", 0, "mem1")
 			},
 			keys:    []string{"key1", "notfound"},
 			want:    nil,
@@ -615,8 +697,8 @@ func TestSDiff(t *testing.T) {
 		{
 			name: "test two members no diff",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1", "mem2")
-				_ = s.SAdds("key2", "mem1", "mem2")
+				_ = s.SAdds("key1", 0, "mem1", "mem2")
+				_ = s.SAdds("key2", 0, "mem1", "mem2")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    nil,
@@ -625,8 +707,8 @@ func TestSDiff(t *testing.T) {
 		{
 			name: "test three members with two diffs",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1")
-				_ = s.SAdds("key2", "mem3")
+				_ = s.SAdds("key1", 0, "mem2", "mem1")
+				_ = s.SAdds("key2", 0, "mem3")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem2", "mem1"},
@@ -635,9 +717,9 @@ func TestSDiff(t *testing.T) {
 		{
 			name: "test three keys  with five three",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1", "mem3", "mem4")
-				_ = s.SAdds("key2", "mem3")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2", "mem1", "mem3", "mem4")
+				_ = s.SAdds("key2", 0, "mem3")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key1", "key2", "key3"},
 			want:    []string{"mem1", "mem2", "mem4"},
@@ -646,9 +728,9 @@ func TestSDiff(t *testing.T) {
 		{
 			name: "test three keys  with no diffs",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1", "mem3", "mem4")
-				_ = s.SAdds("key2", "mem3")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2", "mem1", "mem3", "mem4")
+				_ = s.SAdds("key2", 0, "mem3")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key2", "key1", "key3"}, // the first key here will be `key2`
 			want:    nil,
@@ -703,7 +785,7 @@ func TestSInterStore(t *testing.T) {
 		{
 			name: "test when first keys found but second not found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1")
+				_ = s.SAdds("key1", 0, "mem1")
 			},
 			keys:    []string{"key1", "notfound"},
 			want:    nil,
@@ -712,8 +794,8 @@ func TestSInterStore(t *testing.T) {
 		{
 			name: "test two members no two",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1", "mem2")
-				_ = s.SAdds("key2", "mem1", "mem2")
+				_ = s.SAdds("key1", 0, "mem1", "mem2")
+				_ = s.SAdds("key2", 0, "mem1", "mem2")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem1", "mem2"},
@@ -722,8 +804,8 @@ func TestSInterStore(t *testing.T) {
 		{
 			name: "test three members with no intersect",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1")
-				_ = s.SAdds("key2", "mem3")
+				_ = s.SAdds("key1", 0, "mem2", "mem1")
+				_ = s.SAdds("key2", 0, "mem3")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    nil,
@@ -732,9 +814,9 @@ func TestSInterStore(t *testing.T) {
 		{
 			name: "test three keys  with one intersect",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1", "mem3", "mem4")
-				_ = s.SAdds("key2", "mem3")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2", "mem1", "mem3", "mem4")
+				_ = s.SAdds("key2", 0, "mem3")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key1", "key2", "key3"},
 			want:    []string{"mem3"},
@@ -743,9 +825,9 @@ func TestSInterStore(t *testing.T) {
 		{
 			name: "test three keys with two intersect",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem5", "mem3", "mem4")
-				_ = s.SAdds("key2", "mem3", "mem5")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2", "mem5", "mem3", "mem4")
+				_ = s.SAdds("key2", 0, "mem3", "mem5")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key2", "key1", "key3"}, // the first key here will be `key2`
 			want:    []string{"mem3", "mem5"},
@@ -802,7 +884,7 @@ func TestSUnionStore(t *testing.T) {
 		{
 			name: "test when first keys found but second not found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1")
+				_ = s.SAdds("key1", 0, "mem1")
 			},
 			keys:    []string{"key1", "notfound"},
 			want:    nil,
@@ -811,8 +893,8 @@ func TestSUnionStore(t *testing.T) {
 		{
 			name: "test two members no diff",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem1", "mem2")
-				_ = s.SAdds("key2", "mem1", "mem2")
+				_ = s.SAdds("key1", 0, "mem1", "mem2")
+				_ = s.SAdds("key2", 0, "mem1", "mem2")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem1", "mem2"},
@@ -821,8 +903,8 @@ func TestSUnionStore(t *testing.T) {
 		{
 			name: "test three members with two diffs",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1")
-				_ = s.SAdds("key2", "mem3")
+				_ = s.SAdds("key1", 0, "mem2", "mem1")
+				_ = s.SAdds("key2", 0, "mem3")
 			},
 			keys:    []string{"key1", "key2"},
 			want:    []string{"mem2", "mem1", "mem3"},
@@ -831,9 +913,9 @@ func TestSUnionStore(t *testing.T) {
 		{
 			name: "test three keys  with five three",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2")
-				_ = s.SAdds("key2", "mem3")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2")
+				_ = s.SAdds("key2", 0, "mem3")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key1", "key2", "key3"},
 			want:    []string{"mem2", "mem3", "mem5", "mem6"},
@@ -842,9 +924,9 @@ func TestSUnionStore(t *testing.T) {
 		{
 			name: "test three keys  with no diffs",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("key1", "mem2", "mem1", "mem3", "mem4")
-				_ = s.SAdds("key2", "mem3")
-				_ = s.SAdds("key3", "mem5", "mem3", "mem6")
+				_ = s.SAdds("key1", 0, "mem2", "mem1", "mem3", "mem4")
+				_ = s.SAdds("key2", 0, "mem3")
+				_ = s.SAdds("key3", 0, "mem5", "mem3", "mem6")
 			},
 			keys:    []string{"key2", "key1", "key3"}, // the first key here will be `key2`
 			want:    []string{"mem1", "mem2", "mem3", "mem4", "mem5", "mem6"},
@@ -902,7 +984,7 @@ func TestSetStructure_exists(t *testing.T) {
 		{
 			name: "test Set with no members  found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("testKey", "non1", "non2")
+				_ = s.SAdds("testKey", 0, "non1", "non2")
 			},
 			key:     "testKey",
 			members: []string{"key1", "key2"},
@@ -911,7 +993,7 @@ func TestSetStructure_exists(t *testing.T) {
 		{
 			name: "test Set with partial members found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("testKey", "key1", "non2")
+				_ = s.SAdds("testKey", 0, "key1", "non2")
 			},
 			key:     "testKey",
 			members: []string{"key1", "key2"},
@@ -920,7 +1002,7 @@ func TestSetStructure_exists(t *testing.T) {
 		{
 			name: "test Set with all members found",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("testKey", "key1", "non2", "key2")
+				_ = s.SAdds("testKey", 0, "key1", "non2", "key2")
 			},
 			key:     "testKey",
 			members: []string{"key1", "key2"},
@@ -929,7 +1011,7 @@ func TestSetStructure_exists(t *testing.T) {
 		{
 			name: "test Set key empty",
 			setup: func(s *SetStructure) {
-				_ = s.SAdds("testKey", "key1", "non2", "key2")
+				_ = s.SAdds("testKey", 0, "key1", "non2", "key2")
 			},
 			key:     "",
 			members: []string{"key1", "key2"},
@@ -1062,16 +1144,16 @@ func TestSetStructure_Keys(t *testing.T) {
 	set, _ := initTestSetDb()
 	defer set.db.Clean()
 
-	err = set.SAdd("testKey11", "non1")
+	err = set.SAdd("testKey11", "non1", 0)
 	assert.Nil(t, err)
 
-	err = set.SAdd("testKey12", "non1")
+	err = set.SAdd("testKey12", "non1", 0)
 	assert.Nil(t, err)
 
-	err = set.SAdd("testKey3", "non1")
+	err = set.SAdd("testKey3", "non1", 0)
 	assert.Nil(t, err)
 
-	err = set.SAdd("testKey4", "non1")
+	err = set.SAdd("testKey4", "non1", 0)
 	assert.Nil(t, err)
 
 	keys, err := set.Keys("*")
