@@ -2,11 +2,12 @@ package wal
 
 import (
 	"bufio"
+	"github.com/ByteStorage/FlyDB/engine/fileio"
 	"os"
 )
 
 type SequentialLogger struct {
-	file   *os.File
+	m      *fileio.MMapIO
 	writer *bufio.Writer
 }
 
@@ -16,8 +17,9 @@ func NewSequentialLogger(filepath string) (*SequentialLogger, error) {
 		return nil, err
 	}
 
+	manager, err := fileio.NewMMapIOManager(filepath, 1024*1024*1024)
 	return &SequentialLogger{
-		file:   f,
+		m:      manager,
 		writer: bufio.NewWriter(f),
 	}, nil
 }
