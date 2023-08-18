@@ -3,7 +3,7 @@ package structure
 import (
 	"bytes"
 	"errors"
-	"github.com/ByteStorage/FlyDB/engine/engine"
+	"fmt"
 	"reflect"
 	"regexp"
 	"time"
@@ -11,10 +11,11 @@ import (
 	"encoding/gob"
 
 	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/engine/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 )
 
-// Due to the complexity of each operation is at least O(n)
+// ListStructure Due to the complexity of each operation is at least O(n)
 // So we can directly use slice to implement the list at the bottom level
 // If the implementation of the db is improved later, we need to switch to a linked list
 type ListStructure struct {
@@ -711,10 +712,13 @@ func (l *ListStructure) decodeList(value []byte) (*DecodedList, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	expiration := expiredItem.Expiration
+
 	if expiration != 0 && expiration < time.Now().UnixNano() {
 		return nil, _const.ErrKeyIsExpired
 	}
+
 	decodedList := &DecodedList{
 		List:       &lst,
 		Expiration: expiration, // Calculate remaining time
@@ -726,4 +730,41 @@ func (l *ListStructure) decodeList(value []byte) (*DecodedList, error) {
 func (s *ListStructure) Stop() error {
 	err := s.db.Close()
 	return err
+}
+
+func (l *ListStructure) Size(key string) (string, error) {
+	Llen, err := l.LLen(key)
+	if err != nil {
+		return "", err
+	}
+	lRange, err := l.LRange(key, 0, Llen-1)
+	if err != nil {
+		return "", err
+	}
+	var sizeInBytes int
+	for _, v := range lRange {
+		toString, err := interfaceToString(v)
+		if err != nil {
+			return "", err
+		}
+		sizeInBytes += len(toString)
+	}
+	// Convert bytes to corresponding units (KB, MB...)
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+		GB = 1 << 30
+	)
+
+	var size string
+	switch {
+	case sizeInBytes < KB:
+		size = fmt.Sprintf("%dB", sizeInBytes)
+	case sizeInBytes < MB:
+		size = fmt.Sprintf("%.2fKB", float64(sizeInBytes)/KB)
+	case sizeInBytes < GB:
+		size = fmt.Sprintf("%.2fMB", float64(sizeInBytes)/MB)
+	}
+
+	return size, nil
 }
