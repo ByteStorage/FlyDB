@@ -586,7 +586,7 @@ func (l *ListStructure) getListFromDB(key string, isKeyCanNotExist bool) (*list,
 			if len(dbData) != 0 {
 				return nil, 0, err
 			} else {
-				decodedList = &DecodedList{List: &list{nil, 0}, Expiration: -1}
+				decodedList = &DecodedList{List: &list{nil, 0}, Expiration: 0}
 			}
 		}
 		return decodedList.List, decodedList.Expiration, nil
