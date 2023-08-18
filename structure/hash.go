@@ -60,18 +60,18 @@ func NewHashStructure(options config.Options) (*HashStructure, error) {
 // - The function creates a new HashField containing the field details and encodes it.
 // - The function uses a write batch to efficiently commit changes to the database.
 // - It returns a boolean indicating whether the field was newly created or updated.
-func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
+func (hs *HashStructure) HSet(key string, field, value interface{}) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return false, err
 	}
 
 	// Convert the parameters to bytes
-	value, err, valueType := interfaceToBytes(v)
+	v, err, valueType := interfaceToBytes(value)
 
 	if err != nil {
 		return false, err
@@ -85,20 +85,20 @@ func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
 	hs.HashFieldType = fieldType
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
+	if len(k) == 0 || len(f) == 0 || len(v) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
 
 	// Create a new HashField
 	hf := &HashField{
-		key:     key,
-		field:   field,
+		key:     k,
+		field:   f,
 		version: hashMeta.version,
 	}
 
@@ -119,11 +119,11 @@ func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
 	// If the field is not found, increase the counter
 	if !exist {
 		hashMeta.counter++
-		_ = batch.Put(key, hashMeta.encodeHashMeta())
+		_ = batch.Put(k, hashMeta.encodeHashMeta())
 	}
 
 	// Put the field to the database
-	_ = batch.Put(hfBuf, value)
+	_ = batch.Put(hfBuf, v)
 
 	// Commit the write batch
 	err = batch.Commit()
@@ -156,29 +156,29 @@ func (hs *HashStructure) HSet(k string, f, v interface{}) (bool, error) {
 // - Retrieves the byte data from the database using the HashStructure instance's database object.
 // - The retrieved byte data is converted back to the corresponding data type.
 // - Returns the value corresponding to the field and any possible error.
-func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
+func (hs *HashStructure) HGet(key string, field interface{}) (interface{}, error) {
 	// check the key ttl
-	ttl, _ := hs.TTL(k)
+	ttl, _ := hs.TTL(key)
 	if ttl == -1 {
 		return nil, _const.ErrKeyIsExpired
 	}
 
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return nil, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(string(key), Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return nil, err
 	}
@@ -190,8 +190,8 @@ func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -228,31 +228,31 @@ func (hs *HashStructure) HGet(k string, f interface{}) (interface{}, error) {
 //
 //	[]interface{}: An array of interface{} containing values corresponding to the fields.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error) {
+func (hs *HashStructure) HMGet(key string, field ...interface{}) ([]interface{}, error) {
 	// check the key ttl
-	ttl, _ := hs.TTL(k)
+	ttl, _ := hs.TTL(key)
 	if ttl == -1 {
 		return nil, _const.ErrKeyIsExpired
 	}
 
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 	var interfaces []interface{}
 
-	for _, fi := range f {
+	for _, fi := range field {
 		// Convert the parameters to bytes
-		field, err, _ := interfaceToBytes(fi)
+		f, err, _ := interfaceToBytes(fi)
 		if err != nil {
 			return nil, err
 		}
 
 		// Check the parameters
-		if len(key) == 0 || len(field) == 0 {
+		if len(k) == 0 || len(f) == 0 {
 			return nil, _const.ErrKeyIsEmpty
 		}
 
 		// Find the hash metadata by the given key
-		hashMeta, err := hs.findHashMeta(k, Hash)
+		hashMeta, err := hs.findHashMeta(key, Hash)
 		if err != nil {
 			return nil, err
 		}
@@ -264,8 +264,8 @@ func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error
 
 		// Create a new HashField
 		hf := &HashField{
-			field:   field,
-			key:     key,
+			field:   f,
+			key:     k,
 			version: hashMeta.version,
 		}
 
@@ -305,23 +305,23 @@ func (hs *HashStructure) HMGet(k string, f ...interface{}) ([]interface{}, error
 //
 //	bool: True if the field was deleted successfully, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HDel(k string, f interface{}) (bool, error) {
+func (hs *HashStructure) HDel(key string, field interface{}) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return false, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
@@ -333,8 +333,8 @@ func (hs *HashStructure) HDel(k string, f interface{}) (bool, error) {
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -357,7 +357,7 @@ func (hs *HashStructure) HDel(k string, f interface{}) (bool, error) {
 	hashMeta.counter--
 
 	// Put the updated hash metadata to the database
-	_ = batch.Put(key, hashMeta.encodeHashMeta())
+	_ = batch.Put(k, hashMeta.encodeHashMeta())
 
 	// Commit the write batch
 	err = batch.Commit()
@@ -380,17 +380,17 @@ func (hs *HashStructure) HDel(k string, f interface{}) (bool, error) {
 //
 //	bool: True if the hash was deleted successfully, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HDelAll(k string) (bool, error) {
+func (hs *HashStructure) HDelAll(key string) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Check the parameters
-	if len(key) == 0 {
+	if len(k) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
@@ -404,7 +404,7 @@ func (hs *HashStructure) HDelAll(k string) (bool, error) {
 	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
 
 	// Delete the field from the database
-	_ = batch.Delete(key)
+	_ = batch.Delete(k)
 
 	// Commit the write batch
 	err = batch.Commit()
@@ -428,17 +428,17 @@ func (hs *HashStructure) HDelAll(k string) (bool, error) {
 //
 //	bool: True if the timeout was set successfully, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HExpire(k string, ttl int64) (bool, error) {
+func (hs *HashStructure) HExpire(key string, ttl int64) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Check the parameters
-	if len(key) == 0 {
+	if len(k) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
@@ -453,7 +453,7 @@ func (hs *HashStructure) HExpire(k string, ttl int64) (bool, error) {
 
 	// Put the updated hash metadata to the database
 	hashMeta.expire = time.Now().Add(time.Duration(ttl) * time.Second).UnixNano()
-	_ = batch.Put(key, hashMeta.encodeHashMeta())
+	_ = batch.Put(k, hashMeta.encodeHashMeta())
 
 	// Commit the write batch
 	err = batch.Commit()
@@ -477,23 +477,23 @@ func (hs *HashStructure) HExpire(k string, ttl int64) (bool, error) {
 //
 //	bool: True if the field exists, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HExists(k string, f interface{}) (bool, error) {
+func (hs *HashStructure) HExists(key string, field interface{}) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return false, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
@@ -505,8 +505,8 @@ func (hs *HashStructure) HExists(k string, f interface{}) (bool, error) {
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -533,17 +533,17 @@ func (hs *HashStructure) HExists(k string, f interface{}) (bool, error) {
 //
 //	int: The number of fields in the hash.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HLen(k string) (int, error) {
+func (hs *HashStructure) HLen(key string) (int, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Check the parameters
-	if len(key) == 0 {
+	if len(k) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return 0, err
 	}
@@ -570,28 +570,28 @@ func (hs *HashStructure) HLen(k string) (int, error) {
 //
 //	bool: True if the update was successful, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HUpdate(k string, f, v interface{}) (bool, error) {
+func (hs *HashStructure) HUpdate(key string, field, value interface{}) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return false, err
 	}
 
 	// Convert the parameters to bytes
-	value, err, _ := interfaceToBytes(v)
+	v, err, _ := interfaceToBytes(value)
 	if err != nil {
 		return false, err
 	}
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
+	if len(k) == 0 || len(f) == 0 || len(v) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
@@ -603,8 +603,8 @@ func (hs *HashStructure) HUpdate(k string, f, v interface{}) (bool, error) {
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -621,7 +621,7 @@ func (hs *HashStructure) HUpdate(k string, f, v interface{}) (bool, error) {
 	batch := hs.db.NewWriteBatch(config.DefaultWriteBatchOptions)
 
 	// Put the field to the database
-	_ = batch.Put(hfBuf, value)
+	_ = batch.Put(hfBuf, v)
 
 	// Commit the write batch
 	err = batch.Commit()
@@ -646,23 +646,23 @@ func (hs *HashStructure) HUpdate(k string, f, v interface{}) (bool, error) {
 //
 //	int64: The updated value of the field after increment.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HIncrBy(k string, f interface{}, increment int64) (int64, error) {
+func (hs *HashStructure) HIncrBy(key string, field interface{}, increment int64) (int64, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return 0, err
 	}
@@ -674,8 +674,8 @@ func (hs *HashStructure) HIncrBy(k string, f interface{}, increment int64) (int6
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -729,23 +729,23 @@ func (hs *HashStructure) HIncrBy(k string, f interface{}, increment int64) (int6
 //
 //	float64: The updated value of the field after increment.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HIncrByFloat(k string, f interface{}, increment float64) (float64, error) {
+func (hs *HashStructure) HIncrByFloat(key string, field interface{}, increment float64) (float64, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return 0, err
 	}
@@ -757,8 +757,8 @@ func (hs *HashStructure) HIncrByFloat(k string, f interface{}, increment float64
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -812,23 +812,23 @@ func (hs *HashStructure) HIncrByFloat(k string, f interface{}, increment float64
 //
 //	int64: The updated value of the field after decrement.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HDecrBy(k string, f interface{}, decrement int64) (int64, error) {
+func (hs *HashStructure) HDecrBy(key string, field interface{}, decrement int64) (int64, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return 0, err
 	}
@@ -840,8 +840,8 @@ func (hs *HashStructure) HDecrBy(k string, f interface{}, decrement int64) (int6
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -893,23 +893,23 @@ func (hs *HashStructure) HDecrBy(k string, f interface{}, decrement int64) (int6
 //
 //	int: The length of the field's value.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HStrLen(k string, f interface{}) (int, error) {
+func (hs *HashStructure) HStrLen(key string, field interface{}) (int, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return 0, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return 0, err
 	}
@@ -921,8 +921,8 @@ func (hs *HashStructure) HStrLen(k string, f interface{}) (int, error) {
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -952,15 +952,15 @@ func (hs *HashStructure) HStrLen(k string, f interface{}) (int, error) {
 //
 //	bool: True if the move was successful, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HMove(source, destination string, f interface{}) (bool, error) {
+func (hs *HashStructure) HMove(source, destination string, field interface{}) (bool, error) {
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return false, err
 	}
 
 	// Check the parameters
-	if len(source) == 0 || len(destination) == 0 || len(field) == 0 {
+	if len(source) == 0 || len(destination) == 0 || len(f) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
@@ -988,7 +988,7 @@ func (hs *HashStructure) HMove(source, destination string, f interface{}) (bool,
 
 	// Create a new HashField for the source
 	hf := &HashField{
-		field:   field,
+		field:   f,
 		key:     []byte(source),
 		version: sourceMeta.version,
 	}
@@ -998,7 +998,7 @@ func (hs *HashStructure) HMove(source, destination string, f interface{}) (bool,
 
 	// Create a new HashField for the destination
 	destinationHf := &HashField{
-		field:   field,
+		field:   f,
 		key:     []byte(destination),
 		version: destinationMeta.version,
 	}
@@ -1044,37 +1044,37 @@ func (hs *HashStructure) HMove(source, destination string, f interface{}) (bool,
 //
 //	bool: True if the field was set, false otherwise.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HSetNX(k string, f, v interface{}) (bool, error) {
+func (hs *HashStructure) HSetNX(key string, field, value interface{}) (bool, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return false, err
 	}
 
 	// Convert the parameters to bytes
-	value, err, _ := interfaceToBytes(v)
+	v, err, _ := interfaceToBytes(value)
 	if err != nil {
 		return false, err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 || len(value) == 0 {
+	if len(k) == 0 || len(f) == 0 || len(v) == 0 {
 		return false, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return false, err
 	}
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -1084,7 +1084,7 @@ func (hs *HashStructure) HSetNX(k string, f, v interface{}) (bool, error) {
 	// Get the field from the database
 	_, err = hs.db.Get(hfBuf)
 	if err != nil && err == _const.ErrKeyNotFound {
-		_, err := hs.HSet(k, field, value)
+		_, err := hs.HSet(key, field, value)
 		if err != nil {
 			return false, err
 		}
@@ -1107,23 +1107,23 @@ func (hs *HashStructure) HSetNX(k string, f, v interface{}) (bool, error) {
 //
 //	string: The type of the field. Possible values: "hash" (if the field exists), or an empty string.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HTypes(k string, f interface{}) (string, error) {
+func (hs *HashStructure) HTypes(key string, field interface{}) (string, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Convert the parameters to bytes
-	field, err, _ := interfaceToBytes(f)
+	f, err, _ := interfaceToBytes(field)
 	if err != nil {
 		return "", err
 	}
 
 	// Check the parameters
-	if len(key) == 0 || len(field) == 0 {
+	if len(k) == 0 || len(f) == 0 {
 		return "", _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return "", err
 	}
@@ -1135,8 +1135,8 @@ func (hs *HashStructure) HTypes(k string, f interface{}) (string, error) {
 
 	// Create a new HashField
 	hf := &HashField{
-		field:   field,
-		key:     key,
+		field:   f,
+		key:     k,
 		version: hashMeta.version,
 	}
 
@@ -1207,18 +1207,18 @@ func (hs *HashStructure) Keys(regx string) ([]string, error) {
 // Returns:
 //
 // []string: A list of field names in the hash.
-func (hs *HashStructure) GetFields(k string) []string {
+func (hs *HashStructure) GetFields(key string) []string {
 	// Get all the keys from the database
 	byte_keys := hs.db.GetListKeys()
 
 	// Create a new slice of strings
 	fields := make([]string, 0)
 
-	for _, key := range byte_keys {
+	for _, k := range byte_keys {
 		// Check if the key has the identifier suffix
-		if keysIdentify(key) {
-			hf, _ := decodeHashField(key)
-			if string(hf.key) == k {
+		if keysIdentify(k) {
+			hf, _ := decodeHashField(k)
+			if string(hf.key) == key {
 				fields = append(fields, string(hf.field))
 			}
 		}
@@ -1239,13 +1239,13 @@ func (hs *HashStructure) GetFields(k string) []string {
 //
 // map[string]interface{}: A map of field names and their values.
 // error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) HGetAllFieldAndValue(k string) (map[string]interface{}, error) {
-	fields := hs.GetFields(k)
+func (hs *HashStructure) HGetAllFieldAndValue(key string) (map[string]interface{}, error) {
+	fields := hs.GetFields(key)
 
 	filedAndValue := make(map[string]interface{}, 0)
 
 	for _, field := range fields {
-		v, err := hs.HGet(k, field)
+		v, err := hs.HGet(key, field)
 		if err != nil {
 			return nil, err
 		}
@@ -1279,14 +1279,14 @@ func keysIdentify(key []byte) bool {
 //
 //	int64: The remaining TTL in seconds. Returns 0 if the key has expired or doesn't exist.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) TTL(k string) (int64, error) {
+func (hs *HashStructure) TTL(key string) (int64, error) {
 	// Check the parameters
-	if len(k) == 0 {
+	if len(key) == 0 {
 		return -1, _const.ErrKeyIsEmpty
 	}
 
 	// Find the hash metadata by the given key
-	hashMeta, err := hs.findHashMeta(k, Hash)
+	hashMeta, err := hs.findHashMeta(key, Hash)
 	if err != nil {
 		return -1, err
 	}
@@ -1324,21 +1324,18 @@ func (hs *HashStructure) TTL(k string) (int64, error) {
 //
 //	string: A formatted string indicating the size of the field.
 //	error: An error if occurred during the operation, or nil on success.
-func (hs *HashStructure) Size(k string, f ...interface{}) (string, error) {
-	value, err := hs.HMGet(k, f...)
+func (hs *HashStructure) Size(key string) (string, error) {
+	// Get all fields and values
+	keysAndValues, err := hs.HGetAllFieldAndValue(key)
 	if err != nil {
 		return "", err
 	}
 
 	var sizeInBytes int
 
-	// Calculate the size of the value
-	for _, v := range value {
-		toString, err := interfaceToString(v)
-		if err != nil {
-			return "", err
-		}
-		sizeInBytes += len(toString)
+	// Calculate the size
+	for f, v := range keysAndValues {
+		sizeInBytes += len(f) + len(v.(string))
 	}
 
 	// Convert bytes to corresponding units (KB, MB...)
@@ -1362,12 +1359,12 @@ func (hs *HashStructure) Size(k string, f ...interface{}) (string, error) {
 }
 
 // findHashMeta finds the hash metadata by the given key.
-func (hs *HashStructure) findHashMeta(k string, dataType DataStructure) (*HashMetadata, error) {
+func (hs *HashStructure) findHashMeta(key string, dataType DataStructure) (*HashMetadata, error) {
 	// Convert the parameters to bytes
-	key := stringToBytesWithKey(k)
+	k := stringToBytesWithKey(key)
 
 	// Find the hash metadata by the given key
-	meta, err := hs.db.Get(key)
+	meta, err := hs.db.Get(k)
 	if err != nil && err != _const.ErrKeyNotFound {
 		return nil, err
 	}

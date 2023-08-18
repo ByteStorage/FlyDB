@@ -17,7 +17,7 @@ English | [简体中文](https://github.com/ByteStorage/flydb/blob/master/README
 You can install FlyDB using the Go command line tool:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.13
+go get github.com/ByteStorage/FlyDB@v1.1.0
 ```
 
 Or clone this project from github:
