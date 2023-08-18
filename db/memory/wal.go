@@ -3,9 +3,10 @@ package memory
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/ByteStorage/FlyDB/db/fileio"
 	"hash/crc32"
 	"time"
+
+	"github.com/ByteStorage/FlyDB/db/fileio"
 )
 
 const (
