@@ -26,7 +26,8 @@ type Db struct {
 	oldList     []*MemTable
 	wal         *Wal
 	oldListChan chan *MemTable
-	size        int64
+	totalSize   int64
+	activeSize  int64
 }
 
 func NewDB(option Options) (*Db, error) {
@@ -49,12 +50,18 @@ func NewDB(option Options) (*Db, error) {
 		option:      option,
 		oldList:     make([]*MemTable, 0),
 		oldListChan: make(chan *MemTable, 1000000),
+		activeSize:  0,
+		totalSize:   0,
 	}
 	go d.async()
 	return d, nil
 }
 
 func (d *Db) Put(key []byte, value []byte) error {
+	// calculate key and value size
+	keyLen := int64(len(key))
+	valueLen := int64(len(value))
+
 	// Write to WAL
 	err := d.wal.Put(key, value)
 	if err != nil {
@@ -70,22 +77,25 @@ func (d *Db) Put(key []byte, value []byte) error {
 	}
 
 	// if all memTable size > total memTable size, write to db
-	if d.size > d.option.TotalMemSize {
+	if d.totalSize > d.option.TotalMemSize {
 		return d.db.Put(key, value)
 	}
 
 	// if active memTable size > define size, change to immutable memTable
-	if d.mem.Size()+int64(len(key)+len(value)) > d.option.MemSize {
+	if d.activeSize+keyLen+valueLen > d.option.MemSize {
 		// add to immutable memTable list
 		d.AddOldMemTable(d.mem)
-		// add to size
-		d.size += d.mem.Size()
 		// create new active memTable
 		d.mem = NewMemTable()
+		d.activeSize = 0
 	}
 
 	// write to active memTable
 	d.mem.Put(string(key), value)
+
+	// add size
+	d.activeSize += keyLen + valueLen
+	d.totalSize += keyLen + valueLen
 	return nil
 }
 
@@ -127,6 +137,11 @@ func (d *Db) async() {
 			if err != nil {
 				// TODO handle error: either log it, retry, or whatever makes sense for your application
 			}
+			d.totalSize -= int64(len(key) + len(value))
 		}
 	}
+}
+
+func (d *Db) Clean() {
+	d.db.Clean()
 }

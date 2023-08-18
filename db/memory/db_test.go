@@ -24,6 +24,7 @@ func TestPutAndGet(t *testing.T) {
 		TotalMemSize: 10 * 1024 * 1024 * 1024,
 	}
 	db, err := NewDB(options)
+	defer db.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, db)
 

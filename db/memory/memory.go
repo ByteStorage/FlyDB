@@ -23,7 +23,6 @@ func (m *MemTable) Put(key string, value []byte) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	m.table[key] = value
-	m.size += int64(len(key) + len(value))
 }
 
 func (m *MemTable) Get(key string) ([]byte, error) {
@@ -43,11 +42,4 @@ func (m *MemTable) Flush(key string) {
 	defer m.mutex.Unlock()
 
 	m.hasFlush[key] = true
-}
-
-func (m *MemTable) Size() int64 {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	return m.size
 }
