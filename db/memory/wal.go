@@ -37,12 +37,12 @@ func NewWal(options Options) (*Wal, error) {
 }
 
 // Put writes a record to the WAL.
-//	+---------+-----------+-----------+----------------+--- ... ---+
-//	|CRC (4B) | Size (2B) | Type (1B) | Log number (4B)| Payload   |
-//	+---------+-----------+-----------+----------------+--- ... ---+
-//	Same as above, with the addition of
-//	Log number = 32bit log file number, so that we can distinguish between
-//	records written by the most recent log writer vs a previous one.
+// +---------+-----------+-----------+----------------+--- ... ---+
+// |CRC (4B) | Size (2B) | Type (1B) | Log number (4B)| Payload   |
+// +---------+-----------+-----------+----------------+--- ... ---+
+// Same as above, with the addition of
+// Log number = 32bit log file number, so that we can distinguish between
+// records written by the most recent log writer vs a previous one.
 func (w *Wal) writeRecord(recordType byte, key, value []byte) error {
 	// Prepare the payload based on record type
 	var payload []byte
