@@ -32,9 +32,14 @@ jobs:
           unformatted=$(gofmt -s -l .)
           if [ "$unformatted" != "" ]; then
             echo "the following files are not formatted:"
-            echo "$unformatted"
+            for file in $unformatted; do
+              echo "$file:"
+              gofmt -s -d "$file"
+              echo "------"
+            done
             exit 1
           fi
+          
       
 
       - name: Lint

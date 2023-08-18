@@ -13,6 +13,9 @@ const (
 	// Record types
 	putType    = byte(1)
 	deleteType = byte(2)
+
+	// File names for WAL
+	walFileName = "/db.wal"
 )
 
 type Wal struct {

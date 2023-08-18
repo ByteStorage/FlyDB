@@ -7,10 +7,6 @@ import (
 	"sync"
 )
 
-const (
-	walFileName = "/db.wal"
-)
-
 type Options struct {
 	Option       config.Options
 	LogNum       uint32
