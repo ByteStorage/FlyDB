@@ -26,6 +26,10 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Install Dependency
         run: sudo apt-get update && sudo apt-get -y install librocksdb-dev
+
+      - name: Clear cache
+        run: go clean -modcache
+
       - name: Check Format
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
 
