@@ -3,7 +3,7 @@ package structure
 import (
 	"errors"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/db/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/stretchr/testify/assert"
 	"os"

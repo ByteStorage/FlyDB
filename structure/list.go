@@ -11,11 +11,11 @@ import (
 	"encoding/gob"
 
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/db/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 )
 
-// Due to the complexity of each operation is at least O(n)
+// ListStructure Due to the complexity of each operation is at least O(n)
 // So we can directly use slice to implement the list at the bottom level
 // If the implementation of the db is improved later, we need to switch to a linked list
 type ListStructure struct {

@@ -2,7 +2,7 @@ package datastore
 
 import (
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/db/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/encoding"
 	"github.com/hashicorp/raft"

@@ -3,7 +3,7 @@ package engine
 import (
 	"bytes"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine/index"
+	"github.com/ByteStorage/FlyDB/db/index"
 )
 
 // Iterator iterator
