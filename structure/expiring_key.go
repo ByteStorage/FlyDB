@@ -2,7 +2,7 @@ package structure
 
 import (
 	"encoding/binary"
-	"github.com/ByteStorage/FlyDB/engine/engine"
+	"github.com/ByteStorage/FlyDB/db/engine"
 	"time"
 
 	"github.com/ByteStorage/FlyDB/config"

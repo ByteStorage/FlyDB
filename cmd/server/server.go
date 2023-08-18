@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
-	base "github.com/ByteStorage/FlyDB/engine/grpc"
+	base "github.com/ByteStorage/FlyDB/db/grpc"
 	"os"
 )
 

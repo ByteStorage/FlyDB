@@ -3,7 +3,7 @@ package base
 import (
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine/grpc/service"
+	"github.com/ByteStorage/FlyDB/db/grpc/service"
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
 	"github.com/ByteStorage/FlyDB/lib/proto/gset"

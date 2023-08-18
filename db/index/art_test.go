@@ -1,7 +1,7 @@
 package index
 
 import (
-	"github.com/ByteStorage/FlyDB/engine/data"
+	"github.com/ByteStorage/FlyDB/db/data"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

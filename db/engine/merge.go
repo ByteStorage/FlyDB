@@ -1,7 +1,7 @@
 package engine
 
 import (
-	data2 "github.com/ByteStorage/FlyDB/engine/data"
+	data2 "github.com/ByteStorage/FlyDB/db/data"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"io"
 	"os"
