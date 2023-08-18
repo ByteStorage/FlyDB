@@ -3,6 +3,7 @@ package structure
 import (
 	"bytes"
 	"errors"
+	"github.com/ByteStorage/FlyDB/engine/engine"
 	"reflect"
 	"regexp"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"encoding/gob"
 
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 )
 

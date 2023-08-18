@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/engine/engine"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"

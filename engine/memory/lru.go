@@ -1,4 +1,4 @@
-package wal
+package memory
 
 import (
 	"container/list"

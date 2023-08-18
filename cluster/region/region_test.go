@@ -2,7 +2,7 @@ package region
 
 import (
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/engine/engine"
 	"github.com/hashicorp/raft"
 	"github.com/stretchr/testify/assert"
 	"os"

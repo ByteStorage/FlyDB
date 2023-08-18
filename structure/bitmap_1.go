@@ -3,10 +3,10 @@ package structure
 import (
 	"encoding/binary"
 	"errors"
+	"github.com/ByteStorage/FlyDB/engine/engine"
 	"sort"
 
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 )
 
