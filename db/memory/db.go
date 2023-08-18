@@ -4,6 +4,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/engine"
 	"strings"
+	"sync"
 )
 
 const (
@@ -28,6 +29,8 @@ type Db struct {
 	oldListChan chan *MemTable
 	totalSize   int64
 	activeSize  int64
+	pool        *sync.Pool
+	errMsgCh    chan []byte
 }
 
 func NewDB(option Options) (*Db, error) {
@@ -52,9 +55,17 @@ func NewDB(option Options) (*Db, error) {
 		oldListChan: make(chan *MemTable, 1000000),
 		activeSize:  0,
 		totalSize:   0,
+		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
 	}
 	go d.async()
 	return d, nil
+}
+
+func (d *Db) handlerErrMsg() {
+	for msg := range d.errMsgCh {
+		// TODO handle error: either log it, retry, or whatever makes sense for your application
+		_ = msg
+	}
 }
 
 func (d *Db) Put(key []byte, value []byte) error {
@@ -62,11 +73,16 @@ func (d *Db) Put(key []byte, value []byte) error {
 	keyLen := int64(len(key))
 	valueLen := int64(len(value))
 
-	// Write to WAL
-	err := d.wal.Put(key, value)
-	if err != nil {
-		return err
-	}
+	d.pool.Put(func() {
+		// Write to WAL
+		err := d.wal.Put(key, value)
+		if err != nil {
+			err := d.wal.Delete(key)
+			if err != nil {
+				d.errMsgCh <- []byte(err.Error())
+			}
+		}
+	})
 
 	// if sync write, save wal
 	if d.option.Option.SyncWrite {
