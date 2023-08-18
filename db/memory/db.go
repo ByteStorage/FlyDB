@@ -1,20 +1,9 @@
 package memory
 
 import (
-	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/engine"
-	"strings"
 	"sync"
 )
-
-type Options struct {
-	Option       config.Options
-	LogNum       uint32
-	FileSize     int64
-	SaveTime     int64
-	MemSize      int64
-	TotalMemSize int64
-}
 
 type Db struct {
 	option      Options
@@ -31,21 +20,15 @@ type Db struct {
 
 func NewDB(option Options) (*Db, error) {
 	mem := NewMemTable()
+	option.Option.DirPath = option.Option.DirPath + "/" + option.ColumnName
 	db, err := engine.NewDB(option.Option)
 	if err != nil {
 		return nil, err
 	}
-	// Create or open the WAL file.
-	option.Option.DirPath = strings.TrimSuffix(option.Option.DirPath, "/")
-	wal, err := NewWal(option)
-	if err != nil {
-		return nil, err
-	}
-	go wal.AsyncSave()
 	d := &Db{
 		mem:         mem,
 		db:          db,
-		wal:         wal,
+		wal:         option.wal,
 		option:      option,
 		oldList:     make([]*MemTable, 0),
 		oldListChan: make(chan *MemTable, 1000000),
@@ -54,6 +37,7 @@ func NewDB(option Options) (*Db, error) {
 		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
 	}
 	go d.async()
+	go d.wal.AsyncSave()
 	return d, nil
 }
 
@@ -128,6 +112,14 @@ func (d *Db) Get(key []byte) ([]byte, error) {
 
 	// if immutable memTable not found, get from db
 	return d.db.Get(key)
+}
+
+func (d *Db) Delete(key []byte) error {
+	panic("implement me")
+}
+
+func (d *Db) Keys() ([][]byte, error) {
+	panic("implement me")
 }
 
 func (d *Db) Close() error {
