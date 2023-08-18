@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/engine"
+	"github.com/ByteStorage/FlyDB/db/engine"
 	"github.com/ByteStorage/FlyDB/flydb"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"math/rand"

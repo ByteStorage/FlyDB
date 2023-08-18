@@ -5,8 +5,8 @@ package engine
 
 import (
 	"github.com/ByteStorage/FlyDB/config"
-	data2 "github.com/ByteStorage/FlyDB/engine/data"
-	"github.com/ByteStorage/FlyDB/engine/index"
+	data2 "github.com/ByteStorage/FlyDB/db/data"
+	"github.com/ByteStorage/FlyDB/db/index"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"go.uber.org/zap"
 	"io"
