@@ -30,6 +30,14 @@ jobs:
       - name: Clear cache
         run: go clean -modcache
 
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Check Format
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
 
