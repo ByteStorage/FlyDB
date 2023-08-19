@@ -5,22 +5,12 @@ import (
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/memory"
+	"github.com/ByteStorage/FlyDB/lib/wal"
 	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
 )
-
-type Options struct {
-	Option       config.Options
-	LogNum       uint32
-	FileSize     int64
-	SaveTime     int64
-	MemSize      int64
-	TotalMemSize int64
-	ColumnName   string
-	Wal          *memory.Wal
-}
 
 // Column is a column family
 type Column interface {
@@ -41,9 +31,15 @@ type Column interface {
 }
 
 // NewColumn create a column family
-func NewColumn(option Options) (Column, error) {
+func NewColumn(option config.ColumnOptions) (Column, error) {
 	// create wal, all column family share a wal
-	wal, err := memory.NewWal(option)
+	walConf := config.WalConfig{
+		DirPath:  option.Option.DirPath,
+		LogNum:   option.LogNum,
+		SaveTime: option.SaveTime,
+		FileSize: option.FileSize,
+	}
+	w, err := wal.NewWal(walConf)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +60,7 @@ func NewColumn(option Options) (Column, error) {
 			option:       option,
 			mux:          sync.RWMutex{},
 			columnFamily: columnFamily,
-			wal:          wal,
+			wal:          w,
 		}, nil
 	}
 
@@ -73,8 +69,18 @@ func NewColumn(option Options) (Column, error) {
 		option.ColumnName = "default"
 	}
 
+	options := config.DbMemoryOptions{
+		Option:       option.Option,
+		LogNum:       option.LogNum,
+		FileSize:     option.FileSize,
+		SaveTime:     option.SaveTime,
+		MemSize:      option.MemSize,
+		TotalMemSize: option.TotalMemSize,
+		ColumnName:   option.ColumnName,
+	}
+
 	// create a new db
-	db, err := memory.NewDB(option)
+	db, err := memory.NewDB(options)
 	if err != nil {
 		return nil, err
 	}
@@ -84,15 +90,15 @@ func NewColumn(option Options) (Column, error) {
 		columnFamily: map[string]*memory.Db{
 			option.ColumnName: db,
 		},
-		wal: wal,
+		wal: w,
 	}, nil
 }
 
 type column struct {
 	mux          sync.RWMutex
-	wal          *memory.Wal
+	wal          *wal.Wal
 	columnFamily map[string]*memory.Db
-	option       Options
+	option       config.ColumnOptions
 }
 
 func (c *column) CreateColumnFamily(name string) error {
@@ -101,7 +107,16 @@ func (c *column) CreateColumnFamily(name string) error {
 	if _, ok := c.columnFamily[name]; ok {
 		return errors.New("column family already exists")
 	}
-	db, err := memory.NewDB(c.option)
+	options := config.DbMemoryOptions{
+		Option:       c.option.Option,
+		LogNum:       c.option.LogNum,
+		FileSize:     c.option.FileSize,
+		SaveTime:     c.option.SaveTime,
+		MemSize:      c.option.MemSize,
+		TotalMemSize: c.option.TotalMemSize,
+		ColumnName:   c.option.ColumnName,
+	}
+	db, err := memory.NewDB(options)
 	if err != nil {
 		return err
 	}
@@ -145,7 +160,7 @@ func (c *column) Keys(cf string) ([][]byte, error) {
 	return c.columnFamily[cf].Keys()
 }
 
-func loadColumn(option Options) (map[string]*memory.Db, error) {
+func loadColumn(option config.ColumnOptions) (map[string]*memory.Db, error) {
 	base := option.Option.DirPath
 	base = strings.Trim(base, "/")
 	// Check if the base path exists
@@ -163,7 +178,16 @@ func loadColumn(option Options) (map[string]*memory.Db, error) {
 			colName := dir.Name()
 			dirPath := base + "/" + colName
 			option.Option.DirPath = dirPath
-			db, err := memory.NewDB(option)
+			options := config.DbMemoryOptions{
+				Option:       option.Option,
+				LogNum:       option.LogNum,
+				FileSize:     option.FileSize,
+				SaveTime:     option.SaveTime,
+				MemSize:      option.MemSize,
+				TotalMemSize: option.TotalMemSize,
+				ColumnName:   option.ColumnName,
+			}
+			db, err := memory.NewDB(options)
 			if err != nil {
 				return nil, err
 			}

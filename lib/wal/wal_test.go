@@ -1,60 +1,30 @@
 package wal
 
 import (
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/db/column"
+	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
-func TestNew(t *testing.T) {
-	wal, err := New()
+func TestWal_Put(t *testing.T) {
+	opt := column.Options{
+		Option:   config.DefaultOptions,
+		LogNum:   100,
+		FileSize: 100 * 1024 * 1024,
+		SaveTime: 100 * 1000,
+	}
+	wal, err := NewWal(opt)
+	defer wal.Close()
 	assert.Nil(t, err)
 	assert.NotNil(t, wal)
-	index, err := wal.log.LastIndex()
-	assert.Nil(t, err)
-	assert.Equal(t, uint64(1), index)
-}
-
-func TestWal_Write(t *testing.T) {
-	wal, err := New()
-	assert.Nil(t, err)
-	index, err := wal.log.LastIndex()
-
-	assert.Nil(t, err)
-	assert.Equal(t, uint64(1), index)
-
-	data := []byte("test data")
-	err = wal.Write(data)
-	assert.Nil(t, err)
-
-	index, err = wal.log.LastIndex()
-	assert.Nil(t, err)
-	assert.Equal(t, uint64(2), index)
-}
-
-func TestWal_Read(t *testing.T) {
-	wal, err := New()
-	assert.Nil(t, err)
-
-	data := []byte("test data")
-	err = wal.Write(data)
-	assert.Nil(t, err)
-
-	index, err := wal.log.LastIndex()
-
-	readData, err := wal.Read(index)
-	assert.Nil(t, err)
-	assert.Equal(t, data, readData)
-}
-
-func TestWal_ReadLast(t *testing.T) {
-	wal, err := New()
-	assert.Nil(t, err)
-
-	data := []byte("test data")
-	err = wal.Write(data)
-	assert.Nil(t, err)
-
-	readData, err := wal.ReadLast()
-	assert.Nil(t, err)
-	assert.Equal(t, data, readData)
+	start := time.Now()
+	for n := 0; n < 500000; n++ {
+		err = wal.Put(randkv.GetTestKey(n), randkv.RandomValue(24))
+		assert.Nil(t, err)
+	}
+	end := time.Now()
+	t.Log("put time: ", end.Sub(start).String())
 }

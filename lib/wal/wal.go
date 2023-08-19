@@ -1,49 +1,113 @@
 package wal
 
 import (
-	"github.com/tidwall/wal"
+	"encoding/binary"
+	"errors"
+	"github.com/ByteStorage/FlyDB/config"
+	"hash/crc32"
+	"time"
+
+	"github.com/ByteStorage/FlyDB/db/fileio"
 )
 
-const FileName = "/tmp/flydb/wal"
+const (
+	// Record types
+	putType    = byte(1)
+	deleteType = byte(2)
 
+	// File names for WAL
+	walFileName = "/db.wal"
+)
+
+// Wal is a write-ahead log.
 type Wal struct {
-	log *wal.Log
+	m        *fileio.MMapIO // MMapIOManager
+	logNum   uint32         // Log number
+	saveTime int64          // Save time
 }
 
-func (w *Wal) Write(data []byte) error {
-	index, err := w.log.LastIndex()
-	if err != nil {
-		return err
-	}
-	return w.log.Write(index+1, data)
-}
-
-func (w *Wal) Read(index uint64) ([]byte, error) {
-	return w.log.Read(index)
-}
-
-func (w *Wal) ReadLast() ([]byte, error) {
-	index, err := w.log.LastIndex()
+// NewWal creates a new WAL.
+func NewWal(options config.WalConfig) (*Wal, error) {
+	mapIO, err := fileio.NewMMapIOManager(options.DirPath+walFileName, options.FileSize)
 	if err != nil {
 		return nil, err
 	}
-	return w.log.Read(index)
+	return &Wal{
+		m:        mapIO,
+		logNum:   options.LogNum,
+		saveTime: options.SaveTime,
+	}, nil
 }
 
-func New() (*Wal, error) {
-	log, err := wal.Open(FileName, nil)
-	if err != nil {
-		return &Wal{}, err
+// Put writes a record to the WAL.
+// +---------+-----------+-----------+----------------+--- ... ---+
+// |CRC (4B) | Size (2B) | Type (1B) | Log number (4B)| Payload   |
+// +---------+-----------+-----------+----------------+--- ... ---+
+// Same as above, with the addition of
+// Log number = 32bit log file number, so that we can distinguish between
+// records written by the most recent log writer vs a previous one.
+func (w *Wal) writeRecord(recordType byte, key, value []byte) error {
+	// Prepare the payload based on record type
+	var payload []byte
+	switch recordType {
+	case putType:
+		payload = append(key, value...)
+	case deleteType:
+		payload = key
+	default:
+		return errors.New("unknown record type")
 	}
-	index, err := log.LastIndex()
-	if err != nil {
-		return &Wal{}, err
-	}
-	if index == 0 {
-		err := log.Write(1, []byte("--------------------"))
+
+	size := uint16(4 + len(payload)) // 4 bytes for log number
+	buffer := make([]byte, 4+2+1+4+len(payload))
+
+	// Compute CRC
+	crc := crc32.ChecksumIEEE(buffer[4:])
+	binary.LittleEndian.PutUint32(buffer, crc)
+
+	// Write size
+	binary.LittleEndian.PutUint16(buffer[4:], size)
+
+	// Write type
+	buffer[4+2] = recordType
+
+	// Write log number
+	binary.LittleEndian.PutUint32(buffer[4+2+1:], w.logNum)
+
+	// Write payload
+	copy(buffer[4+2+1+4:], payload)
+
+	_, err := w.m.Write(buffer)
+	return err
+}
+
+// Put writes a record to the WAL.
+func (w *Wal) Put(key []byte, value []byte) error {
+	return w.writeRecord(putType, key, value)
+}
+
+// Delete writes a delete record to the WAL.
+func (w *Wal) Delete(key []byte) error {
+	return w.writeRecord(deleteType, key, nil)
+}
+
+// Save flushes the WAL to disk.
+func (w *Wal) Save() error {
+	return w.m.Sync()
+}
+
+// Close closes the WAL.
+func (w *Wal) Close() error {
+	return w.m.Close()
+}
+
+// AsyncSave periodically flushes the WAL to disk.
+func (w *Wal) AsyncSave() {
+	for range time.Tick(time.Duration(w.saveTime)) {
+		err := w.Save()
 		if err != nil {
-			return &Wal{}, err
+			// TODO how to fix this error?
+			continue
 		}
 	}
-	return &Wal{log: log}, nil
 }

@@ -1,17 +1,18 @@
 package memory
 
 import (
-	"github.com/ByteStorage/FlyDB/db/column"
+	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/engine"
+	"github.com/ByteStorage/FlyDB/lib/wal"
 	"sync"
 )
 
 type Db struct {
-	option      column.Options
+	option      config.DbMemoryOptions
 	db          *engine.DB
 	mem         *MemTable
 	oldList     []*MemTable
-	wal         *Wal
+	wal         *wal.Wal
 	oldListChan chan *MemTable
 	totalSize   int64
 	activeSize  int64
@@ -19,22 +20,32 @@ type Db struct {
 	errMsgCh    chan []byte
 }
 
-func NewDB(option column.Options) (*Db, error) {
+func NewDB(option config.DbMemoryOptions) (*Db, error) {
 	mem := NewMemTable()
 	option.Option.DirPath = option.Option.DirPath + "/" + option.ColumnName
 	db, err := engine.NewDB(option.Option)
 	if err != nil {
 		return nil, err
 	}
+	walConfig := config.WalConfig{
+		DirPath:  option.Option.DirPath,
+		LogNum:   option.LogNum,
+		FileSize: option.FileSize,
+		SaveTime: option.SaveTime,
+	}
+	newWal, err := wal.NewWal(walConfig)
+	if err != nil {
+		return nil, err
+	}
 	d := &Db{
 		mem:         mem,
 		db:          db,
-		wal:         option.Wal,
 		option:      option,
 		oldList:     make([]*MemTable, 0),
 		oldListChan: make(chan *MemTable, 1000000),
 		activeSize:  0,
 		totalSize:   0,
+		wal:         newWal,
 		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
 	}
 	go d.async()
