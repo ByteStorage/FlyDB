@@ -2,30 +2,43 @@ package memory
 
 import "math"
 
+const (
+	seed = 0xbc9f1d34
+	m    = 0xc6a4a793
+)
+
 // Filter is an encoded set of []byte keys.
 type Filter []byte
 
 // MayContainKey returns whether the filter may contain given key. False positives
 func (f Filter) MayContainKey(k []byte) bool {
-	return f.MayContain(Hash(k))
+	return f.mayContain(Hash(k))
 }
 
 // MayContain returns whether the filter may contain given key. False positives
 // are possible, where it returns true for keys not in the original set.
-func (f Filter) MayContain(h uint32) bool {
+func (f Filter) mayContain(h uint32) bool {
+	// check if the filter is empty
 	if len(f) < 2 {
 		return false
 	}
+	// obtain the number of hash functions
 	k := f[len(f)-1]
+	// if k > 30, this is reserved for potentially new encodings for short Bloom filters.
 	if k > 30 {
 		// This is reserved for potentially new encodings for short Bloom filters.
 		// Consider it a match.
 		return true
 	}
+	// calculate the total number of bits in the filter.
 	nBits := uint32(8 * (len(f) - 1))
+	// change the hash value by right shift and left shift to generate different bit positions for subsequent iterations.
 	delta := h>>17 | h<<15
 	for j := uint8(0); j < k; j++ {
+		// For each hash function, calculate the bit position bitPos
 		bitPos := h % nBits
+		// Check if the corresponding bit has been set.
+		// If the bit has not been set, the key is definitely not in the set, and false is returned.
 		if f[bitPos/8]&(1<<(bitPos%8)) == 0 {
 			return false
 		}
@@ -112,16 +125,16 @@ func extend(b []byte, n int) (overall, trailer []byte) {
 
 // Hash implements a hashing algorithm similar to the Murmur hash.
 func Hash(b []byte) uint32 {
-	const (
-		seed = 0xbc9f1d34
-		m    = 0xc6a4a793
-	)
+	// The original algorithm uses a seed of 0x9747b28c.
 	h := uint32(seed) ^ uint32(len(b))*m
+	// Pick up four bytes at a time.
 	for ; len(b) >= 4; b = b[4:] {
+		// The original algorithm uses the following commented out code to load
 		h += uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24
 		h *= m
 		h ^= h >> 16
 	}
+	// Pick up remaining bytes.
 	switch len(b) {
 	case 3:
 		h += uint32(b[2]) << 16
