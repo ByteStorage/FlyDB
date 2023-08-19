@@ -3,6 +3,7 @@ package memory
 import (
 	"encoding/binary"
 	"errors"
+	"github.com/ByteStorage/FlyDB/db/column"
 	"hash/crc32"
 	"time"
 
@@ -18,13 +19,15 @@ const (
 	walFileName = "/db.wal"
 )
 
+// Wal is a write-ahead log.
 type Wal struct {
-	m        *fileio.MMapIO
-	logNum   uint32
-	saveTime int64
+	m        *fileio.MMapIO // MMapIOManager
+	logNum   uint32         // Log number
+	saveTime int64          // Save time
 }
 
-func NewWal(options Options) (*Wal, error) {
+// NewWal creates a new WAL.
+func NewWal(options column.Options) (*Wal, error) {
 	mapIO, err := fileio.NewMMapIOManager(options.Option.DirPath+walFileName, options.FileSize)
 	if err != nil {
 		return nil, err
@@ -88,14 +91,17 @@ func (w *Wal) Delete(key []byte) error {
 	return w.writeRecord(deleteType, key, nil)
 }
 
+// Save flushes the WAL to disk.
 func (w *Wal) Save() error {
 	return w.m.Sync()
 }
 
+// Close closes the WAL.
 func (w *Wal) Close() error {
 	return w.m.Close()
 }
 
+// AsyncSave periodically flushes the WAL to disk.
 func (w *Wal) AsyncSave() {
 	for range time.Tick(time.Duration(w.saveTime)) {
 		err := w.Save()

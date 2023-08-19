@@ -1,12 +1,13 @@
 package memory
 
 import (
+	"github.com/ByteStorage/FlyDB/db/column"
 	"github.com/ByteStorage/FlyDB/db/engine"
 	"sync"
 )
 
 type Db struct {
-	option      Options
+	option      column.Options
 	db          *engine.DB
 	mem         *MemTable
 	oldList     []*MemTable
@@ -18,7 +19,7 @@ type Db struct {
 	errMsgCh    chan []byte
 }
 
-func NewDB(option Options) (*Db, error) {
+func NewDB(option column.Options) (*Db, error) {
 	mem := NewMemTable()
 	option.Option.DirPath = option.Option.DirPath + "/" + option.ColumnName
 	db, err := engine.NewDB(option.Option)
@@ -28,7 +29,7 @@ func NewDB(option Options) (*Db, error) {
 	d := &Db{
 		mem:         mem,
 		db:          db,
-		wal:         option.wal,
+		wal:         option.Wal,
 		option:      option,
 		oldList:     make([]*MemTable, 0),
 		oldListChan: make(chan *MemTable, 1000000),

@@ -17,4 +17,3 @@ type Api interface {
 
 // Put: We can divide one column to many column families. Each column family has its own memTable and SSTable.
 // Like MySQL divide one table to many partitions. Each partition has its own value and index.
-// 简单来说就是通过列族来模拟的MySQL的分库分表的功能，可以实现并发写入，提高写入性能，例如

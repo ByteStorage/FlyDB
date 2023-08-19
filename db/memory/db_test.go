@@ -3,6 +3,7 @@ package memory
 import (
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/db/column"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -16,7 +17,7 @@ func TestPutAndGet(t *testing.T) {
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 
-	options := Options{
+	options := column.Options{
 		Option:       opts,
 		LogNum:       100,
 		SaveTime:     100 * 1000,
@@ -26,7 +27,7 @@ func TestPutAndGet(t *testing.T) {
 	}
 	wal, err := NewWal(options)
 	assert.Nil(t, err)
-	options.wal = wal
+	options.Wal = wal
 	db, err := NewDB(options)
 	defer db.Clean()
 	assert.Nil(t, err)

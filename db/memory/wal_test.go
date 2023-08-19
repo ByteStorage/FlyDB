@@ -2,6 +2,7 @@ package memory
 
 import (
 	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/db/column"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestWal_Put(t *testing.T) {
-	opt := Options{
+	opt := column.Options{
 		Option:   config.DefaultOptions,
 		LogNum:   100,
 		FileSize: 100 * 1024 * 1024,

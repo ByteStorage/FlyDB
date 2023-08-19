@@ -1,9 +1,10 @@
-package memory
+package column
 
 import (
 	"errors"
 	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/db/memory"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -18,7 +19,7 @@ type Options struct {
 	MemSize      int64
 	TotalMemSize int64
 	ColumnName   string
-	wal          *Wal
+	Wal          *memory.Wal
 }
 
 // Column is a column family
@@ -42,7 +43,7 @@ type Column interface {
 // NewColumn create a column family
 func NewColumn(option Options) (Column, error) {
 	// create wal, all column family share a wal
-	wal, err := NewWal(option)
+	wal, err := memory.NewWal(option)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func NewColumn(option Options) (Column, error) {
 
 	// if column family exists, return it
 	if len(col) > 0 {
-		columnFamily := make(map[string]*Db)
+		columnFamily := make(map[string]*memory.Db)
 		for k, v := range col {
 			columnFamily[k] = v
 		}
@@ -73,14 +74,14 @@ func NewColumn(option Options) (Column, error) {
 	}
 
 	// create a new db
-	db, err := NewDB(option)
+	db, err := memory.NewDB(option)
 	if err != nil {
 		return nil, err
 	}
 	return &column{
 		option: option,
 		mux:    sync.RWMutex{},
-		columnFamily: map[string]*Db{
+		columnFamily: map[string]*memory.Db{
 			option.ColumnName: db,
 		},
 		wal: wal,
@@ -89,8 +90,8 @@ func NewColumn(option Options) (Column, error) {
 
 type column struct {
 	mux          sync.RWMutex
-	wal          *Wal
-	columnFamily map[string]*Db
+	wal          *memory.Wal
+	columnFamily map[string]*memory.Db
 	option       Options
 }
 
@@ -100,7 +101,7 @@ func (c *column) CreateColumnFamily(name string) error {
 	if _, ok := c.columnFamily[name]; ok {
 		return errors.New("column family already exists")
 	}
-	db, err := NewDB(c.option)
+	db, err := memory.NewDB(c.option)
 	if err != nil {
 		return err
 	}
@@ -144,7 +145,7 @@ func (c *column) Keys(cf string) ([][]byte, error) {
 	return c.columnFamily[cf].Keys()
 }
 
-func loadColumn(option Options) (map[string]*Db, error) {
+func loadColumn(option Options) (map[string]*memory.Db, error) {
 	base := option.Option.DirPath
 	base = strings.Trim(base, "/")
 	// Check if the base path exists
@@ -156,13 +157,13 @@ func loadColumn(option Options) (map[string]*Db, error) {
 	if err != nil {
 		return nil, err
 	}
-	columns := make(map[string]*Db)
+	columns := make(map[string]*memory.Db)
 	for _, dir := range dirs {
 		if dir.IsDir() {
 			colName := dir.Name()
 			dirPath := base + "/" + colName
 			option.Option.DirPath = dirPath
-			db, err := NewDB(option)
+			db, err := memory.NewDB(option)
 			if err != nil {
 				return nil, err
 			}
