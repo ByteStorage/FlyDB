@@ -27,6 +27,7 @@ type Db struct {
 	activeSize  int64
 	pool        *sync.Pool
 	errMsgCh    chan string
+	mux         sync.RWMutex
 }
 
 // NewDB create a new db of wal and memTable
@@ -70,6 +71,7 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 		totalSize:   0,
 		wal:         w,
 		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
+		mux:         sync.RWMutex{},
 	}
 
 	// when loading, the system will execute the every record in wal
@@ -92,6 +94,8 @@ func (d *Db) handlerErrMsg() {
 }
 
 func (d *Db) Put(key []byte, value []byte) error {
+	d.mux.Lock()
+	defer d.mux.Unlock()
 	// calculate key and value size
 	keyLen := int64(len(key))
 	valueLen := int64(len(value))
@@ -146,6 +150,8 @@ func (d *Db) Put(key []byte, value []byte) error {
 }
 
 func (d *Db) Get(key []byte) ([]byte, error) {
+	d.mux.RLock()
+	defer d.mux.RUnlock()
 	// first get from memTable
 	value, err := d.mem.Get(string(key))
 	if err == nil {
@@ -165,7 +171,45 @@ func (d *Db) Get(key []byte) ([]byte, error) {
 }
 
 func (d *Db) Delete(key []byte) error {
-	panic("implement me")
+	d.mux.Lock()
+	defer d.mux.Unlock()
+
+	d.pool.Put(func() {
+		// Write to wal, try 3 times
+		ok := false
+		for i := 0; i < 3; i++ {
+			err := d.wal.Delete(key)
+			if err == nil {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			err := d.wal.Delete(key)
+			if err != nil {
+				d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
+			}
+		}
+	})
+	// get from active memTable
+	get, err := d.mem.Get(string(key))
+	if err == nil {
+		d.activeSize -= int64(len(key) + len(get))
+		d.totalSize -= int64(len(key) + len(get))
+		d.mem.Delete(string(key))
+		return nil
+	}
+	// get from immutable memTable
+	for _, list := range d.oldList {
+		get, err = list.Get(string(key))
+		if err == nil {
+			d.totalSize -= int64(len(key) + len(get))
+			list.Delete(string(key))
+			return nil
+		}
+	}
+	// get from db
+	return d.db.Delete(key)
 }
 
 func (d *Db) Keys() ([][]byte, error) {
