@@ -1,8 +1,6 @@
 package wal
 
 import (
-	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/db/column"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -10,14 +8,14 @@ import (
 )
 
 func TestWal_Put(t *testing.T) {
-	opt := column.Options{
-		Option:   config.DefaultOptions,
+	opt := Options{
+		DirPath:  "./wal_test",
 		LogNum:   100,
 		FileSize: 100 * 1024 * 1024,
 		SaveTime: 100 * 1000,
 	}
 	wal, err := NewWal(opt)
-	defer wal.Close()
+	defer wal.Clean()
 	assert.Nil(t, err)
 	assert.NotNil(t, wal)
 	start := time.Now()

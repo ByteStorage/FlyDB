@@ -27,16 +27,20 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 	if err != nil {
 		return nil, err
 	}
-	walConfig := config.WalConfig{
-		DirPath:  option.Option.DirPath,
-		LogNum:   option.LogNum,
-		FileSize: option.FileSize,
-		SaveTime: option.SaveTime,
+	w := option.Wal
+	if option.Wal == nil {
+		walOptions := wal.Options{
+			DirPath:  option.Option.DirPath,
+			FileSize: option.FileSize,
+			SaveTime: option.SaveTime,
+			LogNum:   option.LogNum,
+		}
+		w, err = wal.NewWal(walOptions)
+		if err != nil {
+			return nil, err
+		}
 	}
-	newWal, err := wal.NewWal(walConfig)
-	if err != nil {
-		return nil, err
-	}
+
 	d := &Db{
 		mem:         mem,
 		db:          db,
@@ -45,7 +49,7 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 		oldListChan: make(chan *MemTable, 1000000),
 		activeSize:  0,
 		totalSize:   0,
-		wal:         newWal,
+		wal:         w,
 		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
 	}
 	go d.async()

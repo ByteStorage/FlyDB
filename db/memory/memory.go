@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// MemTable is a in-memory table
+// MemTable is an in-memory table
 type MemTable struct {
 	table map[string][]byte // key -> value
 	mutex sync.RWMutex      // protect table

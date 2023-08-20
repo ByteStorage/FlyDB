@@ -3,8 +3,8 @@ package wal
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/ByteStorage/FlyDB/config"
 	"hash/crc32"
+	"os"
 	"time"
 
 	"github.com/ByteStorage/FlyDB/db/fileio"
@@ -24,11 +24,28 @@ type Wal struct {
 	m        *fileio.MMapIO // MMapIOManager
 	logNum   uint32         // Log number
 	saveTime int64          // Save time
+	dirPath  string
 }
 
 // NewWal creates a new WAL.
-func NewWal(options config.WalConfig) (*Wal, error) {
-	mapIO, err := fileio.NewMMapIOManager(options.DirPath+walFileName, options.FileSize)
+func NewWal(options Options) (*Wal, error) {
+	fileName := options.DirPath + walFileName
+	stat, err := os.Stat(fileName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := os.MkdirAll(options.DirPath, os.ModePerm)
+			if err != nil {
+				return nil, err
+			}
+			_, err = os.Create(fileName)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		options.LogNum = uint32(stat.Size() / options.FileSize)
+	}
+	mapIO, err := fileio.NewMMapIOManager(fileName, options.FileSize)
 	if err != nil {
 		return nil, err
 	}
@@ -36,6 +53,7 @@ func NewWal(options config.WalConfig) (*Wal, error) {
 		m:        mapIO,
 		logNum:   options.LogNum,
 		saveTime: options.SaveTime,
+		dirPath:  options.DirPath,
 	}, nil
 }
 
@@ -99,6 +117,14 @@ func (w *Wal) Save() error {
 // Close closes the WAL.
 func (w *Wal) Close() error {
 	return w.m.Close()
+}
+
+func (w *Wal) Clean() error {
+	err := w.m.Close()
+	if err != nil {
+		return err
+	}
+	return os.RemoveAll(w.dirPath)
 }
 
 // AsyncSave periodically flushes the WAL to disk.

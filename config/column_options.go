@@ -1,11 +1,8 @@
 package config
 
+import "github.com/ByteStorage/FlyDB/lib/wal"
+
 type ColumnOptions struct {
-	Option       Options
-	LogNum       uint32
-	FileSize     int64
-	SaveTime     int64
-	MemSize      int64
-	TotalMemSize int64
-	ColumnName   string
+	DbMemoryOptions DbMemoryOptions
+	WalOptions      wal.Options
 }

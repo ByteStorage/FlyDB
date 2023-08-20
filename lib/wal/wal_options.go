@@ -1,6 +1,6 @@
-package config
+package wal
 
-type WalConfig struct {
+type Options struct {
 	DirPath  string
 	FileSize int64
 	SaveTime int64
