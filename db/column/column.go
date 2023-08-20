@@ -81,11 +81,14 @@ func NewColumn(option config.ColumnOptions) (Column, error) {
 	}, nil
 }
 
+// column is a column family, it contains a wal and a map of column family
+// the map of column family is a map of column family name and column family
+// the wal is a global wal of all column family
 type column struct {
-	mux          sync.RWMutex
-	wal          *wal.Wal
-	columnFamily map[string]*memory.Db
-	option       config.ColumnOptions
+	mux          sync.RWMutex          // protect column family
+	wal          *wal.Wal              // wal of all column family
+	columnFamily map[string]*memory.Db // column family map
+	option       config.ColumnOptions  // column family options
 }
 
 func (c *column) CreateColumnFamily(name string) error {

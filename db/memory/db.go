@@ -4,8 +4,16 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/engine"
 	"github.com/ByteStorage/FlyDB/lib/wal"
+	"io"
+	"log"
 	"os"
 	"sync"
+)
+
+const (
+	// Record types
+	putType    = byte(1)
+	deleteType = byte(2)
 )
 
 type Db struct {
@@ -25,13 +33,16 @@ type Db struct {
 func NewDB(option config.DbMemoryOptions) (*Db, error) {
 	// create a new memTable
 	mem := NewMemTable()
+
 	// dir path has been changed to dir path + column name
 	option.Option.DirPath = option.Option.DirPath + "/" + option.ColumnName
 	db, err := engine.NewDB(option.Option)
 	if err != nil {
 		return nil, err
 	}
+
 	w := option.Wal
+
 	// if wal is nil, create a new wal
 	// if wal is not nil, the wal was created by column family
 	if option.Wal == nil {
@@ -47,6 +58,7 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 		}
 	}
 
+	// initialize db
 	d := &Db{
 		mem:         mem,
 		db:          db,
@@ -58,17 +70,23 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 		wal:         w,
 		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
 	}
+
+	// when loading, the system will execute the every record in wal
+	d.load()
+	// async write to db
 	go d.async()
+	// async save wal
 	go d.wal.AsyncSave()
+	// async handler error message
 	go d.handlerErrMsg()
 	return d, nil
 }
 
 func (d *Db) handlerErrMsg() {
-	log := d.option.Option.DirPath + "/error.log"
+	msgLog := d.option.Option.DirPath + "/error.log"
 	for msg := range d.errMsgCh {
 		// write to log
-		_ = os.WriteFile(log, []byte(msg), 0666)
+		_ = os.WriteFile(msgLog, []byte(msg), 0666)
 	}
 }
 
@@ -111,7 +129,7 @@ func (d *Db) Put(key []byte, value []byte) error {
 	// if active memTable size > define size, change to immutable memTable
 	if d.activeSize+keyLen+valueLen > d.option.MemSize {
 		// add to immutable memTable list
-		d.AddOldMemTable(d.mem)
+		d.addOldMemTable(d.mem)
 		// create new active memTable
 		d.mem = NewMemTable()
 		d.activeSize = 0
@@ -161,16 +179,27 @@ func (d *Db) Close() error {
 	return d.db.Close()
 }
 
-func (d *Db) AddOldMemTable(oldList *MemTable) {
+func (d *Db) addOldMemTable(oldList *MemTable) {
 	d.oldListChan <- oldList
 }
 
 func (d *Db) async() {
 	for oldList := range d.oldListChan {
 		for key, value := range oldList.table {
-			err := d.db.Put([]byte(key), value)
-			if err != nil {
-				// TODO handle error: either log it, retry, or whatever makes sense for your application
+			// Write to db, try 3 times
+			ok := false
+			for i := 0; i < 3; i++ {
+				err := d.db.Put([]byte(key), value)
+				if err == nil {
+					ok = true
+					break
+				}
+			}
+			if !ok {
+				err := d.wal.Delete([]byte(key))
+				if err != nil {
+					d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
+				}
 			}
 			d.totalSize -= int64(len(key) + len(value))
 		}
@@ -179,4 +208,41 @@ func (d *Db) async() {
 
 func (d *Db) Clean() {
 	d.db.Clean()
+}
+
+func (d *Db) load() {
+	// Initialize reading from the start of the WAL.
+	d.wal.InitReading()
+
+	for {
+		record, err := d.wal.ReadNext()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			// Handle the error: log it, panic, return, etc.
+			log.Printf("Error reading from WAL: %v", err)
+			return
+		}
+
+		switch record.Type {
+		case putType:
+			// Assuming Db has a Put method
+			err := d.Put(record.Key, record.Value)
+			if err != nil {
+				// Handle the error: log it, panic, return, etc.
+				log.Printf("Error applying PUT from WAL: %v", err)
+			}
+		case deleteType:
+			// Assuming Db has a Delete method
+			err := d.Delete(record.Key)
+			if err != nil {
+				// Handle the error: log it, panic, return, etc.
+				log.Printf("Error applying DELETE from WAL: %v", err)
+			}
+		default:
+			// Handle unknown type.
+			log.Printf("Unknown record type in WAL: %v", record.Type)
+		}
+	}
 }

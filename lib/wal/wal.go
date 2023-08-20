@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"hash/crc32"
+	"io"
 	"os"
 	"time"
 
@@ -21,10 +22,11 @@ const (
 
 // Wal is a write-ahead log.
 type Wal struct {
-	m        *fileio.MMapIO // MMapIOManager
-	logNum   uint32         // Log number
-	saveTime int64          // Save time
-	dirPath  string
+	m          *fileio.MMapIO // MMapIOManager
+	logNum     uint32         // Log number
+	saveTime   int64          // Save time
+	dirPath    string         // Dir path
+	readOffset int64          // Read offset
 }
 
 // NewWal creates a new WAL.
@@ -107,6 +109,63 @@ func (w *Wal) Put(key []byte, value []byte) error {
 // Delete writes a delete record to the WAL.
 func (w *Wal) Delete(key []byte) error {
 	return w.writeRecord(deleteType, key, nil)
+}
+
+// Record is a structure that holds information about a record from the WAL.
+type Record struct {
+	Type  byte
+	Key   []byte
+	Value []byte
+}
+
+// InitReading Initializes the WAL reading position to the start of the file.
+func (w *Wal) InitReading() {
+	w.readOffset = 0
+}
+
+// ReadNext reads the next operation from the WAL.
+func (w *Wal) ReadNext() (*Record, error) {
+	buffer := make([]byte, 4+2+1+4) // Buffer size to read headers
+	_, err := w.m.Read(buffer, w.readOffset)
+	if err == io.EOF {
+		return nil, io.EOF
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Move readOffset
+	w.readOffset += int64(len(buffer))
+
+	// Verify CRC
+	expectedCRC := binary.LittleEndian.Uint32(buffer)
+	if crc32.ChecksumIEEE(buffer[4:]) != expectedCRC {
+		return nil, errors.New("corrupted record found")
+	}
+
+	// Get record size and type
+	size := binary.LittleEndian.Uint16(buffer[4:])
+	recordType := buffer[4+2]
+
+	// Read the payload
+	payload := make([]byte, size-4) // Subtract 4 for log number
+	_, err = w.m.Read(payload, w.readOffset)
+	if err != nil {
+		return nil, err
+	}
+
+	// Move readOffset again
+	w.readOffset += int64(len(payload))
+
+	// Parse based on record type
+	switch recordType {
+	case putType:
+		return &Record{Type: putType, Key: payload[:len(payload)-len(buffer)], Value: payload[len(payload)-len(buffer):]}, nil
+	case deleteType:
+		return &Record{Type: deleteType, Key: payload, Value: nil}, nil
+	default:
+		return nil, errors.New("unknown record type")
+	}
 }
 
 // Save flushes the WAL to disk.
