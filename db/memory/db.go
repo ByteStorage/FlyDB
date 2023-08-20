@@ -36,6 +36,7 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 
 	// dir path has been changed to dir path + column name
 	option.Option.DirPath = option.Option.DirPath + "/" + option.ColumnName
+	option.Option.IndexType = config.ARTWithBloom
 	db, err := engine.NewDB(option.Option)
 	if err != nil {
 		return nil, err
@@ -72,7 +73,7 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 	}
 
 	// when loading, the system will execute the every record in wal
-	d.load()
+	//d.load()
 	// async write to db
 	go d.async()
 	// async save wal

@@ -46,6 +46,9 @@ const (
 
 	// SkipList
 	SkipList
+
+	// ARTWithBloom index With Bloom Filter
+	ARTWithBloom
 )
 
 const (
