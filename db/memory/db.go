@@ -4,6 +4,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/engine"
 	"github.com/ByteStorage/FlyDB/lib/wal"
+	"os"
 	"sync"
 )
 
@@ -17,7 +18,7 @@ type Db struct {
 	totalSize   int64
 	activeSize  int64
 	pool        *sync.Pool
-	errMsgCh    chan []byte
+	errMsgCh    chan string
 }
 
 // NewDB create a new db of wal and memTable
@@ -59,13 +60,15 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 	}
 	go d.async()
 	go d.wal.AsyncSave()
+	go d.handlerErrMsg()
 	return d, nil
 }
 
 func (d *Db) handlerErrMsg() {
+	log := d.option.Option.DirPath + "/error.log"
 	for msg := range d.errMsgCh {
-		// TODO handle error: either log it, retry, or whatever makes sense for your application
-		_ = msg
+		// write to log
+		_ = os.WriteFile(log, []byte(msg), 0666)
 	}
 }
 
@@ -75,12 +78,19 @@ func (d *Db) Put(key []byte, value []byte) error {
 	valueLen := int64(len(value))
 
 	d.pool.Put(func() {
-		// Write to WAL
-		err := d.wal.Put(key, value)
-		if err != nil {
+		// Write to wal, try 3 times
+		ok := false
+		for i := 0; i < 3; i++ {
+			err := d.wal.Put(key, value)
+			if err == nil {
+				ok = true
+				break
+			}
+		}
+		if !ok {
 			err := d.wal.Delete(key)
 			if err != nil {
-				d.errMsgCh <- []byte(err.Error())
+				d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
 			}
 		}
 	})
