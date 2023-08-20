@@ -27,6 +27,7 @@ type Wal struct {
 	saveTime   int64          // Save time
 	dirPath    string         // Dir path
 	readOffset int64          // Read offset
+	filesize   int64          // File size
 }
 
 // NewWal creates a new WAL.
@@ -56,6 +57,7 @@ func NewWal(options Options) (*Wal, error) {
 		logNum:   options.LogNum,
 		saveTime: options.SaveTime,
 		dirPath:  options.DirPath,
+		filesize: options.FileSize,
 	}, nil
 }
 
@@ -166,6 +168,101 @@ func (w *Wal) ReadNext() (*Record, error) {
 	default:
 		return nil, errors.New("unknown record type")
 	}
+}
+
+func (w *Wal) Compact() error {
+	// Create a map to track the latest put operations and a set to track deleted keys
+	latestPuts := make(map[string][]byte)
+	deletedKeys := make(map[string]bool)
+
+	w.InitReading()
+	for {
+		record, err := w.ReadNext()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if record.Type == putType {
+			latestPuts[string(record.Key)] = record.Value
+			// If the key was previously deleted, ensure it's removed from the deletedKeys set
+			delete(deletedKeys, string(record.Key))
+		} else if record.Type == deleteType {
+			delete(latestPuts, string(record.Key))
+			deletedKeys[string(record.Key)] = true
+		}
+	}
+
+	// Step 2: Create a temporary WAL for writing compressed records
+	tmpWALPath := w.dirPath + "/db.tmp.wal"
+	tmpWAL, err := fileio.NewMMapIOManager(tmpWALPath, w.filesize) // assuming w.m provides FileSize method
+	if err != nil {
+		return err
+	}
+	defer tmpWAL.Close()
+
+	// Step 3: Write records to temporary WAL
+	for key, value := range latestPuts {
+		// Skip the key if it was deleted
+		if _, deleted := deletedKeys[key]; deleted {
+			continue
+		}
+		// TODO: Consider adding the log number, if necessary.
+		err = w.writeToSpecificWAL(tmpWAL, putType, []byte(key), value)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Rename files to replace the old WAL with the compacted one
+	err = os.Rename(tmpWALPath, w.dirPath+walFileName)
+	if err != nil {
+		return err
+	}
+
+	// Reinitialize mmap with the compacted file
+	w.m, err = fileio.NewMMapIOManager(w.dirPath+walFileName, w.filesize)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w *Wal) writeToSpecificWAL(targetWAL *fileio.MMapIO, recordType byte, key, value []byte) error {
+	// Prepare the payload based on record type
+	var payload []byte
+	switch recordType {
+	case putType:
+		payload = append(key, value...)
+	case deleteType:
+		payload = key
+	default:
+		return errors.New("unknown record type")
+	}
+
+	size := uint16(4 + len(payload)) // 4 bytes for log number
+	buffer := make([]byte, 4+2+1+4+len(payload))
+
+	// Compute CRC
+	crc := crc32.ChecksumIEEE(buffer[4:])
+	binary.LittleEndian.PutUint32(buffer, crc)
+
+	// Write size
+	binary.LittleEndian.PutUint16(buffer[4:], size)
+
+	// Write type
+	buffer[4+2] = recordType
+
+	// Write log number
+	binary.LittleEndian.PutUint32(buffer[4+2+1:], w.logNum)
+
+	// Write payload
+	copy(buffer[4+2+1+4:], payload)
+
+	_, err := targetWAL.Write(buffer)
+	return err
 }
 
 // Save flushes the WAL to disk.
