@@ -63,6 +63,7 @@ func NewColumn(option config.ColumnOptions) (Column, error) {
 		option.DbMemoryOptions.ColumnName = "default"
 	}
 
+	// set wal, the wal is a global wal of all column family
 	option.DbMemoryOptions.Wal = w
 
 	// create a new db
@@ -93,6 +94,7 @@ func (c *column) CreateColumnFamily(name string) error {
 	if _, ok := c.columnFamily[name]; ok {
 		return errors.New("column family already exists")
 	}
+	c.option.DbMemoryOptions.ColumnName = name
 	db, err := memory.NewDB(c.option.DbMemoryOptions)
 	if err != nil {
 		return err
@@ -106,6 +108,10 @@ func (c *column) DropColumnFamily(name string) error {
 	defer c.mux.Unlock()
 	if _, ok := c.columnFamily[name]; !ok {
 		return errors.New("column family not exists")
+	}
+	err := os.RemoveAll(c.option.DbMemoryOptions.Option.DirPath + "/" + name)
+	if err != nil {
+		return err
 	}
 	delete(c.columnFamily, name)
 	return nil

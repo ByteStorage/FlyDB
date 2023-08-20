@@ -20,14 +20,19 @@ type Db struct {
 	errMsgCh    chan []byte
 }
 
+// NewDB create a new db of wal and memTable
 func NewDB(option config.DbMemoryOptions) (*Db, error) {
+	// create a new memTable
 	mem := NewMemTable()
+	// dir path has been changed to dir path + column name
 	option.Option.DirPath = option.Option.DirPath + "/" + option.ColumnName
 	db, err := engine.NewDB(option.Option)
 	if err != nil {
 		return nil, err
 	}
 	w := option.Wal
+	// if wal is nil, create a new wal
+	// if wal is not nil, the wal was created by column family
 	if option.Wal == nil {
 		walOptions := wal.Options{
 			DirPath:  option.Option.DirPath,
