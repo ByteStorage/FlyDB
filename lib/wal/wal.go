@@ -32,9 +32,14 @@ type Wal struct {
 
 // NewWal creates a new WAL.
 func NewWal(options Options) (*Wal, error) {
+	// Construct the full path to the WAL file using the given directory path and
+	// a predefined file name.
 	fileName := options.DirPath + walFileName
+
+	// Check if the WAL file exists.
 	stat, err := os.Stat(fileName)
 	if err != nil {
+		// If the file doesn't exist, create the necessary directory and the file itself.
 		if os.IsNotExist(err) {
 			err := os.MkdirAll(options.DirPath, os.ModePerm)
 			if err != nil {
@@ -46,12 +51,18 @@ func NewWal(options Options) (*Wal, error) {
 			}
 		}
 	} else {
+		// If the file exists, calculate the log number based on its size and
+		// the specified file size.
 		options.LogNum = uint32(stat.Size() / options.FileSize)
 	}
+
+	// Create a memory-mapped I/O manager for the WAL file.
 	mapIO, err := fileio.NewMMapIOManager(fileName, options.FileSize)
 	if err != nil {
 		return nil, err
 	}
+
+	// Initialize and return a new WAL instance with the provided options and created I/O manager.
 	return &Wal{
 		m:        mapIO,
 		logNum:   options.LogNum,

@@ -17,17 +17,19 @@ const (
 )
 
 type Db struct {
-	option      config.DbMemoryOptions
-	db          *engine.DB
-	mem         *MemTable
-	oldList     []*MemTable
-	wal         *wal.Wal
-	oldListChan chan *MemTable
-	totalSize   int64
-	activeSize  int64
-	pool        *sync.Pool
-	errMsgCh    chan string
-	mux         sync.RWMutex
+	option            config.DbMemoryOptions
+	db                *engine.DB
+	mem               *MemTable
+	oldList           []*MemTable
+	wal               *wal.Wal
+	oldListChan       chan *MemTable
+	totalSize         int64
+	activeSize        int64
+	pool              *sync.Pool
+	errMsgCh          chan string
+	mux               sync.RWMutex
+	walDataMtList     []*MemTable
+	walDataMtListChan chan *MemTable
 }
 
 // NewDB create a new db of wal and memTable
@@ -62,20 +64,22 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 
 	// initialize db
 	d := &Db{
-		mem:         mem,
-		db:          db,
-		option:      option,
-		oldList:     make([]*MemTable, 0),
-		oldListChan: make(chan *MemTable, 1000000),
-		activeSize:  0,
-		totalSize:   0,
-		wal:         w,
-		pool:        &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
-		mux:         sync.RWMutex{},
+		mem:               mem,
+		db:                db,
+		option:            option,
+		oldList:           make([]*MemTable, 0),
+		oldListChan:       make(chan *MemTable, 1000000),
+		activeSize:        0,
+		totalSize:         0,
+		wal:               w,
+		pool:              &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
+		mux:               sync.RWMutex{},
+		walDataMtList:     make([]*MemTable, 0),
+		walDataMtListChan: make(chan *MemTable, 1000000),
 	}
 
 	// when loading, the system will execute the every record in wal
-	//d.load()
+	d.load()
 	// async write to db
 	go d.async()
 	// async save wal
@@ -92,6 +96,8 @@ func (d *Db) handlerErrMsg() {
 		_ = os.WriteFile(msgLog, []byte(msg), 0666)
 	}
 }
+
+var putTypeInt = int64(1)
 
 func (d *Db) Put(key []byte, value []byte) error {
 	d.mux.Lock()
@@ -134,7 +140,12 @@ func (d *Db) Put(key []byte, value []byte) error {
 	// if active memTable size > define size, change to immutable memTable
 	if d.activeSize+keyLen+valueLen > d.option.MemSize {
 		// add to immutable memTable list
-		d.addOldMemTable(d.mem)
+		if putTypeInt == 1 {
+			d.addOldMemTable(d.mem)
+		} else {
+			d.addWalDataToMemTable(d.mem)
+			putTypeInt = 1
+		}
 		// create new active memTable
 		d.mem = NewMemTable()
 		d.activeSize = 0
@@ -158,8 +169,10 @@ func (d *Db) Get(key []byte) ([]byte, error) {
 		return value, nil
 	}
 
+	mtList := append(append([]*MemTable(nil), d.walDataMtList...), d.oldList...)
+
 	// if active memTable not found, get from immutable memTable
-	for _, list := range d.oldList {
+	for _, list := range mtList {
 		value, err = list.Get(string(key))
 		if err == nil {
 			return value, nil
@@ -200,7 +213,8 @@ func (d *Db) Delete(key []byte) error {
 		return nil
 	}
 	// get from immutable memTable
-	for _, list := range d.oldList {
+	mtList := append(append([]*MemTable(nil), d.walDataMtList...), d.oldList...)
+	for _, list := range mtList {
 		get, err = list.Get(string(key))
 		if err == nil {
 			d.totalSize -= int64(len(key) + len(get))
@@ -226,6 +240,10 @@ func (d *Db) Close() error {
 
 func (d *Db) addOldMemTable(oldList *MemTable) {
 	d.oldListChan <- oldList
+}
+
+func (d *Db) addWalDataToMemTable(walDataMt *MemTable) {
+	d.walDataMtListChan <- walDataMt
 }
 
 func (d *Db) async() {
@@ -273,6 +291,7 @@ func (d *Db) load() {
 		switch record.Type {
 		case putType:
 			// Assuming Db has a Put method
+			putTypeInt = 0
 			err := d.Put(record.Key, record.Value)
 			if err != nil {
 				// Handle the error: log it, panic, return, etc.
