@@ -129,3 +129,14 @@ var DefaultWriteBatchOptions = WriteBatchOptions{
 	MaxBatchNum: 10000,
 	SyncWrites:  true,
 }
+
+var DefaultDbMemoryOptions = DbMemoryOptions{
+	Option:       DefaultOptions,
+	LogNum:       1000,
+	FileSize:     256 * 1024 * 1024, // 256MB
+	SaveTime:     100 * 1000,
+	MemSize:      256 * 1024 * 1024,      // 256MB
+	TotalMemSize: 1 * 1024 * 1024 * 1024, // 2GB
+	ColumnName:   "default",
+	Wal:          nil,
+}
