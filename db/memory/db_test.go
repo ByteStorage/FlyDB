@@ -11,14 +11,12 @@ import (
 )
 
 func TestPutAndGet(t *testing.T) {
-	opts := config.DefaultOptions
-	dir, _ := os.MkdirTemp("", "flydb-benchmark")
-	opts.DirPath = dir
-	opts.DataFileSize = 64 * 1024 * 1024
+	err := os.Mkdir("./flydb-benchmark", os.ModePerm)
 	memOpt := config.DefaultDbMemoryOptions
 	memOpt.LogNum = 100
-	memOpt.FileSize = 100 * 1024 * 1024
+	memOpt.FileSize = 256 * 1024 * 1024
 	memOpt.TotalMemSize = 2 * 1024 * 1024 * 1024
+	memOpt.Option.DirPath = "./flydb-benchmark"
 
 	db, err := NewDB(memOpt)
 	defer db.Clean()

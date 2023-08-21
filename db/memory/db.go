@@ -25,7 +25,7 @@ type Db struct {
 	oldListChan       chan *MemTable
 	totalSize         int64
 	activeSize        int64
-	pool              *sync.Pool
+	walTask           chan func()
 	errMsgCh          chan string
 	mux               sync.RWMutex
 	walDataMtList     []*MemTable
@@ -72,10 +72,11 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 		activeSize:        0,
 		totalSize:         0,
 		wal:               w,
-		pool:              &sync.Pool{New: func() interface{} { return make([]byte, 0, 1024) }},
+		walTask:           make(chan func(), 10000000),
 		mux:               sync.RWMutex{},
 		walDataMtList:     make([]*MemTable, 0),
 		walDataMtListChan: make(chan *MemTable, 1000000),
+		errMsgCh:          make(chan string, 1000000),
 	}
 
 	// when loading, the system will execute the every record in wal
@@ -86,6 +87,8 @@ func NewDB(option config.DbMemoryOptions) (*Db, error) {
 	go d.wal.AsyncSave()
 	// async handler error message
 	go d.handlerErrMsg()
+	// async worker
+	go d.work()
 	return d, nil
 }
 
@@ -106,7 +109,12 @@ func (d *Db) Put(key []byte, value []byte) error {
 	keyLen := int64(len(key))
 	valueLen := int64(len(value))
 
-	d.pool.Put(func() {
+	//err := d.wal.Put(key, value)
+	//if err != nil {
+	//	return err
+	//}
+
+	d.walTask <- func() {
 		// Write to wal, try 3 times
 		ok := false
 		for i := 0; i < 3; i++ {
@@ -122,7 +130,28 @@ func (d *Db) Put(key []byte, value []byte) error {
 				d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
 			}
 		}
-	})
+	}
+
+	//err := d.pool.Submit(func() {
+	//	// Write to wal, try 3 times
+	//	ok := false
+	//	for i := 0; i < 3; i++ {
+	//		err := d.wal.Put(key, value)
+	//		if err == nil {
+	//			ok = true
+	//			break
+	//		}
+	//	}
+	//	if !ok {
+	//		err := d.wal.Delete(key)
+	//		if err != nil {
+	//			d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
+	//		}
+	//	}
+	//})
+	//if err != nil {
+	//	return err
+	//}
 
 	// if sync write, save wal
 	if d.option.Option.SyncWrite {
@@ -187,7 +216,7 @@ func (d *Db) Delete(key []byte) error {
 	d.mux.Lock()
 	defer d.mux.Unlock()
 
-	d.pool.Put(func() {
+	d.walTask <- func() {
 		// Write to wal, try 3 times
 		ok := false
 		for i := 0; i < 3; i++ {
@@ -203,7 +232,25 @@ func (d *Db) Delete(key []byte) error {
 				d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
 			}
 		}
-	})
+	}
+
+	//err := d.pool.Submit(func() {
+	//	// Write to wal, try 3 times
+	//	ok := false
+	//	for i := 0; i < 3; i++ {
+	//		err := d.wal.Delete(key)
+	//		if err == nil {
+	//			ok = true
+	//			break
+	//		}
+	//	}
+	//	if !ok {
+	//		err := d.wal.Delete(key)
+	//		if err != nil {
+	//			d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
+	//		}
+	//	}
+	//})
 	// get from active memTable
 	get, err := d.mem.Get(string(key))
 	if err == nil {
@@ -236,6 +283,12 @@ func (d *Db) Close() error {
 		return err
 	}
 	return d.db.Close()
+}
+
+func (d *Db) work() {
+	for task := range d.walTask {
+		task()
+	}
 }
 
 func (d *Db) addOldMemTable(oldList *MemTable) {
