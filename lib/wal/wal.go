@@ -139,6 +139,8 @@ func (w *Wal) InitReading() {
 // ReadNext reads the next operation from the WAL.
 func (w *Wal) ReadNext() (*Record, error) {
 	buffer := make([]byte, 4+2+1+4) // Buffer size to read headers
+
+	//TODO: has bug here, get the buffer is [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 	_, err := w.m.Read(buffer, w.readOffset)
 	if err == io.EOF {
 		return nil, io.EOF
