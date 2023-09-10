@@ -38,3 +38,27 @@ func TestPutAndGet(t *testing.T) {
 	end = time.Now()
 	fmt.Println("get time: ", end.Sub(start).String())
 }
+
+func TestDb_Keys(t *testing.T) {
+	err := os.Mkdir("./flydb", os.ModePerm)
+	memOpt := config.DefaultDbMemoryOptions
+	memOpt.LogNum = 100
+	memOpt.FileSize = 256 * 1024 * 1024
+	memOpt.TotalMemSize = 2 * 1024 * 1024 * 1024
+	memOpt.Option.DirPath = "./"
+
+	db, err := NewDB(memOpt)
+	defer db.Clean()
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	for n := 0; n < 100; n++ {
+		err = db.Put(randkv.GetTestKey(n), randkv.RandomValue(24))
+		assert.Nil(t, err)
+	}
+
+	keys, err := db.Keys()
+	assert.Nil(t, err)
+	assert.Equal(t, 100, len(keys))
+	t.Log(keys)
+}

@@ -274,7 +274,36 @@ func (d *Db) Delete(key []byte) error {
 }
 
 func (d *Db) Keys() ([][]byte, error) {
-	panic("implement me")
+	d.mux.RLock()
+	defer d.mux.RUnlock()
+
+	// Create a slice to hold the keys
+	keys := make([][]byte, 0)
+
+	// Collect keys from the active MemTable
+	for key := range d.mem.table {
+		keys = append(keys, []byte(key))
+	}
+
+	// Collect keys from the immutable MemTables (WAL data MemTables)
+	for _, mt := range d.walDataMtList {
+		for key := range mt.table {
+			keys = append(keys, []byte(key))
+		}
+	}
+
+	// Collect keys from the old MemTables (flushed MemTables)
+	for _, mt := range d.oldList {
+		for key := range mt.table {
+			keys = append(keys, []byte(key))
+		}
+	}
+
+	// Collect keys from the persistent storage (your DB implementation)
+	persistentKeys := d.db.GetListKeys()
+	keys = append(keys, persistentKeys...)
+
+	return keys, nil
 }
 
 func (d *Db) Close() error {
