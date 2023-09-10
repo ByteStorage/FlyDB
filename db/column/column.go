@@ -91,6 +91,17 @@ type column struct {
 	option       config.ColumnOptions  // column family options
 }
 
+// CreateColumnFamily creates a new column family and associates it with the specified name.
+// If a column family with the same name already exists, it returns an error.
+// Column families are logical groups within the database that can contain different types of data. Each column family has its own in-memory table, Write-Ahead Logging (WAL), and persistent storage.
+//
+// Parameters:
+// - name: The name of the column family to create.
+//
+// Returns:
+//   - If the column family is successfully created, it returns nil.
+//     If a column family with the same name already exists or an error occurs during creation,
+//     it returns the corresponding error message.
 func (c *column) CreateColumnFamily(name string) error {
 	c.mux.Lock()
 	defer c.mux.Unlock()
@@ -106,6 +117,17 @@ func (c *column) CreateColumnFamily(name string) error {
 	return nil
 }
 
+// DropColumnFamily deletes a column family with the specified name.
+// If the column family does not exist, it returns an error.
+// This operation removes the associated data files and configurations for the column family.
+//
+// Parameters:
+// - name: The name of the column family to delete.
+//
+// Returns:
+//   - If the column family is successfully deleted, it returns nil.
+//     If the column family does not exist or an error occurs during deletion,
+//     it returns the corresponding error message.
 func (c *column) DropColumnFamily(name string) error {
 	c.mux.Lock()
 	defer c.mux.Unlock()
@@ -120,6 +142,12 @@ func (c *column) DropColumnFamily(name string) error {
 	return nil
 }
 
+// ListColumnFamilies returns a list of all existing column families in the database.
+//
+// Returns:
+//   - A slice of strings containing the names of all existing column families.
+//   - If there are no column families or an error occurs during retrieval,
+//     it returns an empty slice and an error message.
 func (c *column) ListColumnFamilies() ([]string, error) {
 	c.mux.RLock()
 	defer c.mux.RUnlock()
@@ -146,6 +174,15 @@ func (c *column) Keys(cf string) ([][]byte, error) {
 	return c.columnFamily[cf].Keys()
 }
 
+// loadColumn loads and initializes column families from the specified base directory path.
+//
+// Parameters:
+// - option: Configuration options for loading the column families.
+//
+// Returns:
+// - A map where keys are column family names and values are corresponding in-memory databases (memory.Db).
+// - If the base directory does not exist, an error is returned.
+// - If there are any errors while loading or initializing column families, an error is returned.
 func loadColumn(option config.ColumnOptions) (map[string]*memory.Db, error) {
 	base := option.DbMemoryOptions.Option.DirPath
 	base = strings.Trim(base, "/")
