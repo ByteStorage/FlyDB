@@ -109,30 +109,7 @@ func (d *Db) Put(key []byte, value []byte) error {
 	keyLen := int64(len(key))
 	valueLen := int64(len(value))
 
-	//err := d.wal.Put(key, value)
-	//if err != nil {
-	//	return err
-	//}
-
-	d.walTask <- func() {
-		// Write to wal, try 3 times
-		ok := false
-		for i := 0; i < 3; i++ {
-			err := d.wal.Put(key, value)
-			if err == nil {
-				ok = true
-				break
-			}
-		}
-		if !ok {
-			err := d.wal.Delete(key)
-			if err != nil {
-				d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
-			}
-		}
-	}
-
-	//err := d.pool.Submit(func() {
+	//d.walTask <- func() {
 	//	// Write to wal, try 3 times
 	//	ok := false
 	//	for i := 0; i < 3; i++ {
@@ -148,9 +125,6 @@ func (d *Db) Put(key []byte, value []byte) error {
 	//			d.errMsgCh <- "write to wal error when delete the key: " + string(key) + " error: " + err.Error()
 	//		}
 	//	}
-	//})
-	//if err != nil {
-	//	return err
 	//}
 
 	// if sync write, save wal
