@@ -234,3 +234,25 @@ func TestColumn_Keys(t *testing.T) {
 	err = column.DropColumnFamily("test")
 	assert.Nil(t, err)
 }
+
+func TestColumn_Put_Sql(t *testing.T) {
+	option := DefaultColumnOptions
+	defer CleanWalTest()
+
+	column, err := NewColumn(option)
+	assert.Nil(t, err)
+	assert.NotNil(t, column)
+
+	err = column.CreateColumnFamily("test")
+	assert.Nil(t, err)
+
+	err = column.Put("test", []byte("test"), []byte("select * from database;"))
+	assert.Nil(t, err)
+
+	value, err := column.Get("test", []byte("test"))
+	assert.Nil(t, err)
+	assert.Equal(t, []byte("select * from database;"), value)
+
+	err = column.DropColumnFamily("test")
+	assert.Nil(t, err)
+}
