@@ -39,6 +39,9 @@ const (
 
 	// SkipList Index
 	SkipListIndex
+
+	// ARTWithBloom index With Bloom Filter
+	ARTWithBloom
 )
 
 func NewIndexer(typeIndex IndexType, dirPath string) Indexer {
@@ -49,6 +52,8 @@ func NewIndexer(typeIndex IndexType, dirPath string) Indexer {
 		return NewART()
 	case SkipListIndex:
 		return NewSkipList()
+	case ARTWithBloom:
+		return NewARTWithBloom()
 	default:
 		panic("unsupported index type")
 	}

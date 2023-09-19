@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"fmt"
 	"github.com/ByteStorage/FlyDB/config"
 	data2 "github.com/ByteStorage/FlyDB/db/data"
 	"github.com/ByteStorage/FlyDB/db/index"
@@ -549,7 +550,7 @@ func (db *DB) Clean() {
 		_ = db.Close()
 		err := os.RemoveAll(db.options.DirPath)
 		if err != nil {
-			panic(err)
+			_ = fmt.Errorf("clean db error: %v", err)
 		}
 	}
 }
