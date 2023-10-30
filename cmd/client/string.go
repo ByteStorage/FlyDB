@@ -3,7 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
-	"github.com/ByteStorage/FlyDB/engine/grpc/client"
+	"github.com/ByteStorage/FlyDB/db/grpc/client"
 	"github.com/desertbit/grumble"
 )
 
