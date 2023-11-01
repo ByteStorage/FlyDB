@@ -54,12 +54,18 @@ func (e *epollMultiplexer) Wait() ([]int, error) {
 				Events: unix.EPOLLIN,
 				Fd:     int32(fd),
 			}
-			unix.EpollCtl(e.epfd, unix.EPOLL_CTL_ADD, fd, &event)
+			err := unix.EpollCtl(e.epfd, unix.EPOLL_CTL_ADD, fd, &event)
+			if err != nil {
+				return nil, err
+			}
 		}
 	case fd := <-e.removeChan:
 		if e.fds[fd] {
 			delete(e.fds, fd)
-			unix.EpollCtl(e.epfd, unix.EPOLL_CTL_DEL, fd, nil)
+			err := unix.EpollCtl(e.epfd, unix.EPOLL_CTL_DEL, fd, nil)
+			if err != nil {
+				return nil, err
+			}
 		}
 	case <-e.stopChan:
 		return nil, errors.New("multiplexer closed")
@@ -78,7 +84,10 @@ func (e *epollMultiplexer) Wait() ([]int, error) {
 }
 
 func (e *epollMultiplexer) Close() error {
-	unix.Close(e.epfd)
+	err := unix.Close(e.epfd)
+	if err != nil {
+		return err
+	}
 	close(e.stopChan)
 	return nil
 }
