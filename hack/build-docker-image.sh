@@ -26,14 +26,18 @@ if [ -z "$DOCKER_USERNAME" ] || [ -z "$IMAGE_NAME" ] || [ -z "$TAG" ]; then
     exit 1
 fi
 
-go build -o bin/flydb-server cmd/server/cli/flaydb-server.go
+go build -o bin/flydb-server cmd/server/cli/flydb-server.go
+
+echo "DOCKER_USERNAME: $DOCKER_USERNAME"
+echo "IMAGE_NAME: $IMAGE_NAME"
+echo "TAG: $TAG"
 
 # build docker image
-docker build -t DOCKER_USERNAME/IMAGE_NAME:TAG -f docker/Dockerfile .
+docker build -t "$DOCKER_USERNAME/$IMAGE_NAME:$TAG" -f docker/Dockerfile .
 
 # docker login
 
 # push docker image
-docker push DOCKER_USERNAME/IMAGE_NAME:TAG
+docker push "$DOCKER_USERNAME/$IMAGE_NAME:$TAG"
 
 # docker rmi $DOCKER_USERNAME/$IMAGE_NAME:$TAG
