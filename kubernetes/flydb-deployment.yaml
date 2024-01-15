@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flydb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flydb
+  template:
+    metadata:
+      labels:
+        app: flydb
+    spec:
+      containers:
+        - name: flydb-container
+          image: 1234sdc/flydb
+          ports:
+            - containerPort: 8999
+              hostPort: 8999

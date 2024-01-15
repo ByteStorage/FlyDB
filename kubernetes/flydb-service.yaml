@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flydb-service
+spec:
+  selector:
+    app: flydb
+  ports:
+    - protocol: TCP
+      port: 8999
+      targetPort: 8999
+  type: NodePort
