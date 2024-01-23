@@ -9,7 +9,7 @@ import (
 // CopyFile copies a file from src to dest.
 func copyFile(src, dest string, mode os.FileMode) error {
 	// Open the source file
-	srcFile, err := os.OpenFile(src, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+	srcFile, err := os.OpenFile(src, os.O_RDONLY, mode)
 	if err != nil {
 		return err
 	}
@@ -20,9 +20,14 @@ func copyFile(src, dest string, mode os.FileMode) error {
 		}
 	}(srcFile)
 
-	// Create the destination file
-	destFile, err := os.Create(dest)
+	// Create or open the destination file
+	destFile, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
 	if err != nil {
+		// Close the source file if opening destination file fails
+		err = srcFile.Close()
+		if err != nil {
+			return err
+		}
 		return err
 	}
 	defer func(destFile *os.File) {
@@ -38,7 +43,7 @@ func copyFile(src, dest string, mode os.FileMode) error {
 	}
 
 	// Set permissions on destination files
-	return os.Chmod(dest, mode)
+	return os.Chmod(dest, 0644)
 }
 
 // CopyDir copies a directory from src to dest.
