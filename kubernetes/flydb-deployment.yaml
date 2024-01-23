@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flydb-deployment
+  namespace: flydb-system
 spec:
   replicas: 1
   selector:
@@ -14,7 +15,8 @@ spec:
     spec:
       containers:
         - name: flydb-container
-          image: 1234sdc/flydb
+          image: bytestorage/flydb:v1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8999
               hostPort: 8999
