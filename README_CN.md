@@ -27,6 +27,8 @@ git clone https://github.com/ByteStorage/FlyDB
 
 ## 🚀 如何使用 FlyDB ?
 
+### 使用Golang SDK
+
 下面是一个如何使用Linux版本的简单示例:
 
 > 详情请参阅 flydb/examples。
@@ -66,10 +68,35 @@ func main() {
 
 
 ```
->你也可以执行以下命令。
+
+### 使用Shell命令
+
 ```shell
 ./build.sh
 ```
+
+### 使用Docker
+
+```shell
+docker run -d --name flydb-server --network=host -p 8999:8999 bytestorage/flydb:v1.0
+```
+
+### 使用Kubernetes
+
+```shell
+kubectl apply -f kubernetes/flydb-namespace.yaml
+kubectl apply -f kubernetes/flydb-deployment.yaml
+kubectl apply -f kubernetes/flydb-service.yaml
+kubectl wait --for=condition=ready pod -l app=flydb -n flydb-system
+kubectl port-forward svc/flydb-service -n flydb-system 8999:8999
+```
+
+**当通过shell/docker/kubernets启动FlyDB时，可使用flydb-client连接FlyDB服务器。**
+
+```shell
+./bin/flydb-client 127.0.0.1:8999"
+```
+
 ## 🚀 性能测试
 
 我们对V1.0.4版本的FlyDB做了一个简单的性能测试。本次测试主要针对大规模数据的读写，我们随机选取了50万条数据进行测试。
