@@ -28,6 +28,8 @@ git clone https://github.com/ByteStorage/FlyDB.git
 
 ## 🖥 How to use FlyDB ?
 
+### Used by Golang SDK
+
 Here is a simple example of how to use the Linux version:
 
 > See flydb/examples for details.
@@ -65,10 +67,32 @@ func main() {
     	}
 }
 ```
->You can also run this command.
+### Used By Shell Command
 
 ```shell
 ./build.sh
+```
+
+### Used By Docker
+
+```shell
+docker run -d --name flydb-server --network=host -p 8999:8999 bytestorage/flydb:v1.0
+```
+
+### Used By Kubernetes
+
+```shell
+kubectl apply -f kubernetes/flydb-namespace.yaml
+kubectl apply -f kubernetes/flydb-deployment.yaml
+kubectl apply -f kubernetes/flydb-service.yaml
+kubectl wait --for=condition=ready pod -l app=flydb -n flydb-system
+kubectl port-forward svc/flydb-service -n flydb-system 8999:8999
+```
+
+**When install flydb server by shell/docker/kubernetes, you can use the flydb-cli to connect the flydb server.**
+
+```shell
+./bin/flydb-client 127.0.0.1:8999"
 ```
 
 ## 🚀 Performance test
