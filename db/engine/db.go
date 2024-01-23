@@ -8,6 +8,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	data2 "github.com/ByteStorage/FlyDB/db/data"
 	"github.com/ByteStorage/FlyDB/db/index"
+	"github.com/ByteStorage/FlyDB/lib/backup"
 	"github.com/ByteStorage/FlyDB/lib/const"
 	"go.uber.org/zap"
 	"io"
@@ -542,6 +543,15 @@ func (db *DB) loadIndexFromDataFiles() error {
 	db.transSeqNo = currentSeqNo
 
 	return nil
+}
+
+// Backup the database to the specified directory
+func (db *DB) Backup(dir string) error {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	// Create a backup directory
+	return backup.CopyDir(db.options.DirPath, dir)
 }
 
 // Clean the DB data directory after the test is complete

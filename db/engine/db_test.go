@@ -423,3 +423,30 @@ func TestDB_Sync(t *testing.T) {
 	err = db.Sync()
 	assert.Nil(t, err)
 }
+
+func TestDB_Backup(t *testing.T) {
+	opts := config.DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-backup")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := NewDB(opts)
+	defer destroyDB(db)
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+
+	for i := 1; i < 1000000; i++ {
+		err = db.Put(randkv.GetTestKey(i), randkv.RandomValue(128))
+		assert.Nil(t, err)
+	}
+
+	backupDir, _ := os.MkdirTemp("", "flydb-backup-test")
+	err = db.Backup(backupDir)
+	assert.Nil(t, err)
+
+	opts1 := config.DefaultOptions
+	opts1.DirPath = backupDir
+	db1, err := NewDB(opts1)
+	defer destroyDB(db1)
+	assert.Nil(t, err)
+	assert.NotNil(t, db1)
+}
