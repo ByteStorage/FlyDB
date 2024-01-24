@@ -627,3 +627,7 @@ func (s *StringStructure) Stop() error {
 func (s *StringStructure) Clean() {
 	s.db.Clean()
 }
+
+func (s *StringStructure) Close() {
+	s.db.Close()
+}
