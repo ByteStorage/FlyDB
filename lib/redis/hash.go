@@ -5,6 +5,7 @@ import (
 	"github.com/tidwall/redcon"
 )
 
+// Set key value
 func HSet(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	if len(args) != 3 {
 		return nil, NewWrongNumberOfArgsError("hset")
@@ -22,6 +23,7 @@ func HSet(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	return redcon.SimpleInt(ok), nil
 }
 
+// HGet key field
 func HGet(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	if len(args) != 2 {
 		return nil, NewWrongNumberOfArgsError("hget")
@@ -34,6 +36,7 @@ func HGet(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	return value, nil
 }
 
+// UseHash change to hash db
 func UseHash(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	if len(args) != 0 {
 		return nil, NewWrongNumberOfArgsError("use-hash")

@@ -19,11 +19,26 @@ func NewWrongNumberOfArgsError(cmd string) error {
 
 type CmdHandler func(cli *FlyDBClient, args [][]byte) (interface{}, error)
 
+// FlyDBSupportCommands is the map of all supported redis commands
 var FlyDBSupportCommands = map[string]CmdHandler{
 	// string
 	"use-str": UseString,
 	"set":     Set,
 	"get":     Get,
+	"del":     Del,
+	"getset":  GetSet,
+	"append":  Append,
+	"strlen":  Strlen,
+	"incr":    Incr,
+	"decr":    Decr,
+	"incrby":  IncrBy,
+	"decrby":  DecrBy,
+	"keys":    Keys,
+	"exists":  Exists,
+	"expire":  Expire,
+	"persist": Persist,
+	"ttl":     TTL,
+	"size":    Size,
 
 	// hash
 	"use-hash": UseHash,
@@ -31,6 +46,7 @@ var FlyDBSupportCommands = map[string]CmdHandler{
 	"hget":     HGet,
 }
 
+// ClientCommands is the handler for all redis commands
 func ClientCommands(conn redcon.Conn, cmd redcon.Command) {
 	command := strings.ToLower(string(cmd.Args[0]))
 	cmdFunc, ok := FlyDBSupportCommands[command]

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// 打开 Redis 数据结构服务
+	// open Redis data structure service
 	options := config.DefaultOptions
 	options.DirPath = config.RedisStringDirPath
 	stringStructure, err := flydb_stru.NewStringStructure(options)
@@ -22,14 +22,14 @@ func main() {
 		panic(err)
 	}
 
-	// 初始化 FlyDBServer
+	// initialize FlyDBServer
 	flydbServer := &redis.FlyDBServer{
 		Dbs: make(map[int]interface{}),
 	}
 	flydbServer.Dbs[0] = stringStructure
 	flydbServer.Dbs[1] = hashStructure
 
-	// 初始化一个 Redis 服务端
+	// initialize a Redis server
 	flydbServer.Server = redcon.NewServer(config.DefaultAddr,
 		redis.ClientCommands, flydbServer.Accept, nil)
 	flydbServer.Listen()

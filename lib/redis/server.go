@@ -14,11 +14,13 @@ type FlyDBServer struct {
 	lock   sync.RWMutex
 }
 
+// Listen starts listening for incoming connections.
 func (svr *FlyDBServer) Listen() {
 	log.Println("FlyDB-Redis Server running, ready to accept connections...")
 	_ = svr.Server.ListenAndServe()
 }
 
+// Accept is called when a new client connects.
 func (svr *FlyDBServer) Accept(conn redcon.Conn) bool {
 	svr.lock.Lock()
 	defer svr.lock.Unlock()
@@ -30,6 +32,7 @@ func (svr *FlyDBServer) Accept(conn redcon.Conn) bool {
 	return true
 }
 
+// Close closes the server.
 func (svr *FlyDBServer) Close() error {
 	if db, ok := svr.Dbs[0].(*structure.StringStructure); ok {
 		db.Clean()
