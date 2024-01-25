@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/ByteStorage/FlyDB/lib/wal"
 	"os"
+	"path/filepath"
 )
 
 // Options is a comprehensive configuration struct that
@@ -140,3 +141,11 @@ var DefaultDbMemoryOptions = DbMemoryOptions{
 	ColumnName:   "default",
 	Wal:          nil,
 }
+
+var (
+	RedisStringDirPath = filepath.Join(os.TempDir(), "flydb/redis/string")
+	RedisHashDirPath   = filepath.Join(os.TempDir(), "flydb/redis/hash")
+	RedisListDirPath   = filepath.Join(os.TempDir(), "flydb/redis/list")
+	RedisSetDirPath    = filepath.Join(os.TempDir(), "flydb/redis/set")
+	RedisZSetDirPath   = filepath.Join(os.TempDir(), "flydb/redis/zset")
+)

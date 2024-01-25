@@ -31,10 +31,7 @@ func Get(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 
 func UseString(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	if len(args) != 0 {
-		return nil, NewWrongNumberOfArgsError("use-string")
+		return nil, NewWrongNumberOfArgsError("use-str")
 	}
-
-	cli.DB[1].(*structure.HashStructure).Stop()
-
 	return redcon.SimpleString("OK"), nil
 }

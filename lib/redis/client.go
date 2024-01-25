@@ -21,9 +21,9 @@ type CmdHandler func(cli *FlyDBClient, args [][]byte) (interface{}, error)
 
 var FlyDBSupportCommands = map[string]CmdHandler{
 	// string
-	"use-string": UseString,
-	"set":        Set,
-	"get":        Get,
+	"use-str": UseString,
+	"set":     Set,
+	"get":     Get,
 
 	// hash
 	"use-hash": UseHash,

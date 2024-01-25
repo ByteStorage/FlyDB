@@ -1402,8 +1402,7 @@ func (hs *HashStructure) findHashMeta(key string, dataType DataStructure) (*Hash
 }
 
 func (hs *HashStructure) Stop() error {
-	err := hs.db.Close()
-	return err
+	return hs.db.Close()
 }
 
 func (hs *HashStructure) Clean() {

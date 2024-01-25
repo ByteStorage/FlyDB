@@ -38,7 +38,5 @@ func UseHash(cli *FlyDBClient, args [][]byte) (interface{}, error) {
 	if len(args) != 0 {
 		return nil, NewWrongNumberOfArgsError("use-hash")
 	}
-
-	cli.DB[0].(*structure.StringStructure).Close()
 	return redcon.SimpleString("OK"), nil
 }

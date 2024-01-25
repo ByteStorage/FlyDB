@@ -728,8 +728,7 @@ func (l *ListStructure) decodeList(value []byte) (*DecodedList, error) {
 }
 
 func (s *ListStructure) Stop() error {
-	err := s.db.Close()
-	return err
+	return s.db.Close()
 }
 
 func (l *ListStructure) Size(key string) (string, error) {

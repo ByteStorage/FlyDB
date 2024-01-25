@@ -9,11 +9,15 @@ import (
 
 func main() {
 	// 打开 Redis 数据结构服务
-	stringStructure, err := flydb_stru.NewStringStructure(config.DefaultOptions)
+	options := config.DefaultOptions
+	options.DirPath = config.RedisStringDirPath
+	stringStructure, err := flydb_stru.NewStringStructure(options)
 	if err != nil {
 		panic(err)
 	}
-	hashStructure, err := flydb_stru.NewHashStructure(config.DefaultOptions)
+
+	options.DirPath = config.RedisHashDirPath
+	hashStructure, err := flydb_stru.NewHashStructure(options)
 	if err != nil {
 		panic(err)
 	}
