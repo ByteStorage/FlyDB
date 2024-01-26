@@ -110,7 +110,8 @@ const (
 )
 
 const (
-	DefaultAddr = "127.0.0.1:8999"
+	DefaultAddr      = "127.0.0.1:8999"
+	DefaultRedisAddr = "127.0.0.1:8998"
 )
 
 var DefaultOptions = Options{
@@ -142,6 +143,7 @@ var DefaultDbMemoryOptions = DbMemoryOptions{
 	Wal:          nil,
 }
 
+// Redis
 var (
 	RedisStringDirPath = filepath.Join(os.TempDir(), "flydb/redis/string")
 	RedisHashDirPath   = filepath.Join(os.TempDir(), "flydb/redis/hash")

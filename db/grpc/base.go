@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -102,7 +103,7 @@ func (s *base) StartGrpcServer() {
 		}
 		break
 	}
-	fmt.Println("flydb start success on ", s.addr)
+	log.Println("FlyDB Server Start Success On: ", s.addr)
 	// graceful shutdown
 	signal.Notify(s.sig, syscall.SIGINT, syscall.SIGKILL)
 
@@ -114,7 +115,7 @@ func (s *base) StartGrpcServer() {
 			return
 		}
 	}
-	fmt.Println("flydb stop success on ", s.addr)
+	log.Println("FlyDB Server Stop Success On: ", s.addr)
 }
 
 func (s *base) StopGrpcServer() {
