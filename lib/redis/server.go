@@ -42,7 +42,6 @@ func (svr *FlyDBServer) Close(conn redcon.Conn, err error) {
 	}
 	_ = svr.Server.Close()
 	log.Println("FlyDB-Redis Server Stop Success On: ", config.DefaultRedisAddr)
-	return
 }
 
 // StartRedisServer starts a Redis server.
