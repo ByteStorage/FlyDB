@@ -44,6 +44,19 @@ var FlyDBSupportCommands = map[string]CmdHandler{
 	"use-hash": UseHash,
 	"hset":     HSet,
 	"hget":     HGet,
+	"hdel":     HDel,
+	"hdelall":  HDelAll,
+	"hexists":  HExists,
+	"hexpire":  HExpire,
+	"hlen":     HLen,
+	"hupdate":  HUpdate,
+	"hkeys":    HKeys,
+	"hstrlen":  HStrlen,
+	"hmove":    HMove,
+	"hsize":    HSize,
+	"httl":     HTTL,
+	"hincrby":  HIncrBy,
+	"hdecrby":  HDecrBy,
 }
 
 // ClientCommands is the handler for all redis commands
