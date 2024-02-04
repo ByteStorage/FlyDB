@@ -21,9 +21,12 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
+	github.com/tidwall/redcon v1.6.2
 	go.etcd.io/bbolt v1.3.7
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/net v0.8.0
+	golang.org/x/sys v0.6.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -47,13 +50,12 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/panjf2000/ants v1.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
+	github.com/tidwall/btree v1.1.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect

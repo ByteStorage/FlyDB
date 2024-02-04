@@ -620,10 +620,16 @@ func decodeStringValue(value []byte) ([]byte, int64, error) {
 }
 
 func (s *StringStructure) Stop() error {
-	err := s.db.Close()
-	return err
+	return s.db.Close()
 }
 
 func (s *StringStructure) Clean() {
 	s.db.Clean()
+}
+
+func (s *StringStructure) Close() {
+	err := s.db.Close()
+	if err != nil {
+		return
+	}
 }
