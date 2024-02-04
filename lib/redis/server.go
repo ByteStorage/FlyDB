@@ -39,6 +39,8 @@ func (svr *FlyDBServer) Close(conn redcon.Conn, err error) {
 		db.Clean()
 	} else if dbh, ok := svr.Dbs[1].(*structure.HashStructure); ok {
 		dbh.Clean()
+	} else if dbl, ok := svr.Dbs[2].(*structure.ListStructure); ok {
+		dbl.Clean()
 	}
 	_ = svr.Server.Close()
 	log.Println("FlyDB-Redis Server Stop Success On: ", config.DefaultRedisAddr)
@@ -48,14 +50,24 @@ func (svr *FlyDBServer) Close(conn redcon.Conn, err error) {
 func StartRedisServer() {
 	// open Redis data structure service
 	options := config.DefaultOptions
+
+	// Redis String Service
 	options.DirPath = config.RedisStringDirPath
 	stringStructure, err := structure.NewStringStructure(options)
 	if err != nil {
 		panic(err)
 	}
 
+	// Redis Hash Service
 	options.DirPath = config.RedisHashDirPath
 	hashStructure, err := structure.NewHashStructure(options)
+	if err != nil {
+		panic(err)
+	}
+
+	// Redis List Service
+	options.DirPath = config.RedisListDirPath
+	listStructure, err := structure.NewListStructure(options)
 	if err != nil {
 		panic(err)
 	}
@@ -66,6 +78,7 @@ func StartRedisServer() {
 	}
 	flydbServer.Dbs[0] = stringStructure
 	flydbServer.Dbs[1] = hashStructure
+	flydbServer.Dbs[2] = listStructure
 
 	// initialize a Redis server
 	flydbServer.Server = redcon.NewServer(config.DefaultRedisAddr,

@@ -767,3 +767,7 @@ func (l *ListStructure) Size(key string) (string, error) {
 
 	return size, nil
 }
+
+func (s *ListStructure) Clean() {
+	s.db.Clean()
+}
