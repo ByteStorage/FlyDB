@@ -3,11 +3,12 @@ package client
 import (
 	"context"
 	"errors"
+
 	"github.com/ByteStorage/FlyDB/lib/proto/gset"
 )
 
 func (c *Client) SAdd(key, member string) error {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -23,7 +24,7 @@ func (c *Client) SAdd(key, member string) error {
 }
 
 func (c *Client) SAdds(key string, members []string) error {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -39,7 +40,7 @@ func (c *Client) SAdds(key string, members []string) error {
 }
 
 func (c *Client) SRem(key, member string) error {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -55,7 +56,7 @@ func (c *Client) SRem(key, member string) error {
 }
 
 func (c *Client) SRems(key string, members []string) error {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -71,7 +72,7 @@ func (c *Client) SRems(key string, members []string) error {
 }
 
 func (c *Client) SCard(key string) (int32, error) {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return 0, errors.New("new grpc client error: " + err.Error())
 	}
@@ -84,7 +85,7 @@ func (c *Client) SCard(key string) (int32, error) {
 }
 
 func (c *Client) SMembers(key string) ([]string, error) {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -97,7 +98,7 @@ func (c *Client) SMembers(key string) ([]string, error) {
 }
 
 func (c *Client) SIsMember(key, member string) (bool, error) {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return false, errors.New("new grpc client error: " + err.Error())
 	}
@@ -110,7 +111,7 @@ func (c *Client) SIsMember(key, member string) (bool, error) {
 }
 
 func (c *Client) SUnion(keys []string) ([]string, error) {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -123,7 +124,7 @@ func (c *Client) SUnion(keys []string) ([]string, error) {
 }
 
 func (c *Client) SInter(keys []string) ([]string, error) {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -136,7 +137,7 @@ func (c *Client) SInter(keys []string) ([]string, error) {
 }
 
 func (c *Client) SDiff(keys []string) ([]string, error) {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -149,7 +150,7 @@ func (c *Client) SDiff(keys []string) ([]string, error) {
 }
 
 func (c *Client) SUnionStore(destination string, keys []string) error {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -165,7 +166,7 @@ func (c *Client) SUnionStore(destination string, keys []string) error {
 }
 
 func (c *Client) SInterStore(destinationKey string, keys []string) error {
-	client, err := newSetGrpcClient(c.Addr)
+	client, err := c.newSetGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}

@@ -3,11 +3,12 @@ package client
 import (
 	"context"
 	"errors"
+
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
 )
 
 func (c *Client) LPush(key string, value interface{}) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -43,7 +44,7 @@ func (c *Client) LPush(key string, value interface{}) error {
 }
 
 func (c *Client) LPushs(key string, values []interface{}) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -81,7 +82,7 @@ func (c *Client) LPushs(key string, values []interface{}) error {
 }
 
 func (c *Client) RPush(key string, value interface{}) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -118,7 +119,7 @@ func (c *Client) RPush(key string, value interface{}) error {
 }
 
 func (c *Client) RPushs(key string, values []interface{}) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -157,7 +158,7 @@ func (c *Client) RPushs(key string, values []interface{}) error {
 }
 
 func (c *Client) LPop(key string) (interface{}, error) {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -190,7 +191,7 @@ func (c *Client) LPop(key string) (interface{}, error) {
 }
 
 func (c *Client) RPop(key string) (interface{}, error) {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -223,7 +224,7 @@ func (c *Client) RPop(key string) (interface{}, error) {
 }
 
 func (c *Client) LRange(key string, start, stop int) ([]interface{}, error) {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -266,7 +267,7 @@ func (c *Client) LRange(key string, start, stop int) ([]interface{}, error) {
 }
 
 func (c *Client) LLen(key string) (int32, error) {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return 0, errors.New("new grpc client error: " + err.Error())
 	}
@@ -281,7 +282,7 @@ func (c *Client) LLen(key string) (int32, error) {
 }
 
 func (c *Client) LRem(key string, count int32, value interface{}) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -318,7 +319,7 @@ func (c *Client) LRem(key string, count int32, value interface{}) error {
 }
 
 func (c *Client) LIndex(key string, index int) (interface{}, error) {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return nil, errors.New("new grpc client error: " + err.Error())
 	}
@@ -354,7 +355,7 @@ func (c *Client) LIndex(key string, index int) (interface{}, error) {
 }
 
 func (c *Client) LSet(key string, index int, value interface{}) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -395,7 +396,7 @@ func (c *Client) LSet(key string, index int, value interface{}) error {
 }
 
 func (c *Client) LTrim(key string, start, stop int) error {
-	client, err := newListGrpcClient(c.Addr)
+	client, err := c.newListGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
