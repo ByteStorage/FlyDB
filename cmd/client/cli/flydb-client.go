@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/ByteStorage/FlyDB/cmd/client"
 	"github.com/desertbit/grumble"
-	"os"
 )
 
 func main() {
