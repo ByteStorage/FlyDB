@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+
 	"github.com/desertbit/grumble"
 	"github.com/pkg/errors"
 )

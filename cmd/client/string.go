@@ -3,17 +3,9 @@ package client
 import (
 	"errors"
 	"fmt"
-	"github.com/ByteStorage/FlyDB/db/grpc/client"
+
 	"github.com/desertbit/grumble"
 )
-
-var Addr string
-
-func newClient() *client.Client {
-	return &client.Client{
-		Addr: Addr,
-	}
-}
 
 func stringPutData(c *grumble.Context) error {
 	key := c.Args.String("key")
