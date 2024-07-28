@@ -178,7 +178,7 @@ func (z *zSet) ZRange(_ context.Context, request *gzset.ZRangeRequest) (*gzset.Z
 	var (
 		err             error
 		members         []structure.ZSetValue
-		responseMembers = make([]*gzset.ZSetValue, 0, len(members))
+		responseMembers []*gzset.ZSetValue
 	)
 
 	if members, err = z.dbs.ZRange(request.Key, int(request.Start), int(request.End)); err != nil {
@@ -209,7 +209,7 @@ func (z *zSet) ZRevRange(_ context.Context, request *gzset.ZRevRangeRequest) (*g
 	var (
 		err             error
 		members         []structure.ZSetValue
-		responseMembers = make([]*gzset.ZSetValue, 0, len(members))
+		responseMembers []*gzset.ZSetValue
 	)
 
 	if members, err = z.dbs.ZRevRange(request.Key, int(request.StartRank), int(request.EndRank)); err != nil {
