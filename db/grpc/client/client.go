@@ -128,6 +128,25 @@ func (c *Client) newSetGrpcClient() (gset.GSetServiceClient, error) {
 	return c.gSetServiceClient, nil
 }
 
+func (c *Client) newZSetGrpcClient() (gzset.GZSetServiceClient, error) {
+	var (
+		conn *grpc.ClientConn
+		err  error
+	)
+
+	if c.gZSetServiceClient != nil {
+		return c.gZSetServiceClient, nil
+	}
+
+	if conn, err = c.getGrpcConn(); err != nil {
+		return nil, err
+	}
+
+	c.gZSetServiceClient = gzset.NewGZSetServiceClient(conn)
+
+	return c.gZSetServiceClient, nil
+}
+
 func (c *Client) Close() error {
 	if c.conn != nil {
 		if err := c.conn.Close(); err != nil {
