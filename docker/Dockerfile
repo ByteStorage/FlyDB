@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM alpine:latest
 
 WORKDIR /app
 
@@ -6,4 +6,4 @@ COPY bin/flydb-server /app/flydb-server
 
 RUN chmod +x /app/flydb-server
 
-CMD ["/app/flydb-server"]
+ENTRYPOINT ["/app/flydb-server"]
