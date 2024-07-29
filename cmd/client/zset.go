@@ -46,15 +46,15 @@ func checkRange(start int, end int) bool {
 
 func ZSetAdd(ctx *grumble.Context) error {
 	var (
-		key       = ctx.Args.String(KeyArg)
-		member    = ctx.Args.String(MemberArg)
-		score     = ctx.Args.Int(ScoreArg)
-		value     = ctx.Args.String(ValueArg)
+		key       = ctx.Args.String(CommonKeyArg)
+		member    = ctx.Args.String(CommonMemberArg)
+		score     = ctx.Args.Int(ZSetScoreArg)
+		value     = ctx.Args.String(CommonValueArg)
 		zSetValue = &gzset.ZSetValue{}
 		err       error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsEmpty(MemberArg, member) || checkIsEmpty(ValueArg, value) || checkIsInt32(ScoreArg, score) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsEmpty(CommonMemberArg, member) || checkIsEmpty(CommonValueArg, value) || checkIsInt32(ZSetScoreArg, score) {
 		return nil
 	}
 
@@ -75,12 +75,12 @@ func ZSetAdd(ctx *grumble.Context) error {
 
 func ZSetRem(ctx *grumble.Context) error {
 	var (
-		key    = ctx.Args.String(KeyArg)
-		member = ctx.Args.String(MemberArg)
+		key    = ctx.Args.String(CommonKeyArg)
+		member = ctx.Args.String(CommonMemberArg)
 		err    error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsEmpty(MemberArg, member) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsEmpty(CommonMemberArg, member) {
 		return nil
 	}
 
@@ -97,12 +97,12 @@ func ZSetRem(ctx *grumble.Context) error {
 
 func ZSetRems(ctx *grumble.Context) error {
 	var (
-		key        = ctx.Args.String(KeyArg)
-		memberList = ctx.Args.StringList(MembersArg)
+		key        = ctx.Args.String(CommonKeyArg)
+		memberList = ctx.Args.StringList(CommonMembersArg)
 		err        error
 	)
 
-	if checkIsEmpty(KeyArg, key) {
+	if checkIsEmpty(CommonKeyArg, key) {
 		return nil
 	}
 
@@ -119,13 +119,13 @@ func ZSetRems(ctx *grumble.Context) error {
 
 func ZSetScore(ctx *grumble.Context) error {
 	var (
-		key      = ctx.Args.String(KeyArg)
-		member   = ctx.Args.String(MemberArg)
+		key      = ctx.Args.String(CommonKeyArg)
+		member   = ctx.Args.String(CommonMemberArg)
 		response *gzset.ZScoreResponse
 		err      error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsEmpty(MemberArg, member) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsEmpty(CommonMemberArg, member) {
 		return nil
 	}
 
@@ -142,13 +142,13 @@ func ZSetScore(ctx *grumble.Context) error {
 
 func ZSetRank(ctx *grumble.Context) error {
 	var (
-		key      = ctx.Args.String(KeyArg)
-		member   = ctx.Args.String(MemberArg)
+		key      = ctx.Args.String(CommonKeyArg)
+		member   = ctx.Args.String(CommonMemberArg)
 		response *gzset.ZRankResponse
 		err      error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsEmpty(MemberArg, member) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsEmpty(CommonMemberArg, member) {
 		return nil
 	}
 
@@ -165,13 +165,13 @@ func ZSetRank(ctx *grumble.Context) error {
 
 func ZSetRevRank(ctx *grumble.Context) error {
 	var (
-		key      = ctx.Args.String(KeyArg)
-		member   = ctx.Args.String(MemberArg)
+		key      = ctx.Args.String(CommonKeyArg)
+		member   = ctx.Args.String(CommonMemberArg)
 		response *gzset.ZRevRankResponse
 		err      error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsEmpty(MemberArg, member) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsEmpty(CommonMemberArg, member) {
 		return nil
 	}
 
@@ -194,15 +194,15 @@ func printZSetResponse(memberList []*gzset.ZSetValue) {
 
 func ZSetRange(ctx *grumble.Context) error {
 	var (
-		key          = ctx.Args.String(KeyArg)
-		start        = ctx.Args.Int(StartArg)
-		end          = ctx.Args.Int(EndArg)
+		key          = ctx.Args.String(CommonKeyArg)
+		start        = ctx.Args.Int(ZSetStartArg)
+		end          = ctx.Args.Int(ZSetEndArg)
 		requestRange = &client.Range{}
 		response     *gzset.ZRangeResponse
 		err          error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsInt32(StartArg, start) || checkIsInt32(EndArg, end) || checkRange(start, end) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsInt32(ZSetStartArg, start) || checkIsInt32(ZSetEndArg, end) || checkRange(start, end) {
 		return nil
 	}
 
@@ -223,20 +223,20 @@ func ZSetRange(ctx *grumble.Context) error {
 
 func ZSetCount(ctx *grumble.Context) error {
 	var (
-		key          = ctx.Args.String(KeyArg)
-		start        = ctx.Args.Int(StartArg)
-		end          = ctx.Args.Int(EndArg)
+		key          = ctx.Args.String(CommonKeyArg)
+		minArg       = ctx.Args.Int(ZSetMinArg)
+		maxArg       = ctx.Args.Int(ZSetMaxArg)
 		requestRange = &client.Range{}
 		response     *gzset.ZCountResponse
 		err          error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsInt32(StartArg, start) || checkIsInt32(EndArg, end) || checkRange(start, end) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsInt32(ZSetStartArg, minArg) || checkIsInt32(ZSetEndArg, maxArg) || checkRange(minArg, maxArg) {
 		return nil
 	}
 
-	requestRange.Start = int32(start)
-	requestRange.End = int32(end)
+	requestRange.Start = int32(minArg)
+	requestRange.End = int32(maxArg)
 
 	if response, err = newClient().ZCount(key, requestRange); err != nil {
 		fmt.Println("ZCount data error: ", err)
@@ -251,15 +251,15 @@ func ZSetCount(ctx *grumble.Context) error {
 
 func ZSetRevRange(ctx *grumble.Context) error {
 	var (
-		key          = ctx.Args.String(KeyArg)
-		start        = ctx.Args.Int(StartArg)
-		end          = ctx.Args.Int(EndArg)
+		key          = ctx.Args.String(CommonKeyArg)
+		start        = ctx.Args.Int(ZSetStartArg)
+		end          = ctx.Args.Int(ZSetEndArg)
 		requestRange = &client.Range{}
 		response     *gzset.ZRevRangeResponse
 		err          error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsInt32(StartArg, start) || checkIsInt32(EndArg, end) || checkRange(start, end) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsInt32(ZSetStartArg, start) || checkIsInt32(ZSetEndArg, end) || checkRange(start, end) {
 		return nil
 	}
 
@@ -281,12 +281,12 @@ func ZSetRevRange(ctx *grumble.Context) error {
 
 func ZSetCard(ctx *grumble.Context) error {
 	var (
-		key      = ctx.Args.String(KeyArg)
+		key      = ctx.Args.String(CommonKeyArg)
 		response *gzset.ZCardResponse
 		err      error
 	)
 
-	if checkIsEmpty(KeyArg, key) {
+	if checkIsEmpty(CommonKeyArg, key) {
 		return nil
 	}
 
@@ -303,15 +303,15 @@ func ZSetCard(ctx *grumble.Context) error {
 
 func ZSetIncrBy(ctx *grumble.Context) error {
 	var (
-		key      = ctx.Args.String(KeyArg)
-		member   = ctx.Args.String(MemberArg)
-		incrBy   = ctx.Args.Int(IncrByArg)
+		key      = ctx.Args.String(CommonKeyArg)
+		member   = ctx.Args.String(CommonMemberArg)
+		incrBy   = ctx.Args.Int(ZSetIncrByArg)
 		incr     = &client.Incr{}
 		response *gzset.ZIncrByResponse
 		err      error
 	)
 
-	if checkIsEmpty(KeyArg, key) || checkIsEmpty(MemberArg, member) || checkIsInt32(IncrByArg, incrBy) {
+	if checkIsEmpty(CommonKeyArg, key) || checkIsEmpty(CommonMemberArg, member) || checkIsInt32(ZSetIncrByArg, incrBy) {
 		return nil
 	}
 
