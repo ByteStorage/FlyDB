@@ -378,7 +378,7 @@ func register(app *grumble.App) {
 		Args: func(a *grumble.Args) {
 			a.String("key", "key", grumble.Default(""))
 			a.Int("start", "start", grumble.Default(0))
-			a.Int("stop", "stop", grumble.Default(math.MaxInt))
+			a.Int("stop", "stop", grumble.Default(-1))
 		},
 	})
 
