@@ -2,20 +2,23 @@ package base
 
 import (
 	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/db/grpc/service"
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
 	"github.com/ByteStorage/FlyDB/lib/proto/gset"
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
-	"net"
-	"os"
-	"os/signal"
-	"syscall"
+	"github.com/ByteStorage/FlyDB/lib/proto/gzset"
 )
 
 type Base interface {
@@ -68,6 +71,13 @@ func NewService(options config.Options, addr string) (Base, error) {
 	}
 	baseService.RegisterService(setService)
 	gset.RegisterGSetServiceServer(baseService.server, setService)
+
+	zsetService, err := service.NewZSetService(options)
+	if err != nil {
+		return nil, err
+	}
+	baseService.RegisterService(zsetService)
+	gzset.RegisterGZSetServiceServer(baseService.server, zsetService)
 
 	return baseService, nil
 }

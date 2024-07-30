@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/ByteStorage/FlyDB/lib/proto/gstring"
 )
 
 // Put puts a key-value pair into the db by client api
 func (c *Client) Put(key string, value interface{}) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -44,7 +45,7 @@ func (c *Client) Put(key string, value interface{}) error {
 
 // Get gets a value by key from the db by client api
 func (c *Client) Get(key string) (interface{}, error) {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func (c *Client) Get(key string) (interface{}, error) {
 
 // Del deletes a key-value pair from the db by client api
 func (c *Client) Del(key string) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,7 @@ func (c *Client) Del(key string) error {
 }
 
 func (c *Client) StrLen(key string) (int32, error) {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return 0, nil
 	}
@@ -101,7 +102,7 @@ func (c *Client) StrLen(key string) (int32, error) {
 }
 
 func (c *Client) Type(key string) (string, error) {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return "", err
 	}
@@ -115,7 +116,7 @@ func (c *Client) Type(key string) (string, error) {
 }
 
 func (c *Client) Append(key string, value string) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -130,7 +131,7 @@ func (c *Client) Append(key string, value string) error {
 }
 
 func (c *Client) GetSet(key string, value interface{}) (interface{}, error) {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err, nil
 	}
@@ -183,7 +184,7 @@ func (c *Client) GetSet(key string, value interface{}) (interface{}, error) {
 }
 
 func (c *Client) Incr(key string) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -196,7 +197,7 @@ func (c *Client) Incr(key string) error {
 }
 
 func (c *Client) IncrBy(key string, amount int64) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -210,7 +211,7 @@ func (c *Client) IncrBy(key string, amount int64) error {
 }
 
 func (c *Client) IncrByFloat(key string, amount float64) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -225,7 +226,7 @@ func (c *Client) IncrByFloat(key string, amount float64) error {
 }
 
 func (c *Client) Decr(key string) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -240,7 +241,7 @@ func (c *Client) Decr(key string) error {
 }
 
 func (c *Client) DecrBy(key string, amount int64) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -255,7 +256,7 @@ func (c *Client) DecrBy(key string, amount int64) error {
 }
 
 func (c *Client) Exists(key string) (bool, error) {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return false, nil
 	}
@@ -267,7 +268,7 @@ func (c *Client) Exists(key string) (bool, error) {
 }
 
 func (c *Client) Expire(key string, ttl int64) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -282,7 +283,7 @@ func (c *Client) Expire(key string, ttl int64) error {
 }
 
 func (c *Client) Persist(key string) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -297,7 +298,7 @@ func (c *Client) Persist(key string) error {
 }
 
 func (c *Client) MGet(keys []string) ([]interface{}, error) {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +330,7 @@ func (c *Client) MGet(keys []string) ([]interface{}, error) {
 }
 
 func (c *Client) MSet(pairs ...interface{}) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -376,7 +377,7 @@ func (c *Client) MSet(pairs ...interface{}) error {
 }
 
 func (c *Client) MSetNX(pairs ...interface{}) error {
-	client, err := newGrpcClient(c.Addr)
+	client, err := c.newGrpcClient()
 	if err != nil {
 		return err
 	}

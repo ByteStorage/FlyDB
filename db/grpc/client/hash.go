@@ -3,12 +3,13 @@ package client
 import (
 	"context"
 	"errors"
+
 	"github.com/ByteStorage/FlyDB/lib/proto/ghash"
 )
 
 // HSet puts a key-value pair into the db by client api
 func (c *Client) HSet(key, field string, value interface{}) error {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return errors.New("new grpc client error: " + err.Error())
 	}
@@ -30,7 +31,7 @@ func (c *Client) HSet(key, field string, value interface{}) error {
 
 // HGet gets a value by key from the db by client api
 func (c *Client) HGet(key, field string) (interface{}, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (c *Client) HGet(key, field string) (interface{}, error) {
 
 // HDel deletes a key-value pair from the db by client api
 func (c *Client) HDel(key, field string) error {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -108,7 +109,7 @@ func getValue(resp *ghash.GHashGetResponse) (interface{}, error) {
 }
 
 func (c *Client) HExists(key, field string) (bool, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return false, err
 	}
@@ -123,7 +124,7 @@ func (c *Client) HExists(key, field string) (bool, error) {
 }
 
 func (c *Client) HLen(key string) (int64, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return 0, err
 	}
@@ -138,7 +139,7 @@ func (c *Client) HLen(key string) (int64, error) {
 }
 
 func (c *Client) HUpdate(key, field string, value interface{}) error {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -182,7 +183,7 @@ func updateValue(req *ghash.GHashUpdateRequest, value interface{}) error {
 }
 
 func (c *Client) HIncrBy(key, field string, value int64) (int64, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return 0, err
 	}
@@ -197,7 +198,7 @@ func (c *Client) HIncrBy(key, field string, value int64) (int64, error) {
 }
 
 func (c *Client) HIncrByFloat(key, field string, value float64) (float64, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return 0.0, err
 	}
@@ -212,7 +213,7 @@ func (c *Client) HIncrByFloat(key, field string, value float64) (float64, error)
 }
 
 func (c *Client) HDecrBy(key, field string, value int64) (int64, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return 0, err
 	}
@@ -227,7 +228,7 @@ func (c *Client) HDecrBy(key, field string, value int64) (int64, error) {
 }
 
 func (c *Client) HStrLen(key, field string) (int64, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return 0, err
 	}
@@ -242,7 +243,7 @@ func (c *Client) HStrLen(key, field string) (int64, error) {
 }
 
 func (c *Client) HMove(key, dest, field string) error {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -257,7 +258,7 @@ func (c *Client) HMove(key, dest, field string) error {
 }
 
 func (c *Client) HSetNX(key, field string, value interface{}) error {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return err
 	}
@@ -300,7 +301,7 @@ func setNXValue(req *ghash.GHashSetNXRequest, value interface{}) error {
 }
 
 func (c *Client) HType(key, field string) (string, error) {
-	client, err := newHashGrpcClient(c.Addr)
+	client, err := c.newHashGrpcClient()
 	if err != nil {
 		return "", err
 	}
