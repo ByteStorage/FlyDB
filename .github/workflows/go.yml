@@ -39,8 +39,8 @@ jobs:
             done
             exit 1
           fi
-          
-      
+
+
 
       - name: Lint
         uses: golangci/golangci-lint-action@v3.6.0
@@ -52,4 +52,19 @@ jobs:
         run: go build -v ./...
 
       - name: Test
-        run: go test -v ./...
+        run: go list ./... | grep -v "./cmd/client" | xargs go test -v
+
+      - name: Hash Structure Integration test
+        run: go test -v ./cmd/client/hash_test.go
+
+      - name: List Structure Integration test
+        run: go test -v ./cmd/client/list_test.go
+
+      - name: Set Structure Integration test
+        run: go test -v ./cmd/client/set_test.go
+
+      - name: String Structure Integration test
+        run: go test -v ./cmd/client/string_test.go
+
+      - name: ZSet Structure Integration test
+        run: go test -v ./cmd/client/zset_test.go
