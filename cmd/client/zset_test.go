@@ -1,3 +1,5 @@
+//go:build zset_integration
+
 package client
 
 import "testing"

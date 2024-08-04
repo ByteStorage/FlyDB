@@ -1,3 +1,5 @@
+//go:build set_integration
+
 package client
 
 import "testing"

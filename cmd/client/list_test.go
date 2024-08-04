@@ -1,3 +1,5 @@
+//go:build list_integration
+
 package client
 
 import "testing"

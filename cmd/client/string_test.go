@@ -1,3 +1,5 @@
+//go:build string_integration
+
 package client
 
 import (

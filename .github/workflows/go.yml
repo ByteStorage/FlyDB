@@ -55,16 +55,16 @@ jobs:
         run: go list ./... | grep -v "./cmd/client" | xargs go test -v
 
       - name: Hash Structure Integration test
-        run: go test -v ./cmd/client/hash_test.go
+        run: go test -v -a -tags hash_integration ./cmd/client/...
 
       - name: List Structure Integration test
-        run: go test -v ./cmd/client/list_test.go
+        run: go test -v -a -tags list_integration ./cmd/client/...
 
       - name: Set Structure Integration test
-        run: go test -v ./cmd/client/set_test.go
+        run: go test -v -a -tags set_integration ./cmd/client/...
 
       - name: String Structure Integration test
-        run: go test -v ./cmd/client/string_test.go
+        run: go test -v -a -tags string_integration ./cmd/client/...
 
       - name: ZSet Structure Integration test
-        run: go test -v ./cmd/client/zset_test.go
+        run: go test -v -a -tags zset_integration ./cmd/client/...

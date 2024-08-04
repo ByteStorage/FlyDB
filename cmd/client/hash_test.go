@@ -1,3 +1,5 @@
+//go:build hash_integration
+
 package client
 
 import (
