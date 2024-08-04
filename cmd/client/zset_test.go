@@ -28,9 +28,9 @@ func TestZCount(t *testing.T) {
 	addCmdMetaData.cmdTest(t)
 
 	cmdMetaData := &cmdMeta{
-		cmd: "ZCount for-zount 0 1",
+		cmd: "ZCount for-zcount 0 1",
 		expectResult: []string{
-			"ZCount data success",
+			"ZCount data success, count: 1",
 		},
 		testcaseName: "TestZCount",
 	}
