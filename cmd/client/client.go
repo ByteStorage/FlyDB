@@ -1,8 +1,6 @@
 package client
 
 import (
-	"fmt"
-
 	"github.com/ByteStorage/FlyDB/db/grpc/client"
 )
 
@@ -18,13 +16,13 @@ func newClient() *client.Client {
 	}
 
 	if cliClient, err = client.NewClient(Addr); err != nil {
-		fmt.Println("new client error: ", err)
+		panic(err)
 	}
 
 	return cliClient
 }
 
-func close() error {
+func cliClientClose() error {
 	if cliClient == nil {
 		return nil
 	}
