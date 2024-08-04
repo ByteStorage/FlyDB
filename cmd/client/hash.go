@@ -36,6 +36,12 @@ func hashHGetData(c *grumble.Context) error {
 		fmt.Println("get data error: ", err)
 		return err
 	}
+
+	if value == nil {
+		fmt.Println("Field or Key does not exist in the hash")
+		return nil
+	}
+
 	fmt.Println(value)
 	return nil
 }
