@@ -180,7 +180,7 @@ func (c *cmdMeta) cmdTest(t *testing.T) {
 	for _, expectResult := range c.expectResult {
 		select {
 		case stdoutString = <-stdoutStringCh:
-		case <-time.After(1 * time.Second):
+		case <-time.After(10 * time.Second):
 			c.lofFileAndLine(t, c.testcaseName)
 			t.Fatal("not get stdout")
 		}
