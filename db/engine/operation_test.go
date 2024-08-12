@@ -401,6 +401,11 @@ func TestOperationLogHandler_Restore(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer destroyDB(db)
+	if _, err = os.Stat(logger.LogLocation); !os.IsNotExist(err) {
+		if err = os.Remove(logger.LogLocation); err != nil {
+			t.Fatal(err)
+		}
+	}
 	defer func() {
 		if err = os.RemoveAll(filepath.Dir(logger.LogLocation)); err != nil {
 			t.Fatal(err)
@@ -488,7 +493,6 @@ func TestOperationLogHandler_Restore(t *testing.T) {
 	err = operationLogHandler.RestoreWithTime(time.Date(2024, 8, 11, 20, 20, 0, 0, location), time.Date(2024, 8, 11, 23, 20,
 		0, 0, location))
 	assert.Error(t, err)
-	t.Log(err)
 
 	value, err := db.Get([]byte("test"))
 	assert.Error(t, err)
