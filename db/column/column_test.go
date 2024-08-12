@@ -4,6 +4,7 @@ import (
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/wal"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -75,6 +76,15 @@ func TestColumn_ListColumnFamilies(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, column)
 
+	dirs, err := ioutil.ReadDir(option.DbMemoryOptions.Option.DirPath)
+	assert.Nil(t, err)
+	dirCount := 0
+	for _, dir := range dirs {
+		if dir.IsDir() {
+			dirCount++
+		}
+	}
+
 	err = column.CreateColumnFamily("test")
 	assert.Nil(t, err)
 
@@ -89,7 +99,7 @@ func TestColumn_ListColumnFamilies(t *testing.T) {
 
 	list, err := column.ListColumnFamilies()
 	assert.Nil(t, err)
-	assert.Equal(t, 4, len(list))
+	assert.Equal(t, dirCount+3, len(list))
 
 	err = column.DropColumnFamily("test")
 	assert.Nil(t, err)
