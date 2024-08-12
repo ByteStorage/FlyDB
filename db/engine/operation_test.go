@@ -73,21 +73,33 @@ func Test_parseLogTime(t *testing.T) {
 	}
 }
 
+type decodeLogConsoleMetaTestCase struct {
+	name          string
+	log           string
+	expectErr     bool
+	expectLogMeta *logMeta
+}
+
+func newDecodeLogConsoleMetaTestCase(name string, log string, expectErr bool, expectLogMeat *logMeta) *decodeLogConsoleMetaTestCase {
+	return &decodeLogConsoleMetaTestCase{
+		name:          name,
+		log:           log,
+		expectErr:     expectErr,
+		expectLogMeta: expectLogMeat,
+	}
+}
+
 func Test_decodeLogConsoleMeta(t *testing.T) {
 	operationLogHandler := NewOperationLogHandler(WithLogConsoleEncoder())
 
-	testcase := []struct {
-		name          string
-		log           string
-		expectErr     bool
-		expectLogMeta *logMeta
-	}{
-		{
-			name: "decode put log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+	testcase := []*decodeLogConsoleMetaTestCase{
+		newDecodeLogConsoleMetaTestCase(
+			"decode put log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-			expectLogMeta: &logMeta{
+			false,
+			&logMeta{
 				logLevel: "INFO",
 				file:     "engine/db.go:171",
 				Operation: &Operation{
@@ -96,13 +108,14 @@ func Test_decodeLogConsoleMeta(t *testing.T) {
 					Value: "test",
 				},
 			},
-		},
-		{
-			name: "decode delete log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tdelete error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+		),
+		newDecodeLogConsoleMetaTestCase(
+			"decode delete log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tdelete error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"delete\",\"key\":\"test\"}}\n",
-			expectLogMeta: &logMeta{
+			false,
+			&logMeta{
 				logLevel: "INFO",
 				file:     "engine/db.go:171",
 				Operation: &Operation{
@@ -110,39 +123,38 @@ func Test_decodeLogConsoleMeta(t *testing.T) {
 					Key:  "test",
 				},
 			},
-			expectErr: false,
-		},
-		{
-			name:          "empty log",
-			log:           "",
-			expectErr:     true,
-			expectLogMeta: nil,
-		},
-		{
-			name: "bad log log meta is not enough",
-			log: "2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db",
-			expectErr:     true,
-			expectLogMeta: nil,
-		},
-		{
-			name: "bad log without operation",
-			log: "2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db	{\"options\": {\"DirPath\":\"." +
-				"/data\",\"DataFileSize\":268435456,\"SyncWrite\":false,\"IndexType\":2,\"FIOType\":3}}",
-			expectErr:     true,
-			expectLogMeta: nil,
-		},
-		{
-			name: "bad log parse time error",
-			log: "15:04:05.999+0800\tINFO\tengine/db.go:68	open db	{\"options\": {\"DirPath\":\".",
-			expectErr:     true,
-			expectLogMeta: nil,
-		},
-		{
-			name: "bad log log field unmarshal error",
-			log: "2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db	errorField",
-			expectErr:     true,
-			expectLogMeta: nil,
-		},
+		),
+		newDecodeLogConsoleMetaTestCase(
+			"empty log",
+			"",
+			true,
+			nil,
+		),
+		newDecodeLogConsoleMetaTestCase(
+			"bad log log field length is not enough",
+			"2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db\n",
+			true,
+			nil,
+		),
+		newDecodeLogConsoleMetaTestCase(
+			"bad log without operation",
+			"2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db	{\"options\": {\"DirPath\":\"."+
+				"/data\",\"DataFileSize\":268435456,\"SyncWrite\":false,\"IndexType\":2,\"FIOType\":3}}\n",
+			true,
+			nil,
+		),
+		newDecodeLogConsoleMetaTestCase(
+			"bad log parse time error",
+			"15:04:05.999+0800\tINFO\tengine/db.go:68	open db	{\"options\": {\"DirPath\":\".\n",
+			true,
+			nil,
+		),
+		newDecodeLogConsoleMetaTestCase(
+			"bad log log field unmarshal error",
+			"2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db	errorField",
+			true,
+			nil,
+		),
 	}
 
 	for _, testcaseData := range testcase {
@@ -216,64 +228,81 @@ func Test_readLogError(t *testing.T) {
 	assert.Equal(t, 0, len(operationLogHandler.logLinesChan))
 }
 
+type testDecodeLogConsoleEncodeTestcase struct {
+	name            string
+	log             string
+	expectErr       bool
+	expectOperation *Operation
+}
+
+func newTestDecodeLogConsoleEncodeTestcase(name string, log string, expectErr bool, expectOperation *Operation) *testDecodeLogConsoleEncodeTestcase {
+	return &testDecodeLogConsoleEncodeTestcase{
+		name:            name,
+		log:             log,
+		expectErr:       expectErr,
+		expectOperation: expectOperation,
+	}
+}
+
 func TestDecodeLogConsoleEncode(t *testing.T) {
 	operationLogHandler := NewOperationLogHandler(WithLogConsoleEncoder())
 	operationLogHandler.logLevel = infoLogLevel
 	expectOperationList := make([]*Operation, 0)
 
-	testcase := []struct {
-		name            string
-		log             string
-		expectErr       bool
-		expectOperation *Operation
-	}{
-		{
-			name: "decode put log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+	testcase := []*testDecodeLogConsoleEncodeTestcase{
+		newTestDecodeLogConsoleEncodeTestcase(
+			"decode put log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-			expectOperation: &Operation{
+			false,
+			&Operation{
 				Name:  "put",
 				Key:   "test",
 				Value: "test",
 			},
-		},
-		{
-			name: "decode delete log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tdelete error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+		),
+		newTestDecodeLogConsoleEncodeTestcase(
+			"decode delete log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tdelete error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"delete\",\"key\":\"test\"}}\n",
-			expectOperation: &Operation{
+			false,
+			&Operation{
 				Name: "delete",
 				Key:  "test",
 			},
-		},
-		{
-			name: "decode put log file name not engin/db.go",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tnotEngine/db." +
-				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+		),
+		newTestDecodeLogConsoleEncodeTestcase(
+			"decode put log file name not engin/db.go",
+			"2024-08-11T20:23:07.877+0800\tINFO\tnotEngine/db."+
+				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-			expectOperation: nil,
-		},
-		{
-			name: "decode time is before start",
-			log: "1999-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+			false,
+			nil,
+		),
+		newTestDecodeLogConsoleEncodeTestcase(
+			"decode put log time is before start",
+			"1999-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-			expectOperation: nil,
-		},
-		{
-			name: "decode time is after end",
-			log: "2800-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", " +
+			false,
+			nil,
+		),
+		newTestDecodeLogConsoleEncodeTestcase(
+			"decode put log time is after end",
+			"2800-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput error\t{\"error\": \"truncate data\\\\000000000.data: Access is denied.\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-			expectOperation: nil,
-		},
-		{
-			name:            "decode log console error",
-			log:             "",
-			expectOperation: nil,
-		},
+			false,
+			nil,
+		),
+		newTestDecodeLogConsoleEncodeTestcase(
+			"decode put log parse time error",
+			"",
+			false,
+			nil,
+		),
 	}
 
 	for _, testcaseData := range testcase {
@@ -351,6 +380,18 @@ func TestRestoreOperation(t *testing.T) {
 	assert.Nil(t, value)
 }
 
+type testOperationLogHandlerRestoreTestCase struct {
+	name string
+	log  string
+}
+
+func newTestOperationLogHandlerRestoreTestCase(name string, log string) *testOperationLogHandlerRestoreTestCase {
+	return &testOperationLogHandlerRestoreTestCase{
+		name: name,
+		log:  log,
+	}
+}
+
 func TestOperationLogHandler_Restore(t *testing.T) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("./", "flydb")
@@ -372,68 +413,64 @@ func TestOperationLogHandler_Restore(t *testing.T) {
 
 	operationLogHandler := NewOperationLogHandler(WithLogConsoleEncoder(), WithDB(db))
 
-	testcases := []struct {
-		name string
-		log  string
-	}{
-		{
-			name: "success put log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput mock\t{\"mock\": \"mock log\", " +
+	testcases := []*testOperationLogHandlerRestoreTestCase{
+		newTestOperationLogHandlerRestoreTestCase(
+			"success put log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test-success\",\"value\":\"test\"}}\n",
-		},
-		{
-			name: "success delete log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tdelete mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"success delete log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tdelete mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"delete\",\"key\":\"test-success\"}}\n",
-		},
-		{
-			name: "error log level log",
-			log: "2024-08-11T20:23:07.877+0800\tERROR\tengine/db." +
-				"go:171\tdelete mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"error log level log",
+			"2024-08-11T20:23:07.877+0800\tERROR\tengine/db."+
+				"go:171\tdelete mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"delete\",\"key\":\"test\"}}\n",
-		},
-		{
-			name: "time is before start",
-			log: "1999-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"time is before start",
+			"1999-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-		},
-		{
-			name: "time is after end",
-			log: "2800-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"time is after end",
+			"2800-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-		},
-		{
-			name: "file name is not engine/db.go",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tnotEngine/db." +
-				"go:171\tput mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"file name is not engine/db.go",
+			"2024-08-11T20:23:07.877+0800\tINFO\tnotEngine/db."+
+				"go:171\tput mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-		},
-		{
-			name: "parse time error",
-			log: "15:04:05.999+0800\tINFO\tengine/db.go:68	error parse time" +
-				"\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"parse time error",
+			"15:04:05.999+0800\tINFO\tengine/db.go:68	error parse time\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"test\",\"value\":\"test\"}}\n",
-		},
-		{
-			name: "log field length is not enough",
-			log: "2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db\n",
-		},
-		{
-			name: "success put new log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tput mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"log field length is not enough",
+			"2021-08-01T15:04:05.999+0800\tINFO\tengine/db.go:68	open db\n",
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"success put new log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tput mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"put\",\"key\":\"new_key\",\"value\":\"test\"}}\n",
-		},
-		{
-			name: "delete need to remove log",
-			log: "2024-08-11T20:23:07.877+0800\tINFO\tengine/db." +
-				"go:171\tdelete mock\t{\"mock\": \"mock log\", " +
+		),
+		newTestOperationLogHandlerRestoreTestCase(
+			"delete need to remove log",
+			"2024-08-11T20:23:07.877+0800\tINFO\tengine/db."+
+				"go:171\tdelete mock\t{\"mock\": \"mock log\", "+
 				"\"operation\": {\"name\":\"delete\",\"key\":\"need_to_remove\"}}\n",
-		},
+		),
 	}
 
 	logFile, err := os.OpenFile(logger.LogLocation, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
