@@ -6,6 +6,9 @@
 
 English | [简体中文](https://github.com/ByteStorage/flydb/blob/master/README_CN.md)
 
+> 作者在准备秋招，有没有可以帮忙内推的呀？感谢你们！
+> 联系方式：微信：qishen_on或者扫下面二维码
+
 **FlyDB** aims to serve as an alternative to in-memory key-value storage (such as **Redis**) in some cases, aiming to strike a balance between performance and storage cost. It does this by optimizing resource allocation and using cost-effective storage media. By intelligently managing data, **FlyDB** ensures efficient operations while minimizing storage costs. It provides a reliable solution for scenarios that require a balance between performance and storage costs.
 
 ## 📚 What is FlyDB ?
