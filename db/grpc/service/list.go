@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/proto/glist"
 	"github.com/ByteStorage/FlyDB/structure"
@@ -241,8 +242,31 @@ func (l *list) LLen(ctx context.Context, req *glist.GListLLenRequest) (*glist.GL
 }
 
 func (l *list) LRem(ctx context.Context, req *glist.GListLRemRequest) (*glist.GListLRemResponse, error) {
-	err := l.dbs.LRem(req.Key, int(req.Count), req.Value)
-	if err != nil {
+	var (
+		needToRemoveValue interface{}
+		err               error
+	)
+
+	switch req.Value.(type) {
+	case *glist.GListLRemRequest_StringValue:
+		needToRemoveValue = req.GetStringValue()
+	case *glist.GListLRemRequest_Int32Value:
+		needToRemoveValue = req.GetInt32Value()
+	case *glist.GListLRemRequest_Int64Value:
+		needToRemoveValue = req.GetInt64Value()
+	case *glist.GListLRemRequest_Float32Value:
+		needToRemoveValue = req.GetFloat32Value()
+	case *glist.GListLRemRequest_Float64Value:
+		needToRemoveValue = req.GetFloat64Value()
+	case *glist.GListLRemRequest_BoolValue:
+		needToRemoveValue = req.GetBoolValue()
+	case *glist.GListLRemRequest_BytesValue:
+		needToRemoveValue = req.GetBytesValue()
+	default:
+		return &glist.GListLRemResponse{}, fmt.Errorf("unknown value type")
+	}
+
+	if err = l.dbs.LRem(req.Key, int(req.Count), needToRemoveValue); err != nil {
 		return &glist.GListLRemResponse{}, err
 	}
 	return &glist.GListLRemResponse{Ok: true}, nil

@@ -35,3 +35,7 @@ const (
 	ZSetDefaultMinHelp     = "the min score of the zset"
 	ZSetDefaultMaxHelp     = "the max score of the zset"
 )
+
+const (
+	flyDBServerPort = "8999/tcp"
+)

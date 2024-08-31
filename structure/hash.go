@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/ByteStorage/FlyDB/config"
-	"github.com/ByteStorage/FlyDB/db/engine"
-	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/db/engine"
+	_const "github.com/ByteStorage/FlyDB/lib/const"
 )
 
 type HashMetadata struct {
@@ -1007,7 +1008,7 @@ func (hs *HashStructure) HMove(source, destination string, field interface{}) (b
 	destinationHfBuf := destinationHf.encodeHashField()
 
 	// Get the field from the database
-	value, err := hs.db.Get(destinationHfBuf)
+	value, err := hs.db.Get(hfBuf)
 	if err != nil && err == _const.ErrKeyNotFound {
 		return false, nil
 	}
@@ -1019,7 +1020,7 @@ func (hs *HashStructure) HMove(source, destination string, field interface{}) (b
 	_ = batch.Delete(hfBuf)
 
 	// Put the field to the destination
-	_ = batch.Put(hfBuf, value)
+	_ = batch.Put(destinationHfBuf, value)
 
 	// Commit the write batch
 	err = batch.Commit()

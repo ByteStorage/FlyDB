@@ -40,6 +40,11 @@ func (c *Client) HGet(key, field string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if get.Value == nil {
+		return nil, nil
+	}
+
 	value, err := getValue(get)
 	if err != nil {
 		return nil, err
