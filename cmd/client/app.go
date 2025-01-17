@@ -44,6 +44,6 @@ func init() {
                        \/__/     \/__/            \/__/           \/__/                                                                        
 `}, "\r\n"))
 	})
-	App.OnClosing(close)
+	App.OnClosing(cliClientClose)
 	register(App)
 }
