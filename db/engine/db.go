@@ -5,12 +5,6 @@ package engine
 
 import (
 	"fmt"
-	"github.com/ByteStorage/FlyDB/config"
-	data2 "github.com/ByteStorage/FlyDB/db/data"
-	"github.com/ByteStorage/FlyDB/db/index"
-	"github.com/ByteStorage/FlyDB/lib/backup"
-	"github.com/ByteStorage/FlyDB/lib/const"
-	"go.uber.org/zap"
 	"io"
 	"os"
 	"path/filepath"
@@ -18,6 +12,15 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"go.uber.org/zap"
+
+	"github.com/ByteStorage/FlyDB/config"
+	data2 "github.com/ByteStorage/FlyDB/db/data"
+	"github.com/ByteStorage/FlyDB/db/index"
+	"github.com/ByteStorage/FlyDB/lib/backup"
+	"github.com/ByteStorage/FlyDB/lib/const"
+	_ "github.com/ByteStorage/FlyDB/lib/logger"
 )
 
 // DB represents a FlyDB database instance,
@@ -147,7 +150,6 @@ func (db *DB) Sync() error {
 
 // Put write a key-value pair to db, and the key must be not empty
 func (db *DB) Put(key []byte, value []byte) error {
-	zap.L().Info("put", zap.ByteString("key", key), zap.ByteString("value", value))
 	// check key
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
@@ -163,6 +165,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 	// append log record
 	pos, err := db.appendLogRecordWithLock(logRecord)
 	if err != nil {
+		zap.L().Error("put error", zap.Error(err), zap.Any("operation", NewPutOperation(key, value)))
 		return err
 	}
 
@@ -171,6 +174,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 		return _const.ErrIndexUpdateFailed
 	}
 
+	zap.L().Info("put success", zap.Any("operation", NewPutOperation(key, value)))
 	return nil
 }
 
@@ -348,8 +352,6 @@ func (db *DB) getValueByPosition(logRecordPst *data2.LogRecordPst) ([]byte, erro
 
 // Delete data according to the key
 func (db *DB) Delete(key []byte) error {
-	zap.L().Info("delete", zap.ByteString("key", key))
-
 	// Determine the validity of the key
 	if len(key) == 0 {
 		return _const.ErrKeyIsEmpty
@@ -369,6 +371,7 @@ func (db *DB) Delete(key []byte) error {
 	// Write to the data file
 	_, err := db.appendLogRecordWithLock(logRecord)
 	if err != nil {
+		zap.L().Error("delete error", zap.Error(err), zap.Any("operation", NewDeleteOperation(key)))
 		return err
 	}
 
@@ -377,6 +380,7 @@ func (db *DB) Delete(key []byte) error {
 	if !ok {
 		return _const.ErrIndexUpdateFailed
 	}
+	zap.L().Info("delete success", zap.Any("operation", NewDeleteOperation(key)))
 	return nil
 }
 
