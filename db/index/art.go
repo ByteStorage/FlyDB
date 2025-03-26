@@ -2,25 +2,26 @@ package index
 
 import (
 	"bytes"
-	"github.com/ByteStorage/FlyDB/db/data"
-	art "github.com/plar/go-adaptive-radix-tree"
 	"sort"
 	"sync"
+
+	"github.com/ByteStorage/FlyDB/db/data"
+	art "github.com/Clement-Jean/go-art"
 )
 
 // Adaptive Radix Tree Index
 // The following link is the ART library written by go.
 // If you need to know more about it, please go to the corresponding warehouse.
-// https://github.com/plar/go-adaptive-radix-tree
+// https://github.com/Clement-Jean/go-art
 type AdaptiveRadixTree struct {
-	tree art.Tree
+	tree art.Tree[[]byte, *data.LogRecordPst]
 	lock *sync.RWMutex
 }
 
 // NewART Initializes the adaptive radix tree index
 func NewART() *AdaptiveRadixTree {
 	return &AdaptiveRadixTree{
-		tree: art.New(),
+		tree: art.NewAlphaSortedTree[[]byte, *data.LogRecordPst](),
 		lock: new(sync.RWMutex),
 	}
 }
@@ -39,21 +40,19 @@ func (artree *AdaptiveRadixTree) Get(key []byte) *data.LogRecordPst {
 	if !found {
 		return nil
 	}
-	return value.(*data.LogRecordPst)
+	return value
 }
 
 func (artree *AdaptiveRadixTree) Delete(key []byte) bool {
 	artree.lock.Lock()
 	defer artree.lock.Unlock()
-	_, deleted := artree.tree.Delete(key)
-	return deleted
+	return artree.tree.Delete(key)
 }
 
 func (artree *AdaptiveRadixTree) Size() int {
 	artree.lock.RLock()
 	defer artree.lock.RUnlock()
-	size := artree.tree.Size()
-	return size
+	return artree.tree.Size()
 }
 
 func (artree *AdaptiveRadixTree) Iterator(reverse bool) Iterator {
@@ -69,7 +68,7 @@ type ARTreeIterator struct {
 	values    []*Item // Key + Location index information
 }
 
-func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
+func NewARTreeIterator(tree art.Tree[[]byte, *data.LogRecordPst], reverse bool) *ARTreeIterator {
 	// Estimate the expected slice capacity based on tree size
 	expectedSize := tree.Size()
 
@@ -80,26 +79,32 @@ func NewARTreeIterator(tree art.Tree, reverse bool) *ARTreeIterator {
 	values := make([]*Item, 0, expectedSize)
 
 	// Store all the data in an array
-	saveToValues := func(node art.Node) bool {
-		item := &Item{
-			key: node.Key(),
-			pst: node.Value().(*data.LogRecordPst),
-		}
-		mutex.Lock()
-
-		// Append item to values slice
-		values = append(values, item)
-
-		mutex.Unlock()
-
-		return true
-	}
-	tree.ForEach(saveToValues)
-
-	// Reverse the values slice if reverse is true
 	if reverse {
-		for i, j := 0, len(values)-1; i < j; i, j = i+1, j-1 {
-			values[i], values[j] = values[j], values[i]
+		// Reverse the values slice if reverse is true
+		for key, value := range tree.Backward() {
+			item := &Item{
+				key: key,
+				pst: value,
+			}
+			mutex.Lock()
+
+			// Append item to values slice
+			values = append(values, item)
+
+			mutex.Unlock()
+		}
+	} else {
+		for key, value := range tree.All() {
+			item := &Item{
+				key: key,
+				pst: value,
+			}
+			mutex.Lock()
+
+			// Append item to values slice
+			values = append(values, item)
+
+			mutex.Unlock()
 		}
 	}
 

@@ -1,8 +1,9 @@
 module github.com/ByteStorage/FlyDB
 
-go 1.18
+go 1.24.0
 
 require (
+	github.com/Clement-Jean/go-art v0.0.0-20250326081316-f1b2fb5e334c
 	github.com/bits-and-blooms/bitset v1.8.0
 	github.com/boltdb/bolt v1.3.1
 	github.com/bwmarrin/snowflake v0.3.0
@@ -17,13 +18,14 @@ require (
 	github.com/hashicorp/raft-boltdb v0.0.0-20230125174641-2a8082862702
 	github.com/klauspost/reedsolomon v1.11.7
 	github.com/pkg/errors v0.9.1
-	github.com/plar/go-adaptive-radix-tree v1.0.5
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/stretchr/testify v1.8.2
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
 	go.etcd.io/bbolt v1.3.7
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/net v0.8.0
+	golang.org/x/sys v0.6.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -47,14 +49,11 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/panjf2000/ants v1.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

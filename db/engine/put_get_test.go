@@ -1,38 +1,51 @@
 package engine
 
 import (
-	"fmt"
+	"os"
+	"testing"
+
 	"github.com/ByteStorage/FlyDB/config"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
-	"time"
 )
 
-func TestPutAndGet(t *testing.T) {
+func BenchmarkPut(b *testing.B) {
 	opts := config.DefaultOptions
 	dir, _ := os.MkdirTemp("", "flydb-benchmark")
 	opts.DirPath = dir
 	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := NewDB(opts)
 	defer db.Clean()
-	assert.Nil(t, err)
-	assert.NotNil(t, db)
+	assert.Nil(b, err)
+	assert.NotNil(b, db)
 
-	start := time.Now()
-	for n := 0; n < 500000; n++ {
+	n := 0
+	for b.Loop() {
 		err = db.Put(randkv.GetTestKey(n), randkv.RandomValue(24))
-		assert.Nil(t, err)
+		assert.Nil(b, err)
+		n++
 	}
-	end := time.Now()
-	fmt.Println("put time: ", end.Sub(start).String())
+}
 
-	start = time.Now()
-	for n := 0; n < 500000; n++ {
-		_, err = db.Get(randkv.GetTestKey(n))
-		assert.Nil(t, err)
+func BenchmarkGet(b *testing.B) {
+	opts := config.DefaultOptions
+	dir, _ := os.MkdirTemp("", "flydb-benchmark")
+	opts.DirPath = dir
+	opts.DataFileSize = 64 * 1024 * 1024
+	db, err := NewDB(opts)
+	defer db.Clean()
+	assert.Nil(b, err)
+	assert.NotNil(b, db)
+
+	for n := 0; n < b.N; n++ {
+		err = db.Put(randkv.GetTestKey(n), randkv.RandomValue(24))
+		assert.Nil(b, err)
 	}
-	end = time.Now()
-	fmt.Println("get time: ", end.Sub(start).String())
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		_, err = db.Get(randkv.GetTestKey(n))
+		assert.Nil(b, err)
+	}
 }

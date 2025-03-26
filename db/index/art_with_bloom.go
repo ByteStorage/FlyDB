@@ -1,18 +1,19 @@
 package index
 
 import (
+	"sync"
+
 	"github.com/ByteStorage/FlyDB/db/data"
 	"github.com/ByteStorage/FlyDB/lib/bloom"
-	art "github.com/plar/go-adaptive-radix-tree"
-	"sync"
+	art "github.com/Clement-Jean/go-art"
 )
 
 // AdaptiveRadixTreeWithBloom Adaptive Radix Tree Index
 // The following link is the ART library written by go.
 // If you need to know more about it, please go to the corresponding warehouse.
-// https://github.com/plar/go-adaptive-radix-tree
+// https://github.com/Clement-Jean/go-art
 type AdaptiveRadixTreeWithBloom struct {
-	tree   art.Tree
+	tree   art.Tree[[]byte, *data.LogRecordPst]
 	lock   *sync.RWMutex
 	filter *bloom.Filter
 }
@@ -20,7 +21,7 @@ type AdaptiveRadixTreeWithBloom struct {
 // NewARTWithBloom Initializes the adaptive radix tree index
 func NewARTWithBloom() *AdaptiveRadixTreeWithBloom {
 	return &AdaptiveRadixTreeWithBloom{
-		tree:   art.New(),
+		tree:   art.NewAlphaSortedTree[[]byte, *data.LogRecordPst](),
 		lock:   new(sync.RWMutex),
 		filter: bloom.NewBloomFilter(1000, 0.01),
 	}
@@ -44,7 +45,7 @@ func (artree *AdaptiveRadixTreeWithBloom) Get(key []byte) *data.LogRecordPst {
 	if !found {
 		return nil
 	}
-	return value.(*data.LogRecordPst)
+	return value
 }
 
 func (artree *AdaptiveRadixTreeWithBloom) Delete(key []byte) bool {
@@ -53,15 +54,13 @@ func (artree *AdaptiveRadixTreeWithBloom) Delete(key []byte) bool {
 	}
 	artree.lock.Lock()
 	defer artree.lock.Unlock()
-	_, deleted := artree.tree.Delete(key)
-	return deleted
+	return artree.tree.Delete(key)
 }
 
 func (artree *AdaptiveRadixTreeWithBloom) Size() int {
 	artree.lock.RLock()
 	defer artree.lock.RUnlock()
-	size := artree.tree.Size()
-	return size
+	return artree.tree.Size()
 }
 
 func (artree *AdaptiveRadixTreeWithBloom) Iterator(reverse bool) Iterator {
