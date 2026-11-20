@@ -1,13 +1,14 @@
 package structure
 
 import (
+	"os"
+	"testing"
+	"time"
+
 	"github.com/ByteStorage/FlyDB/config"
 	_const "github.com/ByteStorage/FlyDB/lib/const"
 	"github.com/ByteStorage/FlyDB/lib/randkv"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
-	"time"
 )
 
 func initHashDB() (*HashStructure, *config.Options) {
@@ -364,18 +365,29 @@ func TestHashStructure_HMove(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, ok10)
 
-	v1, err := hash.HGet("2", []byte("field1"))
+	v1, err := hash.HGet("1", []byte("field1"))
 	assert.Nil(t, err)
-	assert.Equal(t, v1, []byte("111-1000"))
+	assert.Equal(t, v1, []byte("222-1000"))
 
-	v2, err := hash.HGet("2", []byte("field2"))
+	v2, err := hash.HGet("1", []byte("field2"))
 	assert.Nil(t, err)
-	assert.Equal(t, v2, []byte("111-100"))
+	assert.Equal(t, v2, []byte("222-100"))
 
-	v3, err := hash.HGet("2", []byte("field3"))
+	v3, err := hash.HGet("1", []byte("field3"))
 	assert.Nil(t, err)
-	assert.Equal(t, v3, []byte("111-10"))
+	assert.Equal(t, v3, []byte("222-10"))
 
+	_, getErr := hash.HGet("2", []byte("field1"))
+	assert.NotNil(t, getErr)
+	assert.Equal(t, _const.ErrKeyNotFound, getErr)
+
+	_, getErr = hash.HGet("2", []byte("field2"))
+	assert.NotNil(t, getErr)
+	assert.Equal(t, _const.ErrKeyNotFound, getErr)
+
+	_, getErr = hash.HGet("2", []byte("field3"))
+	assert.NotNil(t, getErr)
+	assert.Equal(t, _const.ErrKeyNotFound, getErr)
 }
 
 func TestHashStructure_HSetNX(t *testing.T) {

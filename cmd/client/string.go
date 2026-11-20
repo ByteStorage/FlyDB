@@ -70,9 +70,14 @@ func stringGetType(c *grumble.Context) error {
 
 func stringStrLen(c *grumble.Context) error {
 	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
 	strLen, err := newClient().StrLen(key)
 	if err != nil {
-		return nil
+		fmt.Println("get string length error: ", err)
+		return err
 	}
 	fmt.Println(strLen)
 	return nil
@@ -88,6 +93,7 @@ func stringGetSet(c *grumble.Context) error {
 	}
 	oldValue, err := newClient().GetSet(key, value)
 	if err != nil {
+		fmt.Println("getset operation error: ", err)
 		return err
 	}
 	fmt.Println(oldValue)
@@ -97,9 +103,13 @@ func stringGetSet(c *grumble.Context) error {
 func stringAppend(c *grumble.Context) error {
 	key := c.Args.String("key")
 	value := c.Args.String("value")
+	if key == "" || value == "" {
+		fmt.Println("key or value is empty")
+		return nil
+	}
 	err := newClient().Append(key, value)
 	if err != nil {
-		fmt.Println("Append failed")
+		fmt.Println("Append operation error: ", err)
 		return err
 	}
 	fmt.Println("Append is successful")
@@ -186,31 +196,51 @@ func stringDecrBy(c *grumble.Context) error {
 
 func stringExists(c *grumble.Context) error {
 	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
 	exists, err := newClient().Exists(key)
 	if err != nil {
 		return err
 	}
+
 	if exists {
 		fmt.Println("key is exist", key)
+	} else {
+		fmt.Println("key is not exist", key)
 	}
+
 	return nil
 }
 
 func stringExpire(c *grumble.Context) error {
 	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
 	ttl := c.Args.Int64("ttl")
 	err := newClient().Expire(key, ttl)
 	if err != nil {
+		fmt.Println("expire operation error: ", err)
 		return err
 	}
+
+	fmt.Println("expire key success")
+
 	return nil
 }
 
 func stringPersist(c *grumble.Context) error {
 	key := c.Args.String("key")
+	if key == "" {
+		fmt.Println("key is empty")
+		return nil
+	}
 	err := newClient().Persist(key)
 	if err != nil {
-		fmt.Println("key is not Persist")
+		fmt.Println("persist operation error: ", err)
 		return err
 	}
 	fmt.Println("key is Persist")
@@ -219,6 +249,10 @@ func stringPersist(c *grumble.Context) error {
 
 func stringMGet(c *grumble.Context) error {
 	keys := c.Args.StringList("key")
+	if len(keys) == 0 {
+		fmt.Println("keys is empty")
+		return nil
+	}
 	values, err := newClient().MGet(keys)
 	if err != nil {
 		fmt.Println("get data error: ", err)

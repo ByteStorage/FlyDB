@@ -36,6 +36,12 @@ func hashHGetData(c *grumble.Context) error {
 		fmt.Println("get data error: ", err)
 		return err
 	}
+
+	if value == nil {
+		fmt.Println("Field or Key does not exist in the hash")
+		return nil
+	}
+
 	fmt.Println(value)
 	return nil
 }
@@ -209,8 +215,8 @@ func hashHSetNXKey(c *grumble.Context) error {
 }
 
 func hashHType(c *grumble.Context) error {
-	key := c.Flags.String("key")
-	field := c.Flags.String("field")
+	key := c.Args.String("key")
+	field := c.Args.String("field")
 
 	if key == "" {
 		return errors.New("key is empty")
@@ -221,7 +227,13 @@ func hashHType(c *grumble.Context) error {
 	}
 	hashType, err := newClient().HType(key, field)
 	if err != nil {
-		return errors.Wrap(err, "HType error")
+		fmt.Println("HType error: ", err)
+		return err
+	}
+
+	if hashType == "" {
+		fmt.Println("Field or Key does not exist in the hash")
+		return nil
 	}
 
 	fmt.Println("Type of field", field, "in hash", key, "is", hashType)
