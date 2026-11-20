@@ -11,7 +11,26 @@ English | [简体中文](https://github.com/ByteStorage/flydb/blob/master/README
 
 ## 📚 What is FlyDB ?
 
-**FlyDB** is a high-performance key-value (KV) storage engine based on the efficient bitcask model. It offers fast and reliable data retrieval and storage capabilities. By leveraging the simplicity and effectiveness of the bitcask model, **FlyDB** ensures efficient read and write operations, resulting in improved overall performance. It provides a streamlined approach to storing and accessing key-value pairs, making it an excellent choice for scenarios that require fast and responsive data access. **FlyDB's** focus on speed and simplicity makes it a valuable alternative for applications that prioritize performance while balancing storage costs. 
+**FlyDB** is a high-performance key-value (KV) storage engine based on the efficient bitcask model. It offers fast and reliable data retrieval and storage capabilities. By leveraging the simplicity and effectiveness of the bitcask model, **FlyDB** ensures efficient read and write operations, resulting in improved overall performance. It provides a streamlined approach to storing and accessing key-value pairs, making it an excellent choice for scenarios that require fast and responsive data access. **FlyDB's** focus on speed and simplicity makes it a valuable alternative for applications that prioritize performance while balancing storage costs. 
+
+## 🧩 Supported data structures
+
+On top of the bitcask engine, FlyDB provides Redis-style data structures in the `structure` package:
+
+| Data structure | Constructor | Representative operations |
+| -------------- | ----------- | ------------------------- |
+| String | `structure.NewStringStructure` | `Set` / `Get` / `Del`, `Expire` / `TTL`, `Incr` / `Decr` / `IncrBy`, `GetRange` / `SetRange`, `SetBit` / `GetBit` / `BitCount`, `MSetNX` / `MGet` |
+| Hash | `structure.NewHashStructure` | `HSet` / `HGet` / `HDel`, `HMSet` / `HGetAll`, `HKeys` / `HVals`, `HIncrBy` / `HIncrByFloat`, `HSetNX`, `HExpire` |
+| List | `structure.NewListStructure` | `LPush` / `RPush`, `LPop` / `RPop`, `LRange` / `LIndex` / `LSet` / `LTrim`, `LRem` / `LInsert`, `LMOVE` / `RPOPLPUSH`, `BLPOP` / `BRPOP` |
+| Set | `structure.NewSetStructure` | `SAdd` / `SRem`, `SCard` / `SMembers` / `SIsMember`, `SUnion` / `SInter` / `SDiff` |
+| Sorted set | `structure.NewZSetStructure` | `ZAdd` / `ZRem`, `ZScore` / `ZRank` / `ZRevRank`, `ZRange` |
+| Bitmap | `structure.NewBitmap` | `SetBit` / `GetBit`, `SetBits` / `GetBits`, `DelBit`, `BitCount`, `BitOp` |
+| Stream | `structure.NewStreamStructure` | `XAdd` / `XRead` / `XDel`, `XLen` / `XRange` / `XRevRange`, `XTrim`, `XGroup` |
+| Expiring keys | `structure.NewExpireStructure` | `EXPIRE` / `PEXPIRE` / `EXPIREAT` / `PEXPIREAT`, `PERSIST` |
+
+Every constructor opens its own database handle on `options.DirPath`. Give each structure its own directory when using several of them, or use one structure per database directory.
+
+> See [examples/](./examples) for runnable programs (`go run ./examples`).
 
 ## 🏁  Fast Start: FlyDB 
 
@@ -40,34 +59,76 @@ package main
 
 import (
 	"fmt"
-	"github.com/ByteStorage/FlyDB/flydb"
+
 	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/flydb"
 )
 
 func main() {
-    	options := config.DefaultOptions
+	options := config.DefaultOptions
 	options.DirPath = "/tmp/flydb"
-	db, _ := flydb.NewFlyDB(options)
 
-    	err := db.Put([]byte("name"), []byte("flydb-example"))
-    	if err != nil {
-        	fmt.Println("Put Error => ", err)
-    	}
+	db, err := flydb.NewFlyDB(options)
+	if err != nil {
+		panic(err)
+	}
 
+	if err := db.Put([]byte("name"), []byte("flydb-example")); err != nil {
+		panic(err)
+	}
 
 	val, err := db.Get([]byte("name"))
 	if err != nil {
-		fmt.Println("Get Error => ", err)
+		panic(err)
 	}
-    	fmt.Println("name value => ", string(val))
-    
-    
-    	err := db.Delete([]byte("name"))
-    	if err != nil {
-        	fmt.Println("Delete Error => ", err)
-    	}
+	fmt.Println("name value =>", string(val))
+
+	if err := db.Delete([]byte("name")); err != nil {
+		panic(err)
+	}
 }
 ```
+
+### Used by the data structure API
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/structure"
+)
+
+func main() {
+	options := config.DefaultOptions
+	options.DirPath = "/tmp/flydb-structure"
+
+	str, err := structure.NewStringStructure(options)
+	if err != nil {
+		panic(err)
+	}
+
+	// ttl is in seconds; 0 means the key never expires
+	if err := str.Set("user:1:name", "flydb", 0); err != nil {
+		panic(err)
+	}
+
+	name, err := str.Get("user:1:name")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("user:1:name =>", name)
+
+	keys, err := str.Keys("user:*")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("keys =>", keys)
+}
+```
+
 ### Used By Shell Command
 
 ```shell
@@ -93,7 +154,7 @@ kubectl port-forward svc/flydb-service -n flydb-system 8999:8999
 **When install flydb server by shell/docker/kubernetes, you can use the flydb-cli to connect the flydb server.**
 
 ```shell
-./bin/flydb-client 127.0.0.1:8999"
+./bin/flydb-client 127.0.0.1:8999
 ```
 
 ## 🚀 Performance test
@@ -179,7 +240,7 @@ Or add my wechat, invite you to enter the project community, and code masters to
 
 ## ✅ TODO List
 
-- [ ] Extended data structure support: including but not limited to string, list, hash, set, etc.
+- [x] Data structure support: string, hash, list, set, sorted set, bitmap, stream and expiring keys.
 - [ ] Compatible with Redis protocols and commands.
 - [x] Support http services.
 - [x] Support tcp services.

@@ -11,12 +11,31 @@
 
 **FlyDB**是基于高效bitcask模型的高性能键值(KV)存储引擎。它提供了快速可靠的数据检索和存储功能。通过利用bitcask模型的简单性和有效性，**FlyDB**确保了高效的读写操作，从而提高了整体性能。它提供了一种简化的方法来存储和访问键值对，使其成为需要快速响应数据访问的场景的绝佳选择。**FlyDB**对速度和简单性的关注使其成为在平衡存储成本的同时优先考虑性能的应用程序的有价值的替代方案。
 
+## 🧩 支持的数据结构
+
+在 bitcask 引擎之上，FlyDB 在 `structure` 包中提供了 Redis 风格的数据结构：
+
+| 数据结构 | 构造函数 | 常用操作 |
+| -------- | -------- | -------- |
+| String | `structure.NewStringStructure` | `Set` / `Get` / `Del`、`Expire` / `TTL`、`Incr` / `Decr` / `IncrBy`、`GetRange` / `SetRange`、`SetBit` / `GetBit` / `BitCount`、`MSetNX` / `MGet` |
+| Hash | `structure.NewHashStructure` | `HSet` / `HGet` / `HDel`、`HMSet` / `HGetAll`、`HKeys` / `HVals`、`HIncrBy` / `HIncrByFloat`、`HSetNX`、`HExpire` |
+| List | `structure.NewListStructure` | `LPush` / `RPush`、`LPop` / `RPop`、`LRange` / `LIndex` / `LSet` / `LTrim`、`LRem` / `LInsert`、`LMOVE` / `RPOPLPUSH`、`BLPOP` / `BRPOP` |
+| Set | `structure.NewSetStructure` | `SAdd` / `SRem`、`SCard` / `SMembers` / `SIsMember`、`SUnion` / `SInter` / `SDiff` |
+| ZSet | `structure.NewZSetStructure` | `ZAdd` / `ZRem`、`ZScore` / `ZRank` / `ZRevRank`、`ZRange` |
+| Bitmap | `structure.NewBitmap` | `SetBit` / `GetBit`、`SetBits` / `GetBits`、`DelBit`、`BitCount`、`BitOp` |
+| Stream | `structure.NewStreamStructure` | `XAdd` / `XRead` / `XDel`、`XLen` / `XRange` / `XRevRange`、`XTrim`、`XGroup` |
+| 过期键 | `structure.NewExpireStructure` | `EXPIRE` / `PEXPIRE` / `EXPIREAT` / `PEXPIREAT`、`PERSIST` |
+
+每个构造函数都会在 `options.DirPath` 上打开独立的数据库句柄。同时使用多种数据结构时，请为每种结构分配独立目录，或每个数据库目录只使用一种数据结构。
+
+> 可运行示例见 [examples/](./examples)（`go run ./examples`）。
+
 ## 🏁  快速入门 : FlyDB
 
 您可以使用Go命令行工具安装FlyDB:
 
 ```GO
-go get github.com/ByteStorage/FlyDB@v1.0.13
+go get github.com/ByteStorage/FlyDB@v1.1.0
 ```
 
 或者从github克隆这个项目:
@@ -38,35 +57,74 @@ package main
 
 import (
 	"fmt"
-	"github.com/ByteStorage/FlyDB/flydb"
+
 	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/flydb"
 )
 
 func main() {
-    	options := config.DefaultOptions
+	options := config.DefaultOptions
 	options.DirPath = "/tmp/flydb"
-	db, _ := flydb.NewFlyDB(options)
 
-    	err := db.Put([]byte("name"), []byte("flydb-example"))
-    	if err != nil {
-        	fmt.Println("Put Error => ", err)
-    	}
+	db, err := flydb.NewFlyDB(options)
+	if err != nil {
+		panic(err)
+	}
 
+	if err := db.Put([]byte("name"), []byte("flydb-example")); err != nil {
+		panic(err)
+	}
 
 	val, err := db.Get([]byte("name"))
 	if err != nil {
-		fmt.Println("Get Error => ", err)
+		panic(err)
 	}
-    	fmt.Println("name value => ", string(val))
-    
-    
-    	err := db.Delete([]byte("name"))
-    	if err != nil {
-        	fmt.Println("Delete Error => ", err)
-    	}
+	fmt.Println("name value =>", string(val))
+
+	if err := db.Delete([]byte("name")); err != nil {
+		panic(err)
+	}
 }
+```
 
+### 使用数据结构 API
 
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/ByteStorage/FlyDB/config"
+	"github.com/ByteStorage/FlyDB/structure"
+)
+
+func main() {
+	options := config.DefaultOptions
+	options.DirPath = "/tmp/flydb-structure"
+
+	str, err := structure.NewStringStructure(options)
+	if err != nil {
+		panic(err)
+	}
+
+	// ttl 单位为秒，0 表示永不过期
+	if err := str.Set("user:1:name", "flydb", 0); err != nil {
+		panic(err)
+	}
+
+	name, err := str.Get("user:1:name")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("user:1:name =>", name)
+
+	keys, err := str.Keys("user:*")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("keys =>", keys)
+}
 ```
 
 ### 使用Shell命令
@@ -94,7 +152,7 @@ kubectl port-forward svc/flydb-service -n flydb-system 8999:8999
 **当通过shell/docker/kubernets启动FlyDB时，可使用flydb-client连接FlyDB服务器。**
 
 ```shell
-./bin/flydb-client 127.0.0.1:8999"
+./bin/flydb-client 127.0.0.1:8999
 ```
 
 ## 🚀 性能测试
@@ -180,7 +238,7 @@ PASS
 
 ## ✅ TODO List
 
-- [ ] 扩展数据结构支持:包括但不限于字符串、列表、散列、集合等。
+- [x] 数据结构支持：字符串、散列、列表、集合、有序集合、位图、流和过期键。
 - [ ] 兼容Redis协议和命令。
 - [x] 支持http服务。
 - [x] 支持tcp服务。
